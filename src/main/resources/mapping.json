@@ -1,0 +1,23 @@
+{
+  "wikipage": {
+    "properties": {
+      "title": {
+        "type": "text",
+        "analyzer": "wiki_analyzer",
+        "fields": {
+          "raw": {
+            "type": "keyword"
+          }
+        }
+      },
+      "text": {
+        "type": "text",
+        "index": "false"
+      },
+      "redirectTitle": {
+        "type": "text",
+        "analyzer": "keyword"
+      }
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "indexName" : "enwiki",
+  "docType" : "wikipage",
+  "mapping" : "mapping.json",
+  "setting" : "es_map_settings.json",
+  "host" : "localhost",
+  "wikiDump" : "dumps/enwiki-latest-pages-articles.xml.bz2",
+  "port" : 9200,
+  "scheme" : "http",
+  "shards" : 1,
+  "replicas" : 0
+}
