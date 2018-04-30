@@ -3,12 +3,51 @@
     "properties": {
       "title": {
         "type": "text",
-        "analyzer": "wiki_analyzer",
+        "similarity": "BM25",
         "fields": {
-          "raw": {
-            "type": "keyword"
+          "keyword": {
+            "type": "text",
+            "index_options": "docs",
+            "similarity": "BM25",
+            "analyzer": "keyword"
+          },
+          "near_match": {
+            "type": "text",
+            "index_options": "docs",
+            "similarity": "BM25",
+            "analyzer": "near_match"
+          },
+          "near_match_asciifolding": {
+            "type": "text",
+            "index_options": "docs",
+            "similarity": "BM25",
+            "analyzer": "near_match_asciifolding"
+          },
+          "plain": {
+            "type": "text",
+            "similarity": "BM25",
+            "analyzer": "plain",
+            "search_analyzer": "plain_search",
+            "position_increment_gap": 10
+          },
+          "prefix": {
+            "type": "text",
+            "index_options": "docs",
+            "similarity": "BM25",
+            "analyzer": "prefix",
+            "search_analyzer": "near_match"
+          },
+          "prefix_asciifolding": {
+            "type": "text",
+            "index_options": "docs",
+            "similarity": "BM25",
+            "analyzer": "prefix_asciifolding",
+            "search_analyzer": "near_match_asciifolding"
           }
-        }
+        },
+        "analyzer": "text",
+        "search_analyzer": "text_search",
+        "position_increment_gap": 10
       },
       "text": {
         "type": "text",

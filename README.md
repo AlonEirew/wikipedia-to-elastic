@@ -9,25 +9,26 @@
 * ElasticSearch 6.2 (<a href=https://www.elastic.co/downloads/elasticsearch>Installation Guide</a>)
 * Wikipedia xml.bz2 dump file (<a href=https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles.xml.bz2>download enwiki latest dump xml</a>)
 
-**Basic Info:**
+**Basic Info and Statistics:**
 * Process will only export the following fields: PageTitle, PageId, RedirectTitle and PageText.<br/>
 All meta data such as contributor/revision/comment/format/etc. are not exported.
-* In case page has a redirect page, text field will not be saved (in order to remove redundancy) most accurate page text will be available in redirect page. 
-* Processing Wiki latest full dump (15GB .bz2 AND 66GB unpacked as .xml) will take about 6 Hours (tested on MacBook pro)
+* In case page has a redirect page, text field will not be exported (in order to remove redundancy) most accurate page text will be available in the redirect page. 
+* Processing Wiki latest full dump (15GB .bz2 AND 66GB unpacked as .xml) will take about 6.5 Hours (tested on MacBook pro)
 * The generated ElasticSearch index size will be 29GB.
+* Index count should be around 18,289,785 Wikipedia pages
 
-**Configuration:**
+**Project Configuration Files:**
 * `.../src/main/resources/conf.json` - basic configuration
 * `.../src/main/resources/mapping.json` - Elastic wiki index mapping
 
-**Building And Running**:<br/>
+**Building And Running From Source**:<br/>
+* Make sure Elastic process is running and active (<a href="http://localhost:9200/">http://localhost:9200/</a>)
 * Checkout/Clone the repository
 * Put wiki xml.bz2 dump file (no need to extract the bz2 file!) in: `/.../wikitoelasticjava/dumps/` folder.<br/> 
 <i><b>Recommendation:</b> Start with a small wiki dump, make sure you like what you get (or modify configurations to meet your needs) before moving to a full blown 15GB dump export..</i>
 * Make sure `conf.json` configuration for Elastic are set as expected (default localhost:9200)
 * From command line navigate to project root directory and run:<br/>
 `./gradlew clean build` <br/>
-*Need to do only once or on any source/resource change*<br/>
 *Should get a message saying: `BUILD SUCCESSFUL in 7s`*
 * Extract build zip file build/distributions/WikipediaToElastic-1.0.zip
 * Then run:<br/>
