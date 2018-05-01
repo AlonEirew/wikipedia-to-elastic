@@ -28,6 +28,7 @@ public class WikiToElasticConfiguration {
     private int port;
     private int shards;
     private int replicas;
+    private int insertBulkSize;
 
     private transient String mappingFileContent = null;
     private transient String settingFileContent = null;
@@ -110,6 +111,14 @@ public class WikiToElasticConfiguration {
 
     public void setSetting(String setting) {
         this.setting = setting;
+    }
+
+    public int getInsertBulkSize() {
+        return insertBulkSize;
+    }
+
+    public void setInsertBulkSize(int insertBulkSize) {
+        this.insertBulkSize = insertBulkSize;
     }
 
     public String getMappingFileContent() {
