@@ -5,12 +5,17 @@
 package wiki.utils;
 
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.lucene.util.fst.IntsRefFSTEnum;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -38,14 +43,15 @@ public class WikiToElasticUtils {
         String fileContent = null;
         try {
             if(fileName != null) {
-                URL resource = WikiToElasticUtils.class.getClassLoader().getResource(fileName);
+                URI resource = WikiToElasticUtils.class.getClassLoader().getResource(fileName).toURI();
                 if(resource != null) {
-                    String file = resource.getFile();
-                    fileContent = new String(Files.readAllBytes(Paths.get(file)), StandardCharsets.UTF_8);
+                    fileContent = IOUtils.toString(resource, "UTF-8");
                 }
             }
         } catch (IOException e) {
-            LOGGER.debug("Failed loading file-" + fileName, e);
+            LOGGER.error("Failed loading file-" + fileName, e);
+        } catch (URISyntaxException e) {
+            LOGGER.error("Failed loading file-" + fileName, e);
         }
 
         return fileContent;

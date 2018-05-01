@@ -88,7 +88,7 @@ public class WikiToElasticMain {
                     ElasticBulkDocCreateListener listener = new ElasticBulkDocCreateListener();
 
                     // Start parsing the xml and adding pages to elastic
-                    IPageHandler pageHandler = new ElasticPageHandler(elasicApi, listener, configuration.getIndexName(), configuration.getDocType());
+                    IPageHandler pageHandler = new ElasticPageHandler(elasicApi, listener, configuration);
 
                     STAXParser parser = new STAXParser(pageHandler);
                     parser.parse(inputStream);

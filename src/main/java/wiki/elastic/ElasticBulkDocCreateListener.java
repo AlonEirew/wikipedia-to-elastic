@@ -19,6 +19,8 @@ public class ElasticBulkDocCreateListener implements ActionListener<BulkResponse
 
     @Override
     public void onResponse(BulkResponse bulkResponse) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Bulk Created/Updated ids: [");
         for (BulkItemResponse bulkItemResponse : bulkResponse) {
             DocWriteResponse itemResponse = bulkItemResponse.getResponse();
 
@@ -28,12 +30,14 @@ public class ElasticBulkDocCreateListener implements ActionListener<BulkResponse
                 String index = indexResponse.getIndex();
                 String id = indexResponse.getId();
                 if (indexResponse.getResult() == DocWriteResponse.Result.CREATED) {
-                    LOGGER.debug("document with id:" + id + " Created successfully at index:" + index);
+                    sb.append(id).append(";");
                 } else if (indexResponse.getResult() == DocWriteResponse.Result.UPDATED) {
-                    LOGGER.debug("document with id:" + id + " Updated successfully at " + index);
+                    sb.append(id).append(";");
                 }
             }
         }
+        sb.append("]");
+        LOGGER.debug(sb.toString());
     }
 
     @Override
