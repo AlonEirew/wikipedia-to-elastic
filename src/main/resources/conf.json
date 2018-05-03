@@ -1,7 +1,7 @@
 {
   "indexName" : "enwiki",
   "docType" : "wikipage",
-  "insertBulkSize": 100,
+  "insertBulkSize": 1000,
   "mapping" : "mapping.json",
   "setting" : "es_map_settings.json",
   "host" : "localhost",
