@@ -56,6 +56,9 @@
       "redirectTitle": {
         "type": "text",
         "analyzer": "keyword"
+      },
+      "relations": {
+        "type": "nested"
       }
     }
   }

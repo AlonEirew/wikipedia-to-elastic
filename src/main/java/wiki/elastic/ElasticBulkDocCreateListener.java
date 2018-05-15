@@ -27,7 +27,6 @@ public class ElasticBulkDocCreateListener implements ActionListener<BulkResponse
             if (bulkItemResponse.getOpType() == DocWriteRequest.OpType.INDEX
                     || bulkItemResponse.getOpType() == DocWriteRequest.OpType.CREATE) {
                 IndexResponse indexResponse = (IndexResponse) itemResponse;
-                String index = indexResponse.getIndex();
                 String id = indexResponse.getId();
                 if (indexResponse.getResult() == DocWriteResponse.Result.CREATED) {
                     sb.append(id).append(";");
@@ -42,6 +41,6 @@ public class ElasticBulkDocCreateListener implements ActionListener<BulkResponse
 
     @Override
     public void onFailure(Exception e) {
-
+        LOGGER.error("Failed to commit some pages", e);
     }
 }

@@ -99,8 +99,29 @@ public class ElasticAPI implements IElasticAPI {
                     page);
 
             this.client.indexAsync(indexRequest, listener);
-            LOGGER.debug("Doc with Id " + page.getId() + " will be created asynchronously");
+            LOGGER.trace("Doc with Id " + page.getId() + " will be created asynchronously");
         }
+    }
+
+    @Override
+    public IndexResponse addDoc(String indexName, String indexType, WikiParsedPage page) {
+        IndexResponse res = null;
+
+        try {
+            if(isValidRequest(indexName, indexType, page)) {
+                IndexRequest indexRequest = createIndexRequest(
+                        indexName,
+                        indexType,
+                        page);
+
+
+                res = this.client.index(indexRequest);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return res;
     }
 
     @Override
@@ -117,7 +138,7 @@ public class ElasticAPI implements IElasticAPI {
         }
 
 
-        client.bulkAsync(bulkRequest, listener);
+        this.client.bulkAsync(bulkRequest, listener);
         LOGGER.debug("Bulk insert will be created asynchronously");
     }
 

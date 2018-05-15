@@ -13,16 +13,14 @@ public class WikiParsedPage {
     private final transient long id;
     private final String text;
     private final String redirectTitle;
-    private final Set<String> aliases;
-    private final Set<String> description;
+    private final WikiParsedPageRelations relations;
 
-    public WikiParsedPage(String title, long id, String text, String redirectTitle, Set<String> aliases, Set<String> description) {
+    public WikiParsedPage(String title, long id, String text, String redirectTitle, WikiParsedPageRelations relations) {
         this.title = title;
         this.id = id;
         this.text = text;
         this.redirectTitle = redirectTitle;
-        this.aliases = aliases;
-        this.description = description;
+        this.relations = relations;
     }
 
     public WikiParsedPage(WikiParsedPage page) {
@@ -30,9 +28,7 @@ public class WikiParsedPage {
         this.id = page.id;
         this.text = page.text;
         this.redirectTitle = page.redirectTitle;
-
-        this.aliases = new HashSet<>(page.aliases);
-        this.description = new HashSet<>(page.description);
+        this.relations = page.relations;
     }
 
     public String getTitle() {
@@ -51,12 +47,8 @@ public class WikiParsedPage {
         return redirectTitle;
     }
 
-    public Set<String> getAliases() {
-        return aliases;
-    }
-
-    public Set<String> getDescription() {
-        return description;
+    public WikiParsedPageRelations getRelations() {
+        return relations;
     }
 
     @Override
@@ -68,14 +60,13 @@ public class WikiParsedPage {
                 Objects.equals(title, that.title) &&
                 Objects.equals(text, that.text) &&
                 Objects.equals(redirectTitle, that.redirectTitle) &&
-                Objects.equals(aliases, that.aliases) &&
-                Objects.equals(description, that.description);
+                Objects.equals(relations, that.relations);
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(title, id, text, redirectTitle, aliases, description);
+        return Objects.hash(title, id, text, redirectTitle, relations);
     }
 
     @Override

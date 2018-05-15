@@ -4,9 +4,9 @@
 
 package wiki.parsers;
 
-import wiki.data.IPageHandler;
-import wiki.data.WikiParsedPage;
-import wiki.data.WikiParsedPageBuilder;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import wiki.data.*;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
@@ -15,14 +15,27 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 import java.io.InputStream;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class STAXParser implements IWikiParser {
 
+    private final static Logger LOGGER = LogManager.getLogger(STAXParser.class);
+
     private final IPageHandler handler;
+    private ExecutorService executorService;
+    private Set<Long> totalIds = new HashSet<>();
 
     public STAXParser(IPageHandler handler) {
+        int cores = Runtime.getRuntime().availableProcessors();
+        this.executorService = Executors.newFixedThreadPool(cores);
         this.handler = handler;
     }
+
 
     @Override
     public void parse(InputStream inputStream) {
@@ -38,7 +51,25 @@ public class STAXParser implements IWikiParser {
             }
 
         } catch(XMLStreamException e) {
-            e.printStackTrace();
+            LOGGER.error(e);
+        }
+    }
+
+    public void shutDownPool() {
+        this.executorService.shutdown(); // Disable new tasks from being submitted
+        try {
+            // Wait a while for existing tasks to terminate
+            if (!this.executorService.awaitTermination(60, TimeUnit.SECONDS)) {
+                this.executorService.shutdownNow(); // Cancel currently executing tasks
+                // Wait a while for tasks to respond to being cancelled
+                if (!this.executorService.awaitTermination(60, TimeUnit.SECONDS))
+                    System.err.println("Pool did not terminate");
+            }
+        } catch (InterruptedException ie) {
+            // (Re-)Cancel if current thread also interrupted
+            this.executorService.shutdownNow();
+            // Preserve interrupt status
+            Thread.currentThread().interrupt();
         }
     }
 
@@ -65,6 +96,7 @@ public class STAXParser implements IWikiParser {
                     case ID_ELEMENT:
                         if(id == -1) {
                             id = Long.valueOf(reader.getElementText());
+                            totalIds.add(id);
                         }
                         break;
                     case TEXT_ELEMENT:
@@ -77,13 +109,17 @@ public class STAXParser implements IWikiParser {
             }
         }
 
-        final WikiParsedPage page = new WikiParsedPageBuilder()
+        final WikiParsedPageBuilder pageBuilder = new WikiParsedPageBuilder()
                 .setId(id)
-                .setText(text)
                 .setTitle(title)
-                .setRedirectTitle(redirect)
-                .build();
+                .setRedirectTitle(redirect);
 
-        handler.addPage(page);
+        WikiParsedPageCreateAndCommit wikiParsedPageCreateAndCommit = new WikiParsedPageCreateAndCommit(pageBuilder, text, this.handler);
+
+        this.executorService.execute(wikiParsedPageCreateAndCommit);
+    }
+
+    public Set<Long> getTotalIds() {
+        return totalIds;
     }
 }

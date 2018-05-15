@@ -64,6 +64,8 @@ public class WikiToElasticMain {
     static void startProcess(WikiToElasticConfiguration configuration) throws IOException {
         RestHighLevelClient client;
         InputStream inputStream = null;
+        STAXParser parser = null;
+        IPageHandler pageHandler = null;
         try(Scanner reader = new Scanner(System.in);) {
             LOGGER.info("Reading wikidump: " + configuration.getWikiDump());
             File wikifile = new File(configuration.getWikiDump());
@@ -88,11 +90,10 @@ public class WikiToElasticMain {
                     ElasticBulkDocCreateListener listener = new ElasticBulkDocCreateListener();
 
                     // Start parsing the xml and adding pages to elastic
-                    IPageHandler pageHandler = new ElasticPageHandler(elasicApi, listener, configuration);
+                    pageHandler = new ElasticPageHandler(elasicApi, listener, configuration);
 
-                    STAXParser parser = new STAXParser(pageHandler);
+                    parser = new STAXParser(pageHandler);
                     parser.parse(inputStream);
-                    pageHandler.flush();
                 }
             } else {
                 LOGGER.error("Cannot find dump file-" + wikifile.getAbsolutePath());
@@ -104,6 +105,16 @@ public class WikiToElasticMain {
             if (inputStream != null) {
                 inputStream.close();
             }
+            if(parser != null) {
+                parser.shutDownPool();
+                if(pageHandler != null) {
+                    pageHandler.flushRemains();
+                }
+            }
+
+            LOGGER.info("*** Total id's extracted=" + parser.getTotalIds().size());
+            LOGGER.info("*** Total id's committed=" + ((ElasticPageHandler) pageHandler).getTotalIdsCommitted());
+            LOGGER.info("*** In commit queue=" + ((ElasticPageHandler) pageHandler).getPagesQueueSize() + "(should be 0)");
         }
     }
 }

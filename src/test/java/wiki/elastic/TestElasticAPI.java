@@ -110,28 +110,22 @@ public class TestElasticAPI {
         wikiPages.add(new WikiParsedPageBuilder()
                 .setTitle("Test Doc")
                 .setText("Testing elastic search")
-                .setDescription(new HashSet<>())
                 .setId(555)
                 .setRedirectTitle("Redirect Test Doc Title")
-                .setAliases(new HashSet<>())
                 .build());
 
         wikiPages.add(new WikiParsedPageBuilder()
                 .setTitle("Test")
                 .setText("Testing elastic search")
-                .setDescription(new HashSet<>())
                 .setId(556)
                 .setRedirectTitle("Redirect Test Doc Title")
-                .setAliases(new HashSet<>())
                 .build());
 
         wikiPages.add(new WikiParsedPageBuilder()
                 .setTitle("Te st")
                 .setText("Testing elastic search")
-                .setDescription(new HashSet<>())
                 .setId(557)
                 .setRedirectTitle("Redirect Test Doc Title")
-                .setAliases(new HashSet<>())
                 .build());
 
         return wikiPages;

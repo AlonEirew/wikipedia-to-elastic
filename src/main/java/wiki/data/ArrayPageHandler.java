@@ -23,6 +23,11 @@ public class ArrayPageHandler implements IPageHandler {
 
     }
 
+    @Override
+    public void flushRemains() {
+
+    }
+
     public List<WikiParsedPage> getPages() {
         return this.pages;
     }
