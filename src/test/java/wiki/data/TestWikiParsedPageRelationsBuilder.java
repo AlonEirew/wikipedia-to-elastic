@@ -19,7 +19,8 @@ public class TestWikiParsedPageRelationsBuilder {
         String text = getFileJsonContant("nlp_wiki_test_text.json");
         WikiParsedPageRelations jsonResult = getFileRelationContant("nlp_relation_result.json");
         WikiParsedPageRelationsBuilder builder = new WikiParsedPageRelationsBuilder();
-        WikiParsedPageRelations wikiParsedPageRelations = builder.buildFromWikipediaPageText(text);
+        WikiParsedPageRelations wikiParsedPageRelations = builder.buildFromWikipediaPageText("Natural language processing", text);
+//        writeResultToFile("/Users/aeirew/workspace/WikipediaToElastic/src/test/resources/nlp_relation_result.json", wikiParsedPageRelations);
         Assert.assertEquals(jsonResult, wikiParsedPageRelations);
     }
 
@@ -28,27 +29,38 @@ public class TestWikiParsedPageRelationsBuilder {
         String text = getFileJsonContant("nlp_disambig_wiki_test_text.json");
         WikiParsedPageRelations jsonResult = getFileRelationContant("nlp_disambig_relation_result.json");
         WikiParsedPageRelationsBuilder builder = new WikiParsedPageRelationsBuilder();
-        WikiParsedPageRelations wikiParsedPageRelations = builder.buildFromWikipediaPageText(text);
+        WikiParsedPageRelations wikiParsedPageRelations = builder.buildFromWikipediaPageText("NLP", text);
+//        writeResultToFile("/Users/aeirew/workspace/WikipediaToElastic/src/test/resources/nlp_disambig_relation_result.json", wikiParsedPageRelations);
         Assert.assertEquals(jsonResult, wikiParsedPageRelations);
     }
 
     @Test
     public void textExtractCategories() {
-        Set<String> categories = WikiPageParser.extractCategories("[[Category:Artificial intelligence]]");
+        Set<String> categories = WikiPageParser.extractCategories("NP", "[[Category:Artificial intelligence]]");
         Assert.assertTrue(categories.contains("Artificial intelligence"));
     }
 
     @Test
     public void textExtractDisCategory() {
-        Set<String> categories = WikiPageParser.extractCategories("{{disambiguation}}");
+        Set<String> categories = WikiPageParser.extractCategories("NP","{{disambiguation}}");
         Assert.assertTrue(categories.contains("disambiguation"));
     }
 
     @Test
-    public void textExtractLinks() {
-        Set<String> categories = WikiPageParser.extractLinks("[[Artificial intelligence|Machine Learning]]");
-        Assert.assertTrue(categories.contains("Artificial intelligence"));
-        Assert.assertTrue(categories.contains("Machine Learning"));
+    public void textExtractLinksAndParenthesis() {
+        LinkParenthesisPair linkParenthesisPair1 = WikiPageParser.extractLinksAndParenthesis("[[Artificial intelligence|Machine Learning]]");
+        Assert.assertTrue(linkParenthesisPair1.getLinks().contains("Artificial intelligence"));
+        Assert.assertTrue(linkParenthesisPair1.getLinks().contains("Machine Learning"));
+
+        LinkParenthesisPair linkParenthesisPair2 = WikiPageParser.extractLinksAndParenthesis("[[Artificial intelligence (Machine Learning)]]");
+        Assert.assertTrue(linkParenthesisPair2.getLinks().contains("Artificial intelligence"));
+        Assert.assertFalse(linkParenthesisPair2.getLinks().contains("Machine Learning"));
+        Assert.assertTrue(linkParenthesisPair2.getParenthesis().contains("Machine Learning"));
+
+        LinkParenthesisPair linkParenthesisPair3 = WikiPageParser.extractLinksAndParenthesis("[[Artificial intelligence(Machine Learning)]]");
+        Assert.assertTrue(linkParenthesisPair3.getLinks().contains("Artificial intelligence"));
+        Assert.assertFalse(linkParenthesisPair3.getLinks().contains("Machine Learning"));
+        Assert.assertTrue(linkParenthesisPair3.getParenthesis().contains("Machine Learning"));
     }
 
     public static String getFileJsonContant(String fileName) {
@@ -64,7 +76,7 @@ public class TestWikiParsedPageRelationsBuilder {
         return jsonResult;
     }
 
-    private void writeResultToFile(WikiParsedPageRelations relations) throws IOException {
-        FileUtils.write(new File("/Users/aeirew/workspace/WikipediaToElastic/src/test/resources/nlp_disambig_relation_result.json"), gson.toJson(relations), "UTF-8");
+    private void writeResultToFile(String fileLocation, WikiParsedPageRelations relations) throws IOException {
+        FileUtils.write(new File(fileLocation), gson.toJson(relations), "UTF-8");
     }
 }

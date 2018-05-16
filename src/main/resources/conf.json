@@ -5,7 +5,7 @@
   "mapping" : "mapping.json",
   "setting" : "es_map_settings.json",
   "host" : "localhost",
-  "wikiDump" : "dumps/afwiki-latest-pages-articles.xml.bz2",
+  "wikiDump" : "dumps/enwiki-latest-pages-articles13.xml-p5040438p6197593.bz2",
   "port" : 9200,
   "scheme" : "http",
   "shards" : 1,

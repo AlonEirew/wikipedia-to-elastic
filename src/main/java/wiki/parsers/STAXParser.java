@@ -114,7 +114,7 @@ public class STAXParser implements IWikiParser {
                 .setTitle(title)
                 .setRedirectTitle(redirect);
 
-        WikiParsedPageCreateAndCommit wikiParsedPageCreateAndCommit = new WikiParsedPageCreateAndCommit(pageBuilder, text, this.handler);
+        WikiParsedPageCreateAndCommit wikiParsedPageCreateAndCommit = new WikiParsedPageCreateAndCommit(pageBuilder, title, text, this.handler);
 
         this.executorService.execute(wikiParsedPageCreateAndCommit);
     }

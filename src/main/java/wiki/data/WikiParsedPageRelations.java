@@ -8,30 +8,32 @@ public class WikiParsedPageRelations {
     private boolean isPartName = false;
     private boolean isDisambiguation = false;
     private Set<String> disambiguationLinks;
-    private Set<String> pageLinks;
     private Set<String> categories;
     private Set<String> aliases;
+    private Set<String> titleParenthesis;
 
     private Set<String> disambiguationLinksNorm;
-    private Set<String> pageLinksNorm;
     private Set<String> categoriesNorm;
     private Set<String> aliasesNorm;
+    private Set<String> titleParenthesisNorm;
 
     public WikiParsedPageRelations(String phrase, boolean isPartName, boolean isDisambiguation,
-                                   Set<String> disambiguationLinks, Set<String> pageLinks, Set<String> categories,
-                                   Set<String> aliases, Set<String> disambiguationLinksNorm, Set<String> pageLinksNorm,
-                                   Set<String> categoriesNorm, Set<String> aliasesNorm) {
+                                   Set<String> disambiguationLinks,
+                                   Set<String> categories, Set<String> aliases, Set<String> titleParenthesis,
+                                   Set<String> disambiguationLinksNorm,
+                                   Set<String> categoriesNorm, Set<String> aliasesNorm,
+                                   Set<String> titleParenthesisNorm) {
         this.phrase = phrase;
         this.isPartName = isPartName;
         this.isDisambiguation = isDisambiguation;
         this.disambiguationLinks = disambiguationLinks;
-        this.pageLinks = pageLinks;
         this.categories = categories;
         this.aliases = aliases;
+        this.titleParenthesis = titleParenthesis;
         this.disambiguationLinksNorm = disambiguationLinksNorm;
-        this.pageLinksNorm = pageLinksNorm;
         this.categoriesNorm = categoriesNorm;
         this.aliasesNorm = aliasesNorm;
+        this.titleParenthesisNorm = titleParenthesisNorm;
     }
 
     public String getPhrase() {
@@ -50,10 +52,6 @@ public class WikiParsedPageRelations {
         return disambiguationLinks;
     }
 
-    public Set<String> getPageLinks() {
-        return pageLinks;
-    }
-
     public Set<String> getCategories() {
         return categories;
     }
@@ -66,16 +64,20 @@ public class WikiParsedPageRelations {
         return disambiguationLinksNorm;
     }
 
-    public Set<String> getPageLinksNorm() {
-        return pageLinksNorm;
-    }
-
     public Set<String> getCategoriesNorm() {
         return categoriesNorm;
     }
 
     public Set<String> getAliasesNorm() {
         return aliasesNorm;
+    }
+
+    public Set<String> getTitleParenthesis() {
+        return titleParenthesis;
+    }
+
+    public Set<String> getTitleParenthesisNorm() {
+        return titleParenthesisNorm;
     }
 
     @Override
@@ -87,18 +89,19 @@ public class WikiParsedPageRelations {
                 isDisambiguation == that.isDisambiguation &&
                 Objects.equals(phrase, that.phrase) &&
                 Objects.equals(disambiguationLinks, that.disambiguationLinks) &&
-                Objects.equals(pageLinks, that.pageLinks) &&
                 Objects.equals(categories, that.categories) &&
                 Objects.equals(aliases, that.aliases) &&
+                Objects.equals(titleParenthesis, that.titleParenthesis) &&
                 Objects.equals(disambiguationLinksNorm, that.disambiguationLinksNorm) &&
-                Objects.equals(pageLinksNorm, that.pageLinksNorm) &&
                 Objects.equals(categoriesNorm, that.categoriesNorm) &&
-                Objects.equals(aliasesNorm, that.aliasesNorm);
+                Objects.equals(aliasesNorm, that.aliasesNorm) &&
+                Objects.equals(titleParenthesisNorm, that.titleParenthesisNorm);
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(phrase, isPartName, isDisambiguation, disambiguationLinks, pageLinks, categories, aliases, disambiguationLinksNorm, pageLinksNorm, categoriesNorm, aliasesNorm);
+        return Objects.hash(phrase, isPartName, isDisambiguation, disambiguationLinks, categories, aliases,
+                titleParenthesis, disambiguationLinksNorm, categoriesNorm, aliasesNorm, titleParenthesisNorm);
     }
 }
