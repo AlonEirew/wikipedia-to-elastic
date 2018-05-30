@@ -1,9 +1,8 @@
 package wiki.utils;
 
-import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
-import wiki.data.ArrayPageHandler;
+import wiki.handlers.ArrayPageHandler;
 import wiki.parsers.IWikiParser;
 import wiki.parsers.STAXParser;
 

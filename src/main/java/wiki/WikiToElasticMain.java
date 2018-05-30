@@ -10,17 +10,17 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
-import wiki.data.ElasticPageHandler;
-import wiki.data.IPageHandler;
+import wiki.handlers.ElasticPageHandler;
+import wiki.handlers.IPageHandler;
 import wiki.elastic.ElasticAPI;
 import wiki.elastic.ElasticBulkDocCreateListener;
 import wiki.elastic.IElasticAPI;
 import wiki.parsers.STAXParser;
+import wiki.utils.WikiPageParser;
 import wiki.utils.WikiToElasticConfiguration;
 import wiki.utils.WikiToElasticUtils;
 
 import java.io.*;
-import java.net.URL;
 import java.util.Scanner;
 
 public class WikiToElasticMain {
@@ -35,6 +35,7 @@ public class WikiToElasticMain {
             if(resource != null) {
                 reader = new JsonReader(new InputStreamReader(resource));
                 WikiToElasticConfiguration configuration = WikiToElasticConfiguration.gson.fromJson(reader, WikiToElasticConfiguration.CONFIGURATION_TYPE);
+                WikiPageParser.initResources();
                 LOGGER.info("Process configuration loaded");
 
                 long startTime = System.currentTimeMillis();

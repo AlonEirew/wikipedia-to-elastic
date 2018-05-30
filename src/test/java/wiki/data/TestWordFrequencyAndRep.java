@@ -10,7 +10,7 @@ public class TestWordFrequencyAndRep {
     @Test
     public void testCountLineFrequency() {
         WordFrequencyAndRepresentation wfar = new WordFrequencyAndRepresentation();
-        String text = TestWikiParsedPageRelationsBuilder.getFileJsonContant("nlp_wiki_test_text.json");
+        String text = TestRelationsBuilderAndPageParser.getFileJsonContant("nlp_wiki_test_text.json");
         wfar.countDocFrequency(text);
 
         System.out.println(gson.toJson(wfar.getDocWordsFrequency()));

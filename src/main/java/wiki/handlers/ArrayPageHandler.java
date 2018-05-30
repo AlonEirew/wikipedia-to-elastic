@@ -2,7 +2,9 @@
  * @author  Alon Eirew
  */
 
-package wiki.data;
+package wiki.handlers;
+
+import wiki.data.WikiParsedPage;
 
 import java.util.ArrayList;
 import java.util.List;

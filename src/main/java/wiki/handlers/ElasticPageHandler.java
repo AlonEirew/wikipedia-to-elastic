@@ -2,12 +2,11 @@
  * @author  Alon Eirew
  */
 
-package wiki.data;
+package wiki.handlers;
 
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.bulk.BulkResponse;
-import org.elasticsearch.action.index.IndexResponse;
-import wiki.elastic.ElasticDocCreateListener;
+import wiki.data.WikiParsedPage;
 import wiki.elastic.IElasticAPI;
 import wiki.utils.WikiToElasticConfiguration;
 

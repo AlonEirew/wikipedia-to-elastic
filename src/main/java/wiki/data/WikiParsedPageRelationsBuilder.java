@@ -1,23 +1,26 @@
 package wiki.data;
 
+import wiki.data.obj.BeCompRelationResult;
+import wiki.data.obj.LinkParenthesisPair;
 import wiki.utils.WikiPageParser;
 
 import java.util.HashSet;
 import java.util.Set;
 
 public class WikiParsedPageRelationsBuilder {
-    private String phrase;
     private boolean isPartName = false;
     private boolean isDisambiguation = false;
     private Set<String> disambiguationLinks;
     private Set<String> categories;
     private Set<String> aliases;
     private Set<String> titleParenthesis;
+    private Set<String> beCompRelations;
 
     private Set<String> disambiguationLinksNorm;
     private Set<String> categoriesNorm;
     private Set<String> aliasesNorm;
     private Set<String> titleParenthesisNorm;
+    private Set<String> beCompRelationsNorm;
 
     public WikiParsedPageRelations buildFromWikipediaPageText(String title, String pageText) {
         this.categories = new HashSet<>();
@@ -51,22 +54,29 @@ public class WikiParsedPageRelationsBuilder {
             this.disambiguationLinksNorm = WikiPageParser.normalizeStringSet(extLinks);
             this.titleParenthesis = extParenthesis;
             this.titleParenthesisNorm = WikiPageParser.normalizeStringSet(extParenthesis);
+        } else {
+            String firstParagraph = WikiPageParser.extractFirstPageParagraph(pageText);
+            final BeCompRelationResult beCompRelations = WikiPageParser.extractBeCompRelationFromFirstSentence(firstParagraph);
+            this.beCompRelations = beCompRelations.getBeCompRelations();
+            this.beCompRelationsNorm = beCompRelations.getBeCompRelationsNorm();
         }
 
         return this.build();
     }
 
     public WikiParsedPageRelations build() {
-        return new WikiParsedPageRelations(this.phrase,
+        return new WikiParsedPageRelations(
                 this.isPartName,
                 this.isDisambiguation,
                 this.disambiguationLinks,
                 this.categories,
                 this.aliases,
                 this.titleParenthesis,
+                this.beCompRelations,
                 this.disambiguationLinksNorm,
                 this.categoriesNorm,
                 this.aliasesNorm,
-                this.titleParenthesisNorm);
+                this.titleParenthesisNorm,
+                this.beCompRelationsNorm);
     }
 }

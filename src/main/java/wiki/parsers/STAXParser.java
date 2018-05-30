@@ -6,7 +6,8 @@ package wiki.parsers;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import wiki.data.*;
+import wiki.handlers.IPageHandler;
+import wiki.handlers.WikiParsedPageCreateAndCommit;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
@@ -17,22 +18,22 @@ import javax.xml.stream.events.XMLEvent;
 import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public class STAXParser implements IWikiParser {
 
     private final static Logger LOGGER = LogManager.getLogger(STAXParser.class);
 
+    private RejectedExecutionHandler rejectedExecutionHandler = new ThreadPoolExecutor.CallerRunsPolicy();
+    private BlockingQueue<Runnable> blockingQueue = new ArrayBlockingQueue<Runnable>(100);
     private final IPageHandler handler;
     private ExecutorService executorService;
     private Set<Long> totalIds = new HashSet<>();
 
     public STAXParser(IPageHandler handler) {
         int cores = Runtime.getRuntime().availableProcessors();
-        this.executorService = Executors.newFixedThreadPool(cores);
+        this.executorService = new ThreadPoolExecutor(cores, cores,
+                0L, TimeUnit.MILLISECONDS, this.blockingQueue, this.rejectedExecutionHandler);
         this.handler = handler;
     }
 
@@ -109,14 +110,9 @@ public class STAXParser implements IWikiParser {
             }
         }
 
-        final WikiParsedPageBuilder pageBuilder = new WikiParsedPageBuilder()
-                .setId(id)
-                .setTitle(title)
-                .setRedirectTitle(redirect);
+        WikiParsedPageCreateAndCommit wikiParsedPageCreateAndCommit = new WikiParsedPageCreateAndCommit(id, title, redirect, text, this.handler);
 
-        WikiParsedPageCreateAndCommit wikiParsedPageCreateAndCommit = new WikiParsedPageCreateAndCommit(pageBuilder, title, text, this.handler);
-
-        this.executorService.execute(wikiParsedPageCreateAndCommit);
+        this.executorService.submit(wikiParsedPageCreateAndCommit);
     }
 
     public Set<Long> getTotalIds() {

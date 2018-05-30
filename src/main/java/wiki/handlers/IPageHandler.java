@@ -2,7 +2,9 @@
  * @author  Alon Eirew
  */
 
-package wiki.data;
+package wiki.handlers;
+
+import wiki.data.WikiParsedPage;
 
 public interface IPageHandler {
     void addPage(WikiParsedPage page);

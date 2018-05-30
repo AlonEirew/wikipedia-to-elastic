@@ -1,4 +1,4 @@
-package wiki.data;
+package wiki.data.obj;
 
 import java.util.Set;
 
