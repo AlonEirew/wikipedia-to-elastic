@@ -7,15 +7,21 @@ package wiki.elastic;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.ElasticsearchException;
+import org.elasticsearch.ElasticsearchStatusException;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
+import org.elasticsearch.action.admin.indices.get.GetIndexRequest;
+import org.elasticsearch.action.admin.indices.open.OpenIndexRequest;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.action.get.GetRequest;
+import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentType;
@@ -140,6 +146,41 @@ public class ElasticAPI implements IElasticAPI {
 
         this.client.bulkAsync(bulkRequest, listener);
         LOGGER.debug("Bulk insert will be created asynchronously");
+    }
+
+    @Override
+    public boolean isDocExists(String indexName, String indexType, String docId) {
+        GetRequest getRequest = new GetRequest(
+                indexName,
+                indexType,
+                docId);
+
+        try {
+            GetResponse getResponse = this.client.get(getRequest);
+            if (getResponse.isExists()) {
+                return true;
+            }
+        } catch (ElasticsearchStatusException e) {
+            LOGGER.error(e);
+        }
+        catch (IOException e) {
+            LOGGER.error(e);
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean isIndexExists(String indexName) {
+        boolean ret = false;
+        try {
+            OpenIndexRequest openIndexRequest = new OpenIndexRequest(indexName);
+            ret = client.indices().open(openIndexRequest).isAcknowledged();
+        } catch (ElasticsearchStatusException ex) {
+        } catch (IOException e) {
+        }
+
+        return ret;
     }
 
     private IndexRequest createIndexRequest(String indexName, String indexType, WikiParsedPage page) {

@@ -20,4 +20,6 @@ public interface IElasticAPI {
     void addDocAsnc(ActionListener<IndexResponse> listener, String indexName, String indexType, WikiParsedPage page);
     IndexResponse addDoc(String indexName, String indexType, WikiParsedPage page);
     void addBulkAsnc(ActionListener<BulkResponse> listener, String indexName, String indexType, List<WikiParsedPage> pages);
+    boolean isDocExists(String indexName, String indexType, String docId);
+    boolean isIndexExists(String indexName);
 }

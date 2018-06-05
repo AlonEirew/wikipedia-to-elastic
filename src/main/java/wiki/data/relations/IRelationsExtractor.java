@@ -1,7 +1,5 @@
 package wiki.data.relations;
 
-import java.util.Set;
-
-public interface IRelationsExtractor {
-    Set<String> extract(String lineToExtractFrom);
+public interface IRelationsExtractor<Result> {
+    Result extract(String lineToExtractFrom);
 }

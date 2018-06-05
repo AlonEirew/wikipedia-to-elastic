@@ -1,5 +1,5 @@
 {
-  "indexName" : "enwikitest",
+  "indexName" : "wikitestingindex",
   "docType" : "wikipage",
   "mapping" : "mapping.json",
   "setting" : "es_map_settings.json",

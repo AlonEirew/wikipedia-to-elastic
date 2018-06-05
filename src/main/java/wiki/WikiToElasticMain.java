@@ -81,21 +81,31 @@ public class WikiToElasticMain {
                 IElasticAPI elasicApi = new ElasticAPI(client);
 
                 // Delete if index already exists
-                System.out.println("You are about to delete index (if exists) \"" + configuration.getIndexName() + "\" do you want to continue [Y/n]?");
+                System.out.println("Would you like to clean & delete index (if exists) \"" + configuration.getIndexName() +
+                        "\" or update (new pages) in it [D(Delete)/U(Update)");
                 String ans = reader.nextLine(); // Scans the next token of the input as an int.
-                if(ans.equalsIgnoreCase("y") || ans.equalsIgnoreCase("yes")) {
+                if(ans.equalsIgnoreCase("d") || ans.equalsIgnoreCase("delete")) {
                     elasicApi.deleteIndex(configuration.getIndexName());
 
                     // Create the index
                     elasicApi.createIndex(configuration);
-                    ElasticBulkDocCreateListener listener = new ElasticBulkDocCreateListener();
-
-                    // Start parsing the xml and adding pages to elastic
-                    pageHandler = new ElasticPageHandler(elasicApi, listener, configuration);
-
-                    parser = new STAXParser(pageHandler);
-                    parser.parse(inputStream);
+                } else if(ans.equalsIgnoreCase("u") || ans.equalsIgnoreCase("update")) {
+                    if(!elasicApi.isIndexExists(configuration.getIndexName())) {
+                        LOGGER.info("Index \"" + configuration.getIndexName() +
+                                "\" not found, exit application.");
+                        return;
+                    }
+                } else {
+                    return;
                 }
+
+                ElasticBulkDocCreateListener listener = new ElasticBulkDocCreateListener();
+
+                // Start parsing the xml and adding pages to elastic
+                pageHandler = new ElasticPageHandler(elasicApi, listener, configuration);
+
+                parser = new STAXParser(pageHandler);
+                parser.parse(inputStream);
             } else {
                 LOGGER.error("Cannot find dump file-" + wikifile.getAbsolutePath());
             }
@@ -107,15 +117,14 @@ public class WikiToElasticMain {
                 inputStream.close();
             }
             if(parser != null) {
+                LOGGER.info("*** Total id's extracted=" + parser.getTotalIds().size());
                 parser.shutDownPool();
                 if(pageHandler != null) {
                     pageHandler.flushRemains();
+                    LOGGER.info("*** Total id's committed=" + ((ElasticPageHandler) pageHandler).getTotalIdsCommitted());
+                    LOGGER.info("*** In commit queue=" + ((ElasticPageHandler) pageHandler).getPagesQueueSize() + "(should be 0)");
                 }
             }
-
-            LOGGER.info("*** Total id's extracted=" + parser.getTotalIds().size());
-            LOGGER.info("*** Total id's committed=" + ((ElasticPageHandler) pageHandler).getTotalIdsCommitted());
-            LOGGER.info("*** In commit queue=" + ((ElasticPageHandler) pageHandler).getPagesQueueSize() + "(should be 0)");
         }
     }
 }

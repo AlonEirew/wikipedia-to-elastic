@@ -1,7 +1,9 @@
 package wiki.data;
 
+import org.apache.xpath.operations.Bool;
 import wiki.data.obj.BeCompRelationResult;
 import wiki.data.obj.LinkParenthesisPair;
+import wiki.data.relations.*;
 import wiki.utils.WikiPageParser;
 
 import java.util.HashSet;
@@ -22,25 +24,30 @@ public class WikiParsedPageRelationsBuilder {
     private Set<String> titleParenthesisNorm;
     private Set<String> beCompRelationsNorm;
 
-    public WikiParsedPageRelations buildFromWikipediaPageText(String title, String pageText) {
+    public WikiParsedPageRelations buildFromWikipediaPageText(String pageText) {
         this.categories = new HashSet<>();
         this.categoriesNorm = new HashSet<>();
         this.titleParenthesis = new HashSet<>();
         this.titleParenthesisNorm = new HashSet<>();
 
+        IRelationsExtractor<Set<String>> categoryExtractor = new CategoryRelationExtractor();
+        IRelationsExtractor<Boolean> partNameExtractor = new PartNameRelationExtractor();
+        IRelationsExtractor<LinkParenthesisPair> pairExtractor = new LinkAndParenthesisRelationExtractor();
+        IRelationsExtractor<BeCompRelationResult> beCompExtractor = new BeCompRelationExtractor();
+
         String[] textLines = pageText.split("\n");
         Set<String> extLinks = new HashSet<>();
         Set<String> extParenthesis = new HashSet<>();
         for (String line : textLines) {
-            Set<String> lineCategories = WikiPageParser.extractCategories(title, line);
+            Set<String> lineCategories = categoryExtractor.extract(line);
             if(!this.isPartName) {
-                this.isPartName = WikiPageParser.isPartName(line);
+                this.isPartName = partNameExtractor.extract(line);
                 if (!this.isPartName) {
                     this.isPartName = WikiPageParser.isPartNameInCategories(lineCategories);
                 }
             }
 
-            LinkParenthesisPair linkParenthesisPair = WikiPageParser.extractLinksAndParenthesis(line);
+            LinkParenthesisPair linkParenthesisPair = pairExtractor.extract(line);
 
             this.categories.addAll(lineCategories);
             this.categoriesNorm.addAll(WikiPageParser.normalizeStringSet(lineCategories));
@@ -56,7 +63,7 @@ public class WikiParsedPageRelationsBuilder {
             this.titleParenthesisNorm = WikiPageParser.normalizeStringSet(extParenthesis);
         } else {
             String firstParagraph = WikiPageParser.extractFirstPageParagraph(pageText);
-            final BeCompRelationResult beCompRelations = WikiPageParser.extractBeCompRelationFromFirstSentence(firstParagraph);
+            final BeCompRelationResult beCompRelations = beCompExtractor.extract(firstParagraph);
             this.beCompRelations = beCompRelations.getBeCompRelations();
             this.beCompRelationsNorm = beCompRelations.getBeCompRelationsNorm();
         }

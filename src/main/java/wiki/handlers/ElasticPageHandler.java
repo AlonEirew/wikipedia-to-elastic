@@ -35,6 +35,15 @@ public class ElasticPageHandler implements IPageHandler {
     }
 
     @Override
+    public boolean isPageExists(String pageId) {
+        if(pageId != null && !pageId.isEmpty()) {
+            return this.elasticApi.isDocExists(this.indexName, this.docType, pageId);
+        }
+
+        return false;
+    }
+
+    @Override
     public void addPage(WikiParsedPage page) {
         synchronized (lock) {
             if (page != null) {

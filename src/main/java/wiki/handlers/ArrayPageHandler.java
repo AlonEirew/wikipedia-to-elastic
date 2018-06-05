@@ -14,6 +14,14 @@ public class ArrayPageHandler implements IPageHandler {
     private final List<WikiParsedPage> pages = new ArrayList<>();
 
     @Override
+    public boolean isPageExists(String pageId) {
+        if(pages.contains(pageId)) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     public void addPage(WikiParsedPage page) {
         if(page != null) {
             pages.add(page);
