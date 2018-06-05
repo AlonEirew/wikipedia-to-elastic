@@ -10,17 +10,17 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
-import wiki.data.ElasticPageHandler;
-import wiki.data.IPageHandler;
+import wiki.handlers.ElasticPageHandler;
+import wiki.handlers.IPageHandler;
 import wiki.elastic.ElasticAPI;
 import wiki.elastic.ElasticBulkDocCreateListener;
 import wiki.elastic.IElasticAPI;
 import wiki.parsers.STAXParser;
+import wiki.utils.WikiPageParser;
 import wiki.utils.WikiToElasticConfiguration;
 import wiki.utils.WikiToElasticUtils;
 
 import java.io.*;
-import java.net.URL;
 import java.util.Scanner;
 
 public class WikiToElasticMain {
@@ -35,6 +35,7 @@ public class WikiToElasticMain {
             if(resource != null) {
                 reader = new JsonReader(new InputStreamReader(resource));
                 WikiToElasticConfiguration configuration = WikiToElasticConfiguration.gson.fromJson(reader, WikiToElasticConfiguration.CONFIGURATION_TYPE);
+                WikiPageParser.initResources();
                 LOGGER.info("Process configuration loaded");
 
                 long startTime = System.currentTimeMillis();
@@ -64,6 +65,8 @@ public class WikiToElasticMain {
     static void startProcess(WikiToElasticConfiguration configuration) throws IOException {
         RestHighLevelClient client;
         InputStream inputStream = null;
+        STAXParser parser = null;
+        IPageHandler pageHandler = null;
         try(Scanner reader = new Scanner(System.in);) {
             LOGGER.info("Reading wikidump: " + configuration.getWikiDump());
             File wikifile = new File(configuration.getWikiDump());
@@ -78,22 +81,31 @@ public class WikiToElasticMain {
                 IElasticAPI elasicApi = new ElasticAPI(client);
 
                 // Delete if index already exists
-                System.out.println("You are about to delete index (if exists) \"" + configuration.getIndexName() + "\" do you want to continue [Y/n]?");
+                System.out.println("Would you like to clean & delete index (if exists) \"" + configuration.getIndexName() +
+                        "\" or update (new pages) in it [D(Delete)/U(Update)");
                 String ans = reader.nextLine(); // Scans the next token of the input as an int.
-                if(ans.equalsIgnoreCase("y") || ans.equalsIgnoreCase("yes")) {
+                if(ans.equalsIgnoreCase("d") || ans.equalsIgnoreCase("delete")) {
                     elasicApi.deleteIndex(configuration.getIndexName());
 
                     // Create the index
                     elasicApi.createIndex(configuration);
-                    ElasticBulkDocCreateListener listener = new ElasticBulkDocCreateListener();
-
-                    // Start parsing the xml and adding pages to elastic
-                    IPageHandler pageHandler = new ElasticPageHandler(elasicApi, listener, configuration);
-
-                    STAXParser parser = new STAXParser(pageHandler);
-                    parser.parse(inputStream);
-                    pageHandler.flush();
+                } else if(ans.equalsIgnoreCase("u") || ans.equalsIgnoreCase("update")) {
+                    if(!elasicApi.isIndexExists(configuration.getIndexName())) {
+                        LOGGER.info("Index \"" + configuration.getIndexName() +
+                                "\" not found, exit application.");
+                        return;
+                    }
+                } else {
+                    return;
                 }
+
+                ElasticBulkDocCreateListener listener = new ElasticBulkDocCreateListener();
+
+                // Start parsing the xml and adding pages to elastic
+                pageHandler = new ElasticPageHandler(elasicApi, listener, configuration);
+
+                parser = new STAXParser(pageHandler);
+                parser.parse(inputStream);
             } else {
                 LOGGER.error("Cannot find dump file-" + wikifile.getAbsolutePath());
             }
@@ -103,6 +115,15 @@ public class WikiToElasticMain {
         } finally {
             if (inputStream != null) {
                 inputStream.close();
+            }
+            if(parser != null) {
+                LOGGER.info("*** Total id's extracted=" + parser.getTotalIds().size());
+                parser.shutDownPool();
+                if(pageHandler != null) {
+                    pageHandler.flushRemains();
+                    LOGGER.info("*** Total id's committed=" + ((ElasticPageHandler) pageHandler).getTotalIdsCommitted());
+                    LOGGER.info("*** In commit queue=" + ((ElasticPageHandler) pageHandler).getPagesQueueSize() + "(should be 0)");
+                }
             }
         }
     }

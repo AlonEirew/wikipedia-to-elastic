@@ -19,9 +19,9 @@ public class ElasticDocCreateListener implements ActionListener<IndexResponse> {
         String index = indexResponse.getIndex();
         String id = indexResponse.getId();
         if (indexResponse.getResult() == DocWriteResponse.Result.CREATED) {
-            LOGGER.debug("document with id:" + id + " Created successfully at index:" + index);
+            LOGGER.trace("document with id:" + id + " Created successfully at index:" + index);
         } else if (indexResponse.getResult() == DocWriteResponse.Result.UPDATED) {
-            LOGGER.debug("document with id:" + id + " Updated successfully at " + index);
+            LOGGER.trace("document with id:" + id + " Updated successfully at " + index);
         }
     }
 

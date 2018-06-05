@@ -13,12 +13,14 @@ import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import wiki.data.WikiParsedPage;
 import wiki.data.WikiParsedPageBuilder;
 import wiki.utils.WikiToElasticConfiguration;
 import wiki.utils.TestWikiToElasticUtils;
 
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
@@ -29,79 +31,86 @@ import java.util.concurrent.TimeUnit;
 
 public class TestElasticAPI {
 
-    @Test
-    public void testPutDocOnElastic() throws IOException, InterruptedException {
-        TestWikiToElasticUtils tu = new TestWikiToElasticUtils();
-        URL url = tu.getClass().getClassLoader().getResource("test_conf.json");
-        if(url != null) {
+    private WikiToElasticConfiguration configuration;
+    private RestHighLevelClient client;
+    private ElasticAPI elasicApi;
+
+
+    @Before
+    public void prepareText() throws FileNotFoundException {
+        URL url = TestElasticAPI.class.getClassLoader().getResource("test_conf.json");
+        if(this.configuration == null && url != null) {
             String file = url.getFile();
             JsonReader reader = new JsonReader(new FileReader(file));
-            WikiToElasticConfiguration configuration = WikiToElasticConfiguration.gson.fromJson(reader, WikiToElasticConfiguration.CONFIGURATION_TYPE);
+            this.configuration = WikiToElasticConfiguration.gson.fromJson(reader, WikiToElasticConfiguration.CONFIGURATION_TYPE);
+        }
 
-            // init elastic client
-            RestHighLevelClient client = new RestHighLevelClient(
+        // init elastic client
+        if(this.elasicApi == null) {
+            this.client = new RestHighLevelClient(
                     RestClient.builder(
                             new HttpHost(configuration.getHost(), configuration.getPort(), configuration.getScheme())));
 
-            IElasticAPI elasicApi = new ElasticAPI(client);
-
-            // Delete if index already exists
-            elasicApi.deleteIndex(configuration.getIndexName());
-
-            // Create the index
-            elasicApi.createIndex(configuration);
-
-            // Create/Add Page
-            // Listener
-            ActionListener<IndexResponse> listener = new ElasticDocCreateListener();
-
-            // Create page
-            List<WikiParsedPage> testPages = createTestPages();
-            for (WikiParsedPage page : testPages) {
-                elasicApi.addDocAsnc(listener, configuration.getIndexName(), configuration.getDocType(), page);
-            }
-
-            // Need to wait for index to be searchable
-            Thread.sleep(2000);
-            searchCreatedIndex(configuration, client, elasicApi);
+            this.elasicApi = new ElasticAPI(client);
         }
+
+
+        // Delete if index already exists
+        this.elasicApi.deleteIndex(configuration.getIndexName());
+
+        // Create the index
+        this.elasicApi.createIndex(configuration);
+    }
+
+    @Test
+    public void testPutDocOnElastic() throws IOException, InterruptedException {
+        // Create/Add Page
+        // Listener
+        ActionListener<IndexResponse> listener = new ElasticDocCreateListener();
+
+        // Create page
+        List<WikiParsedPage> testPages = createTestPages();
+        for (WikiParsedPage page : testPages) {
+            this.elasicApi.addDocAsnc(listener, this.configuration.getIndexName(), this.configuration.getDocType(), page);
+        }
+
+        // Need to wait for index to be searchable
+        Thread.sleep(2000);
+        searchCreatedIndex(this.configuration, this.client, this.elasicApi);
     }
 
     @Test
     public void testPutBulkOnElastic() throws IOException, InterruptedException {
-        TestWikiToElasticUtils tu = new TestWikiToElasticUtils();
-        URL url = tu.getClass().getClassLoader().getResource("test_conf.json");
-        if(url != null) {
-            String file = url.getFile();
-            JsonReader reader = new JsonReader(new FileReader(file));
-            WikiToElasticConfiguration configuration = WikiToElasticConfiguration.gson.fromJson(reader, WikiToElasticConfiguration.CONFIGURATION_TYPE);
+        // Create/Add Page
+        // Listener
+        ActionListener<BulkResponse> listener = new ElasticBulkDocCreateListener();
 
-            // init elastic client
-            RestHighLevelClient client = new RestHighLevelClient(
-                    RestClient.builder(
-                            new HttpHost(configuration.getHost(), configuration.getPort(), configuration.getScheme())));
+        // Create page
+        List<WikiParsedPage> testPages = createTestPages();
 
-            IElasticAPI elasicApi = new ElasticAPI(client);
+        this.elasicApi.addBulkAsnc(listener, this.configuration.getIndexName(), this.configuration.getDocType(), testPages);
 
-            // Delete if index already exists
-            elasicApi.deleteIndex(configuration.getIndexName());
+        Thread.sleep(2000);
 
-            // Create the index
-            elasicApi.createIndex(configuration);
+        searchCreatedIndex(this.configuration, this.client, this.elasicApi);
+    }
 
-            // Create/Add Page
-            // Listener
-            ActionListener<BulkResponse> listener = new ElasticBulkDocCreateListener();
+    @Test
+    public void testIsDocExist() throws InterruptedException {
+        // Create page
+        List<WikiParsedPage> testPages = createTestPages();
+        ActionListener<BulkResponse> listener = new ElasticBulkDocCreateListener();
+        this.elasicApi.addBulkAsnc(listener, this.configuration.getIndexName(), this.configuration.getDocType(), testPages);
 
-            // Create page
-            List<WikiParsedPage> testPages = createTestPages();
+        Thread.sleep(2000);
 
-            elasicApi.addBulkAsnc(listener, configuration.getIndexName(), configuration.getDocType(), testPages);
-
-            Thread.sleep(2000);
-
-            searchCreatedIndex(configuration, client, elasicApi);
+        for(WikiParsedPage page : testPages) {
+            Assert.assertTrue(this.elasicApi.isDocExists(this.configuration.getIndexName(),
+                    this.configuration.getDocType(), String.valueOf(page.getId())));
         }
+
+        Assert.assertFalse(this.elasicApi.isDocExists(this.configuration.getIndexName(),
+                this.configuration.getDocType(), "1234"));
     }
 
     private List<WikiParsedPage> createTestPages() {
@@ -110,28 +119,22 @@ public class TestElasticAPI {
         wikiPages.add(new WikiParsedPageBuilder()
                 .setTitle("Test Doc")
                 .setText("Testing elastic search")
-                .setDescription(new HashSet<>())
                 .setId(555)
                 .setRedirectTitle("Redirect Test Doc Title")
-                .setAliases(new HashSet<>())
                 .build());
 
         wikiPages.add(new WikiParsedPageBuilder()
                 .setTitle("Test")
                 .setText("Testing elastic search")
-                .setDescription(new HashSet<>())
                 .setId(556)
                 .setRedirectTitle("Redirect Test Doc Title")
-                .setAliases(new HashSet<>())
                 .build());
 
         wikiPages.add(new WikiParsedPageBuilder()
                 .setTitle("Te st")
                 .setText("Testing elastic search")
-                .setDescription(new HashSet<>())
                 .setId(557)
                 .setRedirectTitle("Redirect Test Doc Title")
-                .setAliases(new HashSet<>())
                 .build());
 
         return wikiPages;
