@@ -1,28 +1,34 @@
 # Wikipedia XML dump to ElasticSearch
 
-#### Export Wikipedia XML dump to ElasticSearch database
+Project goal - Use 3 different types of Wikipedia pages (Redirect/Disambiguation/Title) in order to extract 5 different 
+semantic features for the task of semantic relations between entities:<br/>
+* Redirect Links
+* Disambiguation Links 
+* Category Links 
+* Link Title Parenthesis
+* 'Is A' (extracted from page first paragraph)
 
 ***
 
-**Requisites:**
+##Basic Info and Statistics
+* Process will only export the following Wikipedia Dump fields: PageTitle, PageId, RedirectTitle and PageText.<br/>
+All meta data such as contributor/revision/comment/format/etc. are not exported.
+* In case page has a redirect page, text field will not be exported (in order to remove redundancy) most accurate page text will be available in the redirect page. 
+* Each 'relation' features will be extracted and saved in Elastic in two fields: one raw, and one that is  normalized and lemmatized.
+* Processing Wiki latest full dump (15GB .bz2 AND 66GB unpacked as .xml) will take about **5 days** (tested on MacBook pro, using stanford parser to extract relations, normalize and lemmatize the data)
+* The generated ElasticSearch index size will be 29GB and will contain 18,289,785 searchable entities and relations.
+
+##Requisites
 * Java 1.8
 * ElasticSearch 6.2 (<a href=https://www.elastic.co/downloads/elasticsearch>Installation Guide</a>)
 * Wikipedia xml.bz2 dump file (<a href=https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles.xml.bz2>download enwiki latest dump xml</a>)
 
-**Basic Info and Statistics:**
-* Process will only export the following fields: PageTitle, PageId, RedirectTitle and PageText.<br/>
-All meta data such as contributor/revision/comment/format/etc. are not exported.
-* In case page has a redirect page, text field will not be exported (in order to remove redundancy) most accurate page text will be available in the redirect page. 
-* Processing Wiki latest full dump (15GB .bz2 AND 66GB unpacked as .xml) will take about **5 days** (tested on MacBook pro, using stanford parser to extract relations from wikipage text)
-* The generated ElasticSearch index size will be 29GB.
-* Index count should be around 18,289,785 Wikipedia pages
-
-**Project Configuration Files:**
+##Project Configuration Files
 * `.../src/main/resources/conf.json` - basic configuration
 * `.../src/main/resources/mapping.json` - Elastic wiki index mapping
 * `.../src/main/resources/es_map_settings.json` - Elastic index settings
 
-**Building And Running From Source**:<br/>
+##Building And Running From Source
 * Make sure Elastic process is running and active (<a href="http://localhost:9200/">http://localhost:9200/</a>)
 * Checkout/Clone the repository
 * Put wiki xml.bz2 dump file (no need to extract the bz2 file!) in: `/.../wikiToElasticjava/dumps/` folder.<br/> 
@@ -35,8 +41,8 @@ All meta data such as contributor/revision/comment/format/etc. are not exported.
 * Then run:<br/>
 `java -Xmx6000m -DentityExpansionLimit=2147480000 -DtotalEntitySizeLimit=2147480000 -Djdk.xml.totalEntitySizeLimit=2147480000 -jar build/distributions/WikipediaToElastic-1.0/WikipediaToElastic-1.0.jar`
 
-**Generated Elastic Page Example:**<br/>
-**Full Main Page Example:**
+##Generated Elastic Page Example
+**Disambiguation Page Example:**
 ```json
 {
   "_index": "enwiki_v2",
@@ -83,29 +89,6 @@ All meta data such as contributor/revision/comment/format/etc. are not exported.
       ],
       "titleParenthesisNorm": []
     }
-  },
-  "highlight": {
-    "title.keyword": [
-      "@kibana-highlighted-field@NLP@/kibana-highlighted-field@"
-    ],
-    "title.prefix_asciifolding": [
-      "@kibana-highlighted-field@NLP@/kibana-highlighted-field@"
-    ],
-    "title.prefix": [
-      "@kibana-highlighted-field@NLP@/kibana-highlighted-field@"
-    ],
-    "title.near_match_asciifolding": [
-      "@kibana-highlighted-field@NLP@/kibana-highlighted-field@"
-    ],
-    "title.plain": [
-      "@kibana-highlighted-field@NLP@/kibana-highlighted-field@"
-    ],
-    "title.near_match": [
-      "@kibana-highlighted-field@NLP@/kibana-highlighted-field@"
-    ],
-    "title": [
-      "@kibana-highlighted-field@NLP@/kibana-highlighted-field@"
-    ]
   }
 }
  ```
@@ -125,29 +108,6 @@ All meta data such as contributor/revision/comment/format/etc. are not exported.
       "isPartName": false,
       "isDisambiguation": false
     }
-  },
-  "highlight": {
-    "title.prefix_asciifolding": [
-      "@kibana-highlighted-field@Nlp@/kibana-highlighted-field@"
-    ],
-    "title.prefix": [
-      "@kibana-highlighted-field@Nlp@/kibana-highlighted-field@"
-    ],
-    "title.near_match_asciifolding": [
-      "@kibana-highlighted-field@Nlp@/kibana-highlighted-field@"
-    ],
-    "title.plain": [
-      "@kibana-highlighted-field@Nlp@/kibana-highlighted-field@"
-    ],
-    "title.near_match": [
-      "@kibana-highlighted-field@Nlp@/kibana-highlighted-field@"
-    ],
-    "title": [
-      "@kibana-highlighted-field@Nlp@/kibana-highlighted-field@"
-    ],
-    "redirectTitle": [
-      "@kibana-highlighted-field@NLP@/kibana-highlighted-field@"
-    ]
   }
 }
  ```
@@ -158,8 +118,8 @@ All meta data such as contributor/revision/comment/format/etc. are not exported.
 | _source.title | Text | Wikipedia page title |
 | _source.text | Text | Wikipedia page text |
 | _source.redirectTitle | Text (optional) | Wikipedia page redirect title |
-| _source.relations.beCompRelations | List (optional) | Be Comp relation list |
-| _source.relations.beCompRelationsNorm | List (optional) | Be Comp relation list norm |
+| _source.relations.beCompRelations | List (optional) | Be-Comp (or 'Is A') relation list |
+| _source.relations.beCompRelationsNorm | List (optional) | Be-Comp (or 'Is A') relation list norm |
 | _source.relations.categories | List (optional) | Categories relation list |
 | _source.relations.categoriesNorm | List (optional) | Categories relation list norm |
 | _source.relations.isDisambiguation | Bool (optional) | is Wikipedia disambiguation page |
@@ -167,4 +127,3 @@ All meta data such as contributor/revision/comment/format/etc. are not exported.
 | _source.relations.titleParenthesis | List (optional) | List of disambiguation secondary links  |
 | _source.relations.titleParenthesisNorm | List (optional) | List of disambiguation secondary links norm |
 
-*In case of a bug, please contact/open issue/fix and PR :)*
