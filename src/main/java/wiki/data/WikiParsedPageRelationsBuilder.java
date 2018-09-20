@@ -25,6 +25,30 @@ public class WikiParsedPageRelationsBuilder {
     private Set<String> beCompRelationsNorm;
 
     public WikiParsedPageRelations buildFromWikipediaPageText(String pageText) {
+        return buildFromText(pageText, true);
+    }
+
+    public WikiParsedPageRelations buildFromWikipediaPageTextNoNormalization(String pageText) {
+        return buildFromText(pageText, false);
+    }
+
+    public WikiParsedPageRelations build() {
+        return new WikiParsedPageRelations(
+                this.isPartName,
+                this.isDisambiguation,
+                this.disambiguationLinks,
+                this.categories,
+                this.aliases,
+                this.titleParenthesis,
+                this.beCompRelations,
+                this.disambiguationLinksNorm,
+                this.categoriesNorm,
+                this.aliasesNorm,
+                this.titleParenthesisNorm,
+                this.beCompRelationsNorm);
+    }
+
+    private WikiParsedPageRelations buildFromText(String pageText, boolean normalize) {
         this.categories = new HashSet<>();
         this.categoriesNorm = new HashSet<>();
         this.titleParenthesis = new HashSet<>();
@@ -50,7 +74,9 @@ public class WikiParsedPageRelationsBuilder {
             LinkParenthesisPair linkParenthesisPair = pairExtractor.extract(line);
 
             this.categories.addAll(lineCategories);
-            this.categoriesNorm.addAll(WikiPageParser.normalizeStringSet(lineCategories));
+            if(normalize) {
+                this.categoriesNorm.addAll(WikiPageParser.normalizeStringSet(lineCategories));
+            }
             extLinks.addAll(linkParenthesisPair.getLinks());
             extParenthesis.addAll(linkParenthesisPair.getParenthesis());
         }
@@ -58,32 +84,19 @@ public class WikiParsedPageRelationsBuilder {
         if (WikiPageParser.isDisambiguation(this.categories)) { // need to replace with utils method to check in categories if disambig
             this.isDisambiguation = true;
             this.disambiguationLinks = extLinks;
-            this.disambiguationLinksNorm = WikiPageParser.normalizeStringSet(extLinks);
             this.titleParenthesis = extParenthesis;
-            this.titleParenthesisNorm = WikiPageParser.normalizeStringSet(extParenthesis);
+            if(normalize) {
+                this.disambiguationLinksNorm = WikiPageParser.normalizeStringSet(extLinks);
+                this.titleParenthesisNorm = WikiPageParser.normalizeStringSet(extParenthesis);
+            }
         } else {
             String firstParagraph = WikiPageParser.extractFirstPageParagraph(pageText);
             final BeCompRelationResult beCompRelations = beCompExtractor.extract(firstParagraph);
             this.beCompRelations = beCompRelations.getBeCompRelations();
-            this.beCompRelationsNorm = beCompRelations.getBeCompRelationsNorm();
+            if(normalize) {
+                this.beCompRelationsNorm = beCompRelations.getBeCompRelationsNorm();
+            }
         }
-
         return this.build();
-    }
-
-    public WikiParsedPageRelations build() {
-        return new WikiParsedPageRelations(
-                this.isPartName,
-                this.isDisambiguation,
-                this.disambiguationLinks,
-                this.categories,
-                this.aliases,
-                this.titleParenthesis,
-                this.beCompRelations,
-                this.disambiguationLinksNorm,
-                this.categoriesNorm,
-                this.aliasesNorm,
-                this.titleParenthesisNorm,
-                this.beCompRelationsNorm);
     }
 }

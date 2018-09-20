@@ -29,6 +29,7 @@ public class WikiToElasticConfiguration {
     private int shards;
     private int replicas;
     private int insertBulkSize;
+    private boolean normalizeFields;
 
     private transient String mappingFileContent = null;
     private transient String settingFileContent = null;
@@ -119,6 +120,14 @@ public class WikiToElasticConfiguration {
 
     public void setInsertBulkSize(int insertBulkSize) {
         this.insertBulkSize = insertBulkSize;
+    }
+
+    public boolean isNormalizeFields() {
+        return normalizeFields;
+    }
+
+    public void setNormalizeFields(boolean normalizeFields) {
+        this.normalizeFields = normalizeFields;
     }
 
     public String getMappingFileContent() {

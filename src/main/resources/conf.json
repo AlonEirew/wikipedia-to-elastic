@@ -1,6 +1,7 @@
 {
-  "indexName" : "enwiki_v2",
+  "indexName" : "enwiki_v3",
   "docType" : "wikipage",
+  "normalizeFields" : "true",
   "insertBulkSize": 100,
   "mapping" : "mapping.json",
   "setting" : "es_map_settings.json",

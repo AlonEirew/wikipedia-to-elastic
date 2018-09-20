@@ -41,7 +41,7 @@ public class WikiToElasticMain {
                 long startTime = System.currentTimeMillis();
                 startProcess(configuration);
                 long endTime = System.currentTimeMillis();
-                LOGGER.info("Process Done, took:" + (endTime - startTime));
+                LOGGER.info("Process Done, took:" + (endTime - startTime) + "ms");
             }
         } catch (FileNotFoundException e) {
             LOGGER.error("Failed to start process", e);
@@ -104,7 +104,7 @@ public class WikiToElasticMain {
                 // Start parsing the xml and adding pages to elastic
                 pageHandler = new ElasticPageHandler(elasicApi, listener, configuration);
 
-                parser = new STAXParser(pageHandler);
+                parser = new STAXParser(pageHandler, configuration.isNormalizeFields());
                 parser.parse(inputStream);
             } else {
                 LOGGER.error("Cannot find dump file-" + wikifile.getAbsolutePath());
@@ -122,7 +122,7 @@ public class WikiToElasticMain {
                 if(pageHandler != null) {
                     pageHandler.flushRemains();
                     LOGGER.info("*** Total id's committed=" + ((ElasticPageHandler) pageHandler).getTotalIdsCommitted());
-                    LOGGER.info("*** In commit queue=" + ((ElasticPageHandler) pageHandler).getPagesQueueSize() + "(should be 0)");
+                    LOGGER.info("*** In commit queue=" + ((ElasticPageHandler) pageHandler).getPagesQueueSize() + " (should be 0)");
                 }
             }
         }

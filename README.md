@@ -15,7 +15,8 @@ semantic features for the task of semantic relations between entities:<br/>
 All meta data such as contributor/revision/comment/format/etc. are not exported.
 * In case page has a redirect page, text field will not be exported (in order to remove redundancy) most accurate page text will be available in the redirect page. 
 * Each 'relation' features will be extracted and saved in Elastic in two fields: one raw, and one that is  normalized and lemmatized.
-* Processing Wiki latest full dump (15GB .bz2 AND 66GB unpacked as .xml) will take about **5 days** (tested on MacBook pro, using stanford parser to extract relations, normalize and lemmatize the data)
+* Processing Wiki latest full dump (15GB .bz2 AND 66GB unpacked as .xml) will take about **5 days** (tested on MacBook pro, using stanford parser to extract relations, normalize and lemmatize the data).<br/>
+It is recommended to normalize the fields for better results, in case not needed or for much faster run **(5 hours)**, set normalize to false in [basic configuration](project-configuration-files).
 * The generated ElasticSearch index size will be 29GB and will contain 18,289,785 searchable entities and relations.
 
 ##Requisites

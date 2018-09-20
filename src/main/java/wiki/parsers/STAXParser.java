@@ -6,8 +6,11 @@ package wiki.parsers;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import wiki.data.WikiParsedPage;
+import wiki.data.WikiParsedPageBuilder;
+import wiki.data.WikiParsedPageRelations;
+import wiki.data.WikiParsedPageRelationsBuilder;
 import wiki.handlers.IPageHandler;
-import wiki.handlers.WikiParsedPageCreateAndCommit;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
@@ -24,17 +27,29 @@ public class STAXParser implements IWikiParser {
 
     private final static Logger LOGGER = LogManager.getLogger(STAXParser.class);
 
-    private RejectedExecutionHandler rejectedExecutionHandler = new ThreadPoolExecutor.CallerRunsPolicy();
-    private BlockingQueue<Runnable> blockingQueue = new ArrayBlockingQueue<Runnable>(100);
+    private final RejectedExecutionHandler rejectedExecutionHandler = new ThreadPoolExecutor.CallerRunsPolicy();
+    private final BlockingQueue<Runnable> blockingQueue = new ArrayBlockingQueue<Runnable>(100);
     private final IPageHandler handler;
-    private ExecutorService executorService;
-    private Set<Long> totalIds = new HashSet<>();
+    private final ExecutorService executorService;
+    private final Set<Long> totalIds = new HashSet<>();
+    private boolean normalize;
 
     public STAXParser(IPageHandler handler) {
-        int cores = Runtime.getRuntime().availableProcessors();
-        this.executorService = new ThreadPoolExecutor(cores, cores,
-                0L, TimeUnit.MILLISECONDS, this.blockingQueue, this.rejectedExecutionHandler);
+        this.executorService = initExecuterService();
         this.handler = handler;
+        this.normalize = true;
+    }
+
+    public STAXParser(IPageHandler handler, boolean normalize) {
+        this.executorService = initExecuterService();
+        this.handler = handler;
+        this.normalize = normalize;
+    }
+
+    private ExecutorService initExecuterService() {
+        int cores = Runtime.getRuntime().availableProcessors();
+        return new ThreadPoolExecutor(cores, cores,
+                0L, TimeUnit.MILLISECONDS, this.blockingQueue, this.rejectedExecutionHandler);
     }
 
 
@@ -110,9 +125,37 @@ public class STAXParser implements IWikiParser {
             }
         }
 
-        WikiParsedPageCreateAndCommit wikiParsedPageCreateAndCommit = new WikiParsedPageCreateAndCommit(id, title, redirect, text, this.handler);
+        prepareSubmit(title, id, text, redirect);
+    }
 
-        this.executorService.submit(wikiParsedPageCreateAndCommit);
+    private void prepareSubmit(final String title, final long id, final String text, final String redirect) {
+        if(!this.handler.isPageExists(String.valueOf(id))) {
+            this.executorService.submit(() -> {
+                LOGGER.info("prepare to commit page with id-" + id + ", title-" + title);
+                WikiParsedPageRelations relations;
+                if (redirect == null || redirect.isEmpty()) {
+                    if (this.normalize) {
+                        relations = new WikiParsedPageRelationsBuilder().buildFromWikipediaPageText(text);
+                    } else {
+                        relations = new WikiParsedPageRelationsBuilder().buildFromWikipediaPageTextNoNormalization(text);
+                    }
+                } else {
+                    relations = new WikiParsedPageRelationsBuilder().build();
+                }
+
+                final WikiParsedPage page = new WikiParsedPageBuilder()
+                        .setId(id)
+                        .setTitle(title)
+                        .setRedirectTitle(redirect)
+                        .setText(text)
+                        .setRelations(relations)
+                        .build();
+
+                handler.addPage(page);
+            });
+        } else {
+            LOGGER.info("Page with id-" + id + ", title-" + title + ", already exist, moving on...");
+        }
     }
 
     public Set<Long> getTotalIds() {
