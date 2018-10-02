@@ -10,7 +10,7 @@ semantic features for the task of semantic relations between entities:<br/>
 
 ***
 
-##Basic Info and Statistics
+### Basic Info and Statistics
 * Process will only export the following Wikipedia Dump fields: PageTitle, PageId, RedirectTitle and PageText.<br/>
 All meta data such as contributor/revision/comment/format/etc. are not exported.
 * In case page has a redirect page, text field will not be exported (in order to remove redundancy) most accurate page text will be available in the redirect page. 
@@ -19,17 +19,17 @@ All meta data such as contributor/revision/comment/format/etc. are not exported.
 It is recommended to normalize the fields for better results, in case not needed or for much faster run **(5 hours)**, set normalize to false in [basic configuration](project-configuration-files).
 * The generated ElasticSearch index size will be 29GB and will contain 18,289,785 searchable entities and relations.
 
-##Requisites
+### Requisites
 * Java 1.8
 * ElasticSearch 6.2 (<a href=https://www.elastic.co/downloads/elasticsearch>Installation Guide</a>)
 * Wikipedia xml.bz2 dump file (<a href=https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles.xml.bz2>download enwiki latest dump xml</a>)
 
-##Project Configuration Files
+### Project Configuration Files
 * `.../src/main/resources/conf.json` - basic configuration
 * `.../src/main/resources/mapping.json` - Elastic wiki index mapping
 * `.../src/main/resources/es_map_settings.json` - Elastic index settings
 
-##Building And Running From Source
+### Building And Running From Source
 * Make sure Elastic process is running and active (<a href="http://localhost:9200/">http://localhost:9200/</a>)
 * Checkout/Clone the repository
 * Put wiki xml.bz2 dump file (no need to extract the bz2 file!) in: `/.../wikiToElasticjava/dumps/` folder.<br/> 
@@ -42,7 +42,7 @@ It is recommended to normalize the fields for better results, in case not needed
 * Then run:<br/>
 `java -Xmx6000m -DentityExpansionLimit=2147480000 -DtotalEntitySizeLimit=2147480000 -Djdk.xml.totalEntitySizeLimit=2147480000 -jar build/distributions/WikipediaToElastic-1.0/WikipediaToElastic-1.0.jar`
 
-##Generated Elastic Page Example
+### Generated Elastic Page Example
 **Disambiguation Page Example:**
 ```json
 {
