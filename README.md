@@ -17,7 +17,7 @@ All meta data such as contributor/revision/comment/format/etc. are not exported 
 * Each 'relation' from above relations (Redirect, Disambiguation, Category, ...) will be extracted and saved in the Elastic index into two separated fields: one containing the raw text as extracted from xml wiki dump text field, 
 and the other one will be saved after normalizing and lemmatizing the text (the second field is optional).
 * Processing Wiki latest full dump (15GB .bz2 AND 66GB unpacked as .xml) including the normalization and lemmatization of text, will take about **5 days** (tested on MacBook pro, using stanford parser to extract relations, normalize and lemmatize the data).<br/>
-In case of using this data in order to identify semantic relations between phrases at run time, It is recommended to normalize the fields for better results, in case not needed or for a much faster data export into elastic **(5 hours)**, set normalize to false in `conf.json`, as shown in [basic configuration](project-configuration-files).
+In case of using this data in order to identify semantic relations between phrases at run time, It is recommended to normalize the fields for better results, in case not needed or for a much faster data export into elastic **(5 hours)**, set normalize to false in `conf.json`, as shown in "Project Configuration Files".
 * The generated ElasticSearch index size will be 29GB and will contain 18,289,785 searchable entities and relations.
 * Query time on created Wikipedia Elastic index will take roughly about 1-2 milliseconds
 
@@ -60,7 +60,7 @@ In case of using this data in order to identify semantic relations between phras
 
 ### Generated Elastic Page Example
 
-Once process has finished, you should see in your ElasticSearch selected index, pages that have been created with the following structures (also see [Fields Attributes](created fields attributes) for more details):   
+Once process has finished, you should see in your ElasticSearch selected index, pages that have been created with the following structures (also see "Created Fields Attributes" for more details):   
 
 **Page Example (Extracted from Wikipedia disambiguation page):**
 ```json
