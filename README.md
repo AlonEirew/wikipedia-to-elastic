@@ -16,8 +16,6 @@ All meta data such as contributor/revision/comment/format/etc. are not exported 
 * In case page has a redirect page, text field will not be exported (in order to remove redundancy) most accurate page text will be available in the redirect page. 
 * Each 'relation' from above relations (Redirect, Disambiguation, Category, ...) will be extracted and saved in the Elastic index into two separated fields: one containing the raw text as extracted from xml wiki dump text field, 
 and the other one will be saved after normalizing and lemmatizing the text (the second field is optional).
-* Processing Wiki latest full dump (15GB .bz2 AND 66GB unpacked as .xml) including the normalization and lemmatization of text, will take about **5 days** (tested on MacBook pro, using stanford parser to extract relations, normalize and lemmatize the data).<br/>
-In case of using this data in order to identify semantic relations between phrases at run time, It is recommended to normalize the fields for better results, in case not needed or for a much faster data export into elastic **(5 hours)**, set normalize to false in `conf.json`, as shown in "Project Configuration Files".
 * The generated ElasticSearch index size will be 29GB and will contain 18,289,785 searchable entities and relations.
 * Query time on created Wikipedia Elastic index will take roughly about 1-2 milliseconds
 
@@ -45,7 +43,34 @@ In case of using this data in order to identify semantic relations between phras
 * `src/main/resources/mapping.json` - Elastic wiki index mapping (Should probably stay unchanged)
 * `src/main/resources/es_map_settings.json` - Elastic index settings (Should probably stay unchanged)
 
+### Getting with Docker
+This is the preferred and fastest way to get the elastic index locally 
+1) Make sure docker image size is set to at least 180GB size before starting first time process,
+after process done you can decrease image size back to 70GB (elastic image will be 60GB)
+ 
+    `#>docker pull aeirew/elastic-wiki`
+    
+    `#>docker run -d -p 9200:9200 -p 9300:9300 elastic-wiki`
+
+2) First time you run the container Elastic Index is still empty, all data is in a compressed file within the image,
+in order to create and export the wiki data into the elatic index (this may take 2-5 hours depends on hardware) run 
+the following command
+
+    `#>docker exec <REPLACE_WITH_RUNNING_CONTAINER_ID> /tmp/build.sh`
+    
+3) once done save the new image (you can delete the original one (ie:elastic-wiki) in order to save space
+
+    `#>docker commit <CONTAINER_ID> <IMAGE_NEW_NAME>`
+
+4) Thats it! :) to run your image just use the first command with <IMAGE_NEW_NAME>
+
+
 ### Building And Running From Source
+**Disclimer** Processing Wiki latest full dump (15GB .bz2 AND 66GB unpacked as .xml) including the normalization and lemmatization of text, will take about **5 days** (tested on MacBook pro, using stanford parser to extract relations, normalize and lemmatize the data).<br/>
+In case of using this data in order to identify semantic relations between phrases at run time, It is recommended to normalize the fields for better results, in case not needed or for a much faster data export into elastic **(5 hours)**, set normalize to false in `conf.json`, as shown in "Project Configuration Files".<br />
+
+You might want to consider using the Docker Image to save that time
+
 * Make sure Elastic process is running and active on your host (if running Elastic locally your IP is <a href="http://localhost:9200/">http://localhost:9200/</a>)
 * Checkout/Clone the repository
 * Put wiki xml.bz2 dump file (no need to extract the bz2 file!) in: `dumps` folder under root checkout repository.<br/> 

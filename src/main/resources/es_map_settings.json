@@ -2,10 +2,6 @@
   "analysis": {
     "analyzer": {
       "prefix_asciifolding": {
-        "filter": [
-          "icu_normalizer",
-          "icu_folding"
-        ],
         "char_filter": [
           "near_space_flattener"
         ],
@@ -13,9 +9,6 @@
         "tokenizer": "prefix"
       },
       "prefix": {
-        "filter": [
-          "icu_normalizer"
-        ],
         "char_filter": [
           "near_space_flattener"
         ],
@@ -23,10 +16,6 @@
         "tokenizer": "prefix"
       },
       "plain": {
-        "filter": [
-          "icu_normalizer",
-          "icu_folding"
-        ],
         "char_filter": [
           "word_break_helper"
         ],
@@ -34,9 +23,6 @@
         "tokenizer": "standard"
       },
       "plain_search": {
-        "filter": [
-          "icu_normalizer"
-        ],
         "char_filter": [
           "word_break_helper"
         ],
@@ -47,9 +33,7 @@
         "filter": [
           "aggressive_splitting",
           "possessive_english",
-          "icu_normalizer",
           "stop",
-          "icu_folding",
           "kstem",
           "custom_stem"
         ],
@@ -64,10 +48,7 @@
         "filter": [
           "aggressive_splitting",
           "possessive_english",
-          "icu_normalizer",
           "stop",
-          "icu_folding",
-          "kstem",
           "custom_stem"
         ],
         "char_filter": [
@@ -86,9 +67,7 @@
       },
       "near_match_asciifolding": {
         "filter": [
-          "truncate_keyword",
-          "icu_normalizer",
-          "icu_folding"
+          "truncate_keyword"
         ],
         "char_filter": [
           "near_space_flattener"
@@ -97,9 +76,6 @@
         "tokenizer": "no_splitting"
       },
       "near_match": {
-        "filter": [
-          "icu_normalizer"
-        ],
         "char_filter": [
           "near_space_flattener"
         ],
