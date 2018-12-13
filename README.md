@@ -44,25 +44,26 @@ and the other one will be saved after normalizing and lemmatizing the text (the 
 * `src/main/resources/es_map_settings.json` - Elastic index settings (Should probably stay unchanged)
 
 ### Getting with Docker
-This is the preferred and fastest way to get the elastic index locally 
-1) Make sure docker image size is set to at least 180GB size before starting first time process,
-after process done you can decrease image size back to 70GB (elastic image will be 60GB)
+This is the preferred and fastest way to get the elastic index locally.<br/>
+Before starting this one-time process, make sure docker disk image size is not limited under 150GB.
+Once below one-time process done, you can decrease image size
  
+1) Pull the image and run it (pulled image is 11GB)
+
     `#>docker pull aeirew/elastic-wiki`
     
     `#>docker run -d -p 9200:9200 -p 9300:9300 elastic-wiki`
 
-2) First time you run the container Elastic Index is still empty, all data is in a compressed file within the image,
-in order to create and export the wiki data into the elatic index (this may take 2-5 hours depends on hardware) run 
-the following command
+2) The Elastic container index is still empty, all data is in a compressed file within the image,
+in order to create and export the wiki data into the Elastic index (which takes a while) run the following command
 
     `#>docker exec <REPLACE_WITH_RUNNING_CONTAINER_ID> /tmp/build.sh`
     
-3) once done save the new image (you can delete the original one (ie:elastic-wiki) in order to save space
+3) Save to new image (you can delete the original elastic-wiki one)
 
     `#>docker commit <CONTAINER_ID> <IMAGE_NEW_NAME>`
 
-4) Thats it! :) to run your image just use the first command with <IMAGE_NEW_NAME>
+4) That's it! from now on run your image using the above `run` command, replace elastic-wiki with <IMAGE_NEW_NAME>
 
 
 ### Building And Running From Source
