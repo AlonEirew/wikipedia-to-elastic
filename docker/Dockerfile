@@ -20,9 +20,11 @@ RUN npm install elasticdump -g
 
 COPY elastic-dump.7z /tmp/elastic-dump.7z
 COPY build.sh /tmp/build.sh
+COPY elasticsearch.yml /etc/elasticsearch/
 
+RUN chmod +r /etc/elasticsearch/elasticsearch.yml
 RUN chmod +x /tmp/build.sh
 
 EXPOSE 9200 9300
 
-CMD service elasticsearch start && tail -f var/log/elasticsearch/elasticsearch.log
+CMD service elasticsearch start && tail -f var/log/elasticsearch/docker-cluster.log

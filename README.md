@@ -52,7 +52,7 @@ Once below one-time process done, you can decrease image size
 
     `#>docker pull aeirew/elastic-wiki`
     
-    `#>docker run -d -p 9200:9200 -p 9300:9300 elastic-wiki`
+    `#>docker run -d -p 9200:9200 -p 9300:9300 aeirew/elastic-wiki`
 
 2) The Elastic container index is still empty, all data is in a compressed file within the image,
 in order to create and export the wiki data into the Elastic index (which takes a while) run the following command
