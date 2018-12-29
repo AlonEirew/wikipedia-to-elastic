@@ -1,23 +1,62 @@
 # Wikipedia XML dump to ElasticSearch
 
 Project goal - Use 3 different types of Wikipedia pages (Redirect/Disambiguation/Title) in order to extract 5 different 
-semantic features for the task of semantic relations between entities:<br/>
+semantic features for the tasks of <a href="http://nlp_architect.nervanasys.com/identifying_semantic_relation.html">Identifying Semantic Relations</a> 
+and <a href="http://nlp_architect.nervanasys.com/cross_doc_coref.html">Cross Document Co-Reference</a>,
+used in <a href="https://github.com/NervanaSystems/nlp-architect">NLP Architect</a>:
+
+#### Relations Types
+
 * Redirect Links - See details at <a href="https://en.wikipedia.org/wiki/Wikipedia:Redirect">Wikipedia Redirect</a>
 * Disambiguation Links - See details at <a href="https://en.wikipedia.org/wiki/Category:Disambiguation_pages">Wikipedia Disambiguation</a>
 * Category Links - See details at <a href="https://en.wikipedia.org/wiki/Help:Category">Wikipedia Category</a>
 * Link Title Parenthesis - See details at paper <a href="http://u.cs.biu.ac.il/~dagan/publications/ACL09%20camera%20ready.pdf">"Extracting Lexical Reference Rules from Wikipedia"</a>
 * 'Is A' (extracted from page first paragraph) - See details at paper <a href="http://u.cs.biu.ac.il/~dagan/publications/ACL09%20camera%20ready.pdf">"Extracting Lexical Reference Rules from Wikipedia"</a>
-
+ 
 ***
 
-### Basic Info and Statistics
-* Process will only export the following Wikipedia XML Dump fields attributes: *PageTitle, PageId, RedirectTitle and PageText*.<br/>
-All meta data such as contributor/revision/comment/format/etc. are not exported into elastic.
-* In case page has a redirect page, text field will not be exported (in order to remove redundancy) most accurate page text will be available in the redirect page. 
-* Each 'relation' from above relations (Redirect, Disambiguation, Category, ...) will be extracted and saved in the Elastic index into two separated fields: one containing the raw text as extracted from xml wiki dump text field, 
-and the other one will be saved after normalizing and lemmatizing the text (the second field is optional).
-* The generated ElasticSearch index size will be 29GB and will contain 18,289,785 searchable entities and relations.
-* Query time on created Wikipedia Elastic index will take roughly about 1-2 milliseconds
+
+### Getting the index with Docker
+This is the preferred and fastest way to get the elastic index locally.<br/>
+
+#### Docker Prerequisites
+Before starting this one-time process, make sure docker disk image size (*in your Docker Engine Preferences*) is not limited under 150GB.
+Once below one-time process done, you can decrease image size
+
+#### Get Image and Build Container
+
+1) Pull the image and run it (pulled image is 11GB)
+
+    `#>docker pull aeirew/elastic-wiki`
+    
+    `#>docker run -d -p 9200:9200 -p 9300:9300 aeirew/elastic-wiki`
+
+2) The Elastic container index is still empty, all data is in a compressed file within the image,
+in order to create and export the wiki data into the Elastic index (which takes a while) run the following command
+
+    `#>docker exec <REPLACE_WITH_RUNNING_CONTAINER_ID> /tmp/build.sh`
+    
+3) Save to new image (after done you can delete the original aeirew/elastic-wiki image, in order to save disk space)
+
+    `#>docker commit <CONTAINER_ID> <IMAGE_NEW_NAME>`
+    
+4) after saving stop the running container with 
+
+    `#>docker stop <CONTAINER_ID>`
+
+4) That's it! run you image with elastic index 
+
+    `#>docker run -d -p 9200:9200 -p 9300:9300 <IMAGE_NEW_NAME>`
+
+
+### Building the index From Source
+
+**Disclimer:** Processing Wiki latest full dump (15GB .bz2 AND 66GB unpacked as .xml) including the normalization and lemmatization of text, 
+will take about **5 days** (tested on MacBook pro, using stanford parser to extract relations, normalize and lemmatize the data).<br/>
+In case of using this data in order to identify semantic relations between phrases at run time, It is recommended to normalize the fields for better results, 
+in case not needed or for a much faster data export into elastic **(5 hours)**, set normalize to false in `conf.json`, as shown in "Project Configuration Files".<br />
+
+You might want to consider using the Docker Image to save that time
 
 ### Requisites
 * Java 1.8
@@ -42,35 +81,6 @@ and the other one will be saved after normalizing and lemmatizing the text (the 
 ```
 * `src/main/resources/mapping.json` - Elastic wiki index mapping (Should probably stay unchanged)
 * `src/main/resources/es_map_settings.json` - Elastic index settings (Should probably stay unchanged)
-
-### Getting with Docker
-This is the preferred and fastest way to get the elastic index locally.<br/>
-Before starting this one-time process, make sure docker disk image size is not limited under 150GB.
-Once below one-time process done, you can decrease image size
- 
-1) Pull the image and run it (pulled image is 11GB)
-
-    `#>docker pull aeirew/elastic-wiki`
-    
-    `#>docker run -d -p 9200:9200 -p 9300:9300 aeirew/elastic-wiki`
-
-2) The Elastic container index is still empty, all data is in a compressed file within the image,
-in order to create and export the wiki data into the Elastic index (which takes a while) run the following command
-
-    `#>docker exec <REPLACE_WITH_RUNNING_CONTAINER_ID> /tmp/build.sh`
-    
-3) Save to new image (you can delete the original elastic-wiki one)
-
-    `#>docker commit <CONTAINER_ID> <IMAGE_NEW_NAME>`
-
-4) That's it! from now on run your image using the above `run` command, replace elastic-wiki with <IMAGE_NEW_NAME>
-
-
-### Building And Running From Source
-**Disclimer** Processing Wiki latest full dump (15GB .bz2 AND 66GB unpacked as .xml) including the normalization and lemmatization of text, will take about **5 days** (tested on MacBook pro, using stanford parser to extract relations, normalize and lemmatize the data).<br/>
-In case of using this data in order to identify semantic relations between phrases at run time, It is recommended to normalize the fields for better results, in case not needed or for a much faster data export into elastic **(5 hours)**, set normalize to false in `conf.json`, as shown in "Project Configuration Files".<br />
-
-You might want to consider using the Docker Image to save that time
 
 * Make sure Elastic process is running and active on your host (if running Elastic locally your IP is <a href="http://localhost:9200/">http://localhost:9200/</a>)
 * Checkout/Clone the repository
