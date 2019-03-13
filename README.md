@@ -1,18 +1,23 @@
-# Wikipedia XML dump to ElasticSearch
+# Wikipedia to ElasticSearch
 
-Project goal - Use 3 different types of Wikipedia pages (Redirect/Disambiguation/Title) in order to extract 5 different 
-semantic features for the tasks of <a href="http://nlp_architect.nervanasys.com/identifying_semantic_relation.html">Identifying Semantic Relations</a> 
-and <a href="http://nlp_architect.nervanasys.com/cross_doc_coref.html">Cross Document Co-Reference</a>,
-used in <a href="https://github.com/NervanaSystems/nlp-architect">NLP Architect</a>:
+This is a knowledge resource based on wikipedia
 
-#### Relations Types
+Project goal - Use 3 different types of Wikipedia pages (Redirect/Disambiguation/Title) in order to extract 6 different 
+semantic features for tasks such as Identifying Semantic Relations, Cross Document Co-Reference, Knowledge Graphs, Summarization and other.
+
+Integrated with Intel NLP Framework <a href="https://github.com/NervanaSystems/nlp-architect">NLP Architect</a>
+
+For more information and examples check this related <a href="https://www.intel.ai/extracting-semantic-relations-using-external-knowledge-resources-with-nlp-architect/#gs.12xroe">blog post</a>.
+
+#### Extracted Relations Types and Features
 
 * Redirect Links - See details at <a href="https://en.wikipedia.org/wiki/Wikipedia:Redirect">Wikipedia Redirect</a>
 * Disambiguation Links - See details at <a href="https://en.wikipedia.org/wiki/Category:Disambiguation_pages">Wikipedia Disambiguation</a>
 * Category Links - See details at <a href="https://en.wikipedia.org/wiki/Help:Category">Wikipedia Category</a>
 * Link Title Parenthesis - See details at paper <a href="http://u.cs.biu.ac.il/~dagan/publications/ACL09%20camera%20ready.pdf">"Extracting Lexical Reference Rules from Wikipedia"</a>
 * 'Is A' (extracted from page first paragraph) - See details at paper <a href="http://u.cs.biu.ac.il/~dagan/publications/ACL09%20camera%20ready.pdf">"Extracting Lexical Reference Rules from Wikipedia"</a>
- 
+* Term Frequency (TBD/WIP) - Hold a map of term frequency for computing TFIDF on Wikipadia
+
 ***
 
 
@@ -44,10 +49,15 @@ in order to create and export the wiki data into the Elastic index (which takes 
 
     `#>docker stop <CONTAINER_ID>`
 
-4) That's it! run you image with elastic index 
+5) That's it! now you can run your created image
 
     `#>docker run -d -p 9200:9200 -p 9300:9300 <IMAGE_NEW_NAME>`
 
+   To test/query, you can run from terminal:
+   
+    `curl -XGET 'http://localhost:9200/enwiki_v2/_search?pretty=true' -H 'Content-Type: application/json' -d '{"size": 5, "query": {"match_phrase": { "title.near_match": "Alan Turing"}}}'`
+    
+   This should return a wikipedia page on Alan Turing.
 
 ### Building the index From Source
 
