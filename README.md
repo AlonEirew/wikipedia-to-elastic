@@ -1,4 +1,8 @@
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3239510.svg)](https://doi.org/10.5281/zenodo.3239510)
+<p align="center">
+    <a href="https://doi.org/10.5281/zenodo.3239509">
+        <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.3239509.svg" alt="DOI">
+    </a>
+</p>
 
 # Wikipedia to ElasticSearch
 
@@ -206,4 +210,6 @@ Once process has finished, you should see in your ElasticSearch selected index, 
 | _source.relations.isPartName | List (optional) | is Wikipedia page name description |
 | _source.relations.titleParenthesis | List (optional) | List of disambiguation secondary links  |
 | _source.relations.titleParenthesisNorm | List (optional) | List of disambiguation secondary links norm |
+
+## If you use this project or the created data in your research, please use the following citation https://doi.org/10.5281/zenodo.3239509
 
