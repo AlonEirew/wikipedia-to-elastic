@@ -211,5 +211,6 @@ Once process has finished, you should see in your ElasticSearch selected index, 
 | _source.relations.titleParenthesis | List (optional) | List of disambiguation secondary links  |
 | _source.relations.titleParenthesisNorm | List (optional) | List of disambiguation secondary links norm |
 
-## If you use this project or the created data in your research, please use the following citation https://doi.org/10.5281/zenodo.3239509
+### Citing
+If you use this project or the created data in your research, please use the following citation https://doi.org/10.5281/zenodo.3239509
 
