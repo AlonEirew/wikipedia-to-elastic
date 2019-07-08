@@ -30,7 +30,7 @@ For more information and examples check this related <a href="https://www.intel.
 
 ### Getting the index with Docker
 This is the preferred and fastest way to get the elastic index locally.<br/>
-The index on Docker Hub is updated with beginning of 2018 wikipedia dump.<br/>
+The index on Docker Hub is updated with wikipedia pages till the beginning of 2018.<br/>
 
 #### Docker Prerequisites
 1) Before starting this one-time process, make sure docker disk image size (*in your Docker Engine Preferences*) is not limited under 150GB.
