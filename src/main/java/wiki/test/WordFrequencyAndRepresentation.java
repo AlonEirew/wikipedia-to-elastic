@@ -1,7 +1,6 @@
 package wiki.test;
 
 import edu.stanford.nlp.simple.Sentence;
-import wiki.test.WordFrequency;
 import wiki.utils.WikiPageParser;
 
 import java.util.HashMap;
