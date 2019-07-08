@@ -10,7 +10,7 @@ This is a knowledge resource based on wikipedia. <br/>
 But also a parsing mechanism that enables parsing of Wikipedia, Wikinews, Wikidata and other Wikimedia .bz2 dumps into an ElasticSearch index.
 
 Project goal - Use 3 different types of Wikipedia pages (Redirect/Disambiguation/Title) in order to extract 6 different 
-semantic features for tasks such as Identifying Semantic Relations, Cross Document Co-Reference, Knowledge Graphs, Summarization and other.
+semantic features for tasks such as Identifying Semantic Relations, Entity Linking, Cross Document Co-Reference, Knowledge Graphs, Summarization and other.
 
 Integrated with Intel NLP Framework <a href="https://github.com/NervanaSystems/nlp-architect">NLP Architect</a>
 
