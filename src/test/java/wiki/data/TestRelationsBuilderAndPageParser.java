@@ -29,26 +29,27 @@ public class TestRelationsBuilderAndPageParser {
     @BeforeClass
     public static void initTests() {
         WikiPageParser.initResources();
+        BeCompRelationExtractor.initResources();
     }
 
     @Test
-    public void testPageAndRelationExtractPageLinks() throws IOException {
+    public void testPageAndRelationExtractPageLinks() {
         String text = getFileJsonContant("nlp_wiki_test_text.json");
         WikiParsedPageRelations jsonResult = getFileRelationContant("nlp_relation_result.json");
         WikiParsedPageRelationsBuilder builder = new WikiParsedPageRelationsBuilder();
         WikiParsedPageRelations wikiParsedPageRelations = builder.buildFromWikipediaPageText(text);
-//        writeResultToFile("/Users/aeirew/workspace/WikipediaToElastic/src/test/resources/nlp_relation_result.json", wikiParsedPageRelations);
+//        writeResultToFile("/Users/aeirew/workspace/WikipediaToElastic/src/frequency/resources/nlp_relation_result.json", wikiParsedPageRelations);
         Assert.assertEquals(jsonResult.getCategories(), wikiParsedPageRelations.getCategories());
         Assert.assertEquals(jsonResult.getCategoriesNorm(), wikiParsedPageRelations.getCategoriesNorm());
     }
 
     @Test
-    public void testPageAndRelationExtractDisambiguation() throws IOException {
+    public void testPageAndRelationExtractDisambiguation() {
         String text = getFileJsonContant("nlp_disambig_wiki_test_text.json");
         WikiParsedPageRelations jsonResult = getFileRelationContant("nlp_disambig_relation_result.json");
         WikiParsedPageRelationsBuilder builder = new WikiParsedPageRelationsBuilder();
         WikiParsedPageRelations wikiParsedPageRelations = builder.buildFromWikipediaPageText(text);
-//        writeResultToFile("/Users/aeirew/workspace/WikipediaToElastic/src/test/resources/nlp_disambig_relation_result.json", wikiParsedPageRelations);
+//        writeResultToFile("/Users/aeirew/workspace/WikipediaToElastic/src/frequency/resources/nlp_disambig_relation_result.json", wikiParsedPageRelations);
         Assert.assertEquals(jsonResult.getDisambiguationLinks(), wikiParsedPageRelations.getDisambiguationLinks());
         Assert.assertEquals(jsonResult.getDisambiguationLinksNorm(), wikiParsedPageRelations.getDisambiguationLinksNorm());
     }

@@ -6,10 +6,13 @@ package wiki;
 
 import com.google.gson.stream.JsonReader;
 import org.apache.http.HttpHost;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
+import wiki.data.relations.BeCompRelationExtractor;
 import wiki.handlers.ElasticPageHandler;
 import wiki.handlers.IPageHandler;
 import wiki.elastic.ElasticAPI;
@@ -31,11 +34,13 @@ public class WikiToElasticMain {
         JsonReader reader = null;
         try {
             LOGGER.info("Starting export Wiki dump to elastic process");
-            InputStream resource = WikiToElasticMain.class.getClassLoader().getResourceAsStream("conf.json");
+//            InputStream resource = WikiToElasticMain.class.getClassLoader().getResourceAsStream("conf.json");
+            InputStream resource = new FileInputStream(new File("conf.json"));
             if(resource != null) {
                 reader = new JsonReader(new InputStreamReader(resource));
                 WikiToElasticConfiguration configuration = WikiToElasticConfiguration.gson.fromJson(reader, WikiToElasticConfiguration.CONFIGURATION_TYPE);
                 WikiPageParser.initResources();
+                BeCompRelationExtractor.initResources();
                 LOGGER.info("Process configuration loaded");
 
                 long startTime = System.currentTimeMillis();
@@ -76,7 +81,11 @@ public class WikiToElasticMain {
                 // init elastic client
                 client = new RestHighLevelClient(
                         RestClient.builder(
-                                new HttpHost(configuration.getHost(), configuration.getPort(), configuration.getScheme())));
+                                new HttpHost(configuration.getHost(), configuration.getPort(),
+                                        configuration.getScheme())).setRequestConfigCallback(
+                                                requestConfigBuilder -> requestConfigBuilder.setConnectTimeout(120000)
+                                .setSocketTimeout(120000))
+                                .setMaxRetryTimeoutMillis(120000));
 
                 IElasticAPI elasicApi = new ElasticAPI(client);
 

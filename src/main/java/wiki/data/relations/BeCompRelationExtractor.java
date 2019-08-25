@@ -18,10 +18,12 @@ public class BeCompRelationExtractor implements IRelationsExtractor<BeCompRelati
 
     private static StanfordCoreNLP sPipeline;
 
-    static {
-        Properties props = new Properties();
-        props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse");
-        sPipeline = new StanfordCoreNLP(props);
+    public static void initResources() {
+        if(sPipeline == null) {
+            Properties props = new Properties();
+            props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse");
+            sPipeline = new StanfordCoreNLP(props);
+        }
     }
 
     @Override
