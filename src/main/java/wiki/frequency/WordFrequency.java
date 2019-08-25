@@ -1,4 +1,4 @@
-package wiki.test;
+package wiki.frequency;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

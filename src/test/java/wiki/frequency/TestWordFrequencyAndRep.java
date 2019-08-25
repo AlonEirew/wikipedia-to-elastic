@@ -1,8 +1,8 @@
-package wiki.data;
+package wiki.frequency;
 
 import com.google.gson.Gson;
 import org.junit.Test;
-import wiki.test.WordFrequencyAndRepresentation;
+import wiki.data.TestRelationsBuilderAndPageParser;
 
 public class TestWordFrequencyAndRep {
     private Gson gson = new Gson();

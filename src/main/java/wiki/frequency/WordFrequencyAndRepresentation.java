@@ -1,4 +1,4 @@
-package wiki.test;
+package wiki.frequency;
 
 import edu.stanford.nlp.simple.Sentence;
 import wiki.utils.WikiPageParser;
@@ -14,6 +14,10 @@ public class WordFrequencyAndRepresentation {
 
     private Map<String, WordFrequency> docWordsFrequency = new HashMap<>();
     private AtomicInteger docWordsCount = new AtomicInteger(0);
+
+    public WordFrequencyAndRepresentation() {
+        WikiPageParser.initResources();
+    }
 
     public void countDocFrequency(String docString) {
         String splittedText[] = docString.split("\n");
