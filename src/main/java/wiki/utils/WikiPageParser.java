@@ -25,7 +25,6 @@ public class WikiPageParser {
 
     public static HashSet<String> STOP_WORDS;
 
-
     public static void initResources() {
         if(STOP_WORDS == null) {
             try (InputStream resource = WikiPageParser.class.getClassLoader().getResourceAsStream("stop_words_en.json")) {

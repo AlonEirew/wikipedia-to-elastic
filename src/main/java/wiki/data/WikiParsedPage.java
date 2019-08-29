@@ -4,9 +4,7 @@
 
 package wiki.data;
 
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 
 public class WikiParsedPage {
     private final String title;
