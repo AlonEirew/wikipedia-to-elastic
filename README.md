@@ -117,7 +117,7 @@ If require to parse other Wiki dumps such as Wikinews, Wikidata, and so on, you 
 <i><b>Recommendation:</b> Start with a small wiki dump, make sure you like what you get (or modify configurations to meet your needs) before moving to a full blown 15GB dump export..</i>
 * Make sure `conf.json` configuration for Elastic are set as expected (default localhost:9200)
 * From command line navigate to project root directory and run:<br/>
-`./gradlew clean build` <br/>
+`./gradlew clean build -x test` <br/>
 *Should get a message saying: `BUILD SUCCESSFUL in 7s`*
 * Extract the build zip file created at this location `build/distributions/WikipediaToElastic-1.0.zip`
 * Run the process from command line:<br/>

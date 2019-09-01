@@ -58,6 +58,7 @@ public class WikiToElasticMain {
         InputStream inputStream = null;
         STAXParser parser = null;
         IPageHandler pageHandler = null;
+        STAXParser.DeleteUpdateMode mode = STAXParser.DeleteUpdateMode.NA;
         try(Scanner reader = new Scanner(System.in)) {
             LOGGER.info("Reading wikidump: " + configuration.getWikiDump());
             File wikifile = new File(configuration.getWikiDump());
@@ -83,12 +84,15 @@ public class WikiToElasticMain {
 
                     // Create the index
                     elasicApi.createIndex(configuration);
+                    mode = STAXParser.DeleteUpdateMode.DELETE;
                 } else if(ans.equalsIgnoreCase("u") || ans.equalsIgnoreCase("update")) {
                     if(!elasicApi.isIndexExists(configuration.getIndexName())) {
                         LOGGER.info("Index \"" + configuration.getIndexName() +
                                 "\" not found, exit application.");
                         return;
                     }
+
+                    mode = STAXParser.DeleteUpdateMode.UPDATE;
                 } else {
                     return;
                 }
@@ -98,7 +102,7 @@ public class WikiToElasticMain {
                 // Start parsing the xml and adding pages to elastic
                 pageHandler = new ElasticPageHandler(elasicApi, listener, configuration);
 
-                parser = new STAXParser(pageHandler, configuration.isNormalizeFields());
+                parser = new STAXParser(pageHandler, configuration.isNormalizeFields(), mode);
                 parser.parse(inputStream);
             } else {
                 LOGGER.error("Cannot find dump file-" + wikifile.getAbsolutePath());

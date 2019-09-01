@@ -6,6 +6,7 @@ package wiki.parsers;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.elasticsearch.index.engine.Engine;
 import wiki.data.WikiParsedPage;
 import wiki.data.WikiParsedPageBuilder;
 import wiki.data.WikiParsedPageRelations;
@@ -25,6 +26,8 @@ import java.util.concurrent.*;
 
 public class STAXParser implements IWikiParser {
 
+    public enum DeleteUpdateMode {DELETE, UPDATE, NA}
+
     private final static Logger LOGGER = LogManager.getLogger(STAXParser.class);
 
     private final RejectedExecutionHandler rejectedExecutionHandler = new ThreadPoolExecutor.CallerRunsPolicy();
@@ -33,17 +36,20 @@ public class STAXParser implements IWikiParser {
     private final ExecutorService executorService;
     private final Set<Long> totalIds = new HashSet<>();
     private boolean normalize;
+    private DeleteUpdateMode deleteUpdateMode;
+
 
     public STAXParser(IPageHandler handler) {
         this.executorService = initExecuterService();
         this.handler = handler;
         this.normalize = true;
+        this.deleteUpdateMode = DeleteUpdateMode.NA;
     }
 
-    public STAXParser(IPageHandler handler, boolean normalize) {
-        this.executorService = initExecuterService();
-        this.handler = handler;
+    public STAXParser(IPageHandler handler, boolean normalize, DeleteUpdateMode mode) {
+        this(handler);
         this.normalize = normalize;
+        this.deleteUpdateMode = mode;
     }
 
     private ExecutorService initExecuterService() {
@@ -125,37 +131,41 @@ public class STAXParser implements IWikiParser {
             }
         }
 
-        prepareSubmit(title, id, text, redirect);
+        if(this.deleteUpdateMode == DeleteUpdateMode.UPDATE) {
+            if(this.handler.isPageExists(String.valueOf(id))) {
+                LOGGER.info("Page with id-" + id + ", title-" + title + ", already exist, moving on...");
+            } else {
+                handlePage(title, id, text, redirect);
+            }
+        } else {
+            handlePage(title, id, text, redirect);
+        }
     }
 
-    private void prepareSubmit(final String title, final long id, final String text, final String redirect) {
-        if(!this.handler.isPageExists(String.valueOf(id))) {
-            this.executorService.submit(() -> {
-                LOGGER.info("prepare to commit page with id-" + id + ", title-" + title);
-                WikiParsedPageRelations relations;
-                if (redirect == null || redirect.isEmpty()) {
-                    if (this.normalize) {
-                        relations = new WikiParsedPageRelationsBuilder().buildFromWikipediaPageText(text);
-                    } else {
-                        relations = new WikiParsedPageRelationsBuilder().buildFromWikipediaPageTextNoNormalization(text);
-                    }
+    private void handlePage(String title, long id, String text, String redirect) {
+        this.executorService.submit(() -> {
+            LOGGER.info("prepare to commit page with id-" + id + ", title-" + title);
+            WikiParsedPageRelations relations;
+            if (redirect == null || redirect.isEmpty()) {
+                if (this.normalize) {
+                    relations = new WikiParsedPageRelationsBuilder().buildFromWikipediaPageText(text);
                 } else {
-                    relations = new WikiParsedPageRelationsBuilder().build();
+                    relations = new WikiParsedPageRelationsBuilder().buildFromWikipediaPageTextNoNormalization(text);
                 }
+            } else {
+                relations = new WikiParsedPageRelationsBuilder().build();
+            }
 
-                final WikiParsedPage page = new WikiParsedPageBuilder()
-                        .setId(id)
-                        .setTitle(title)
-                        .setRedirectTitle(redirect)
-                        .setText(text)
-                        .setRelations(relations)
-                        .build();
+            final WikiParsedPage page = new WikiParsedPageBuilder()
+                    .setId(id)
+                    .setTitle(title)
+                    .setRedirectTitle(redirect)
+                    .setText(text)
+                    .setRelations(relations)
+                    .build();
 
-                handler.addPage(page);
-            });
-        } else {
-            LOGGER.info("Page with id-" + id + ", title-" + title + ", already exist, moving on...");
-        }
+            handler.addPage(page);
+        });
     }
 
     public Set<Long> getTotalIds() {
