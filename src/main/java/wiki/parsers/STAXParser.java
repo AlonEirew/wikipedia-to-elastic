@@ -20,6 +20,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.*;
@@ -27,6 +28,8 @@ import java.util.concurrent.*;
 public class STAXParser implements IWikiParser {
 
     public enum DeleteUpdateMode {DELETE, UPDATE, NA}
+
+    private static final String[] FILTER_TITLES = {"portal:", "category:", "file:", "wikipedia:", "draft:", "template:"};
 
     private final static Logger LOGGER = LogManager.getLogger(STAXParser.class);
 
@@ -143,29 +146,34 @@ public class STAXParser implements IWikiParser {
     }
 
     private void handlePage(String title, long id, String text, String redirect) {
-        this.executorService.submit(() -> {
-            LOGGER.info("prepare to commit page with id-" + id + ", title-" + title);
-            WikiParsedPageRelations relations;
-            if (redirect == null || redirect.isEmpty()) {
-                if (this.normalize) {
-                    relations = new WikiParsedPageRelationsBuilder().buildFromWikipediaPageText(text);
+        String titleLow = title.toLowerCase();
+        if(Arrays.stream(FILTER_TITLES).parallel().anyMatch(titleLow::contains)) {
+            LOGGER.info("Skipping page processing of- " + title);
+        } else {
+            this.executorService.submit(() -> {
+                LOGGER.info("prepare to commit page with id-" + id + ", title-" + title);
+                WikiParsedPageRelations relations;
+                if (redirect == null || redirect.isEmpty()) {
+                    if (this.normalize) {
+                        relations = new WikiParsedPageRelationsBuilder().buildFromWikipediaPageText(text);
+                    } else {
+                        relations = new WikiParsedPageRelationsBuilder().buildFromWikipediaPageTextNoNormalization(text);
+                    }
                 } else {
-                    relations = new WikiParsedPageRelationsBuilder().buildFromWikipediaPageTextNoNormalization(text);
+                    relations = new WikiParsedPageRelationsBuilder().build();
                 }
-            } else {
-                relations = new WikiParsedPageRelationsBuilder().build();
-            }
 
-            final WikiParsedPage page = new WikiParsedPageBuilder()
-                    .setId(id)
-                    .setTitle(title)
-                    .setRedirectTitle(redirect)
-                    .setText(text)
-                    .setRelations(relations)
-                    .build();
+                final WikiParsedPage page = new WikiParsedPageBuilder()
+                        .setId(id)
+                        .setTitle(title)
+                        .setRedirectTitle(redirect)
+                        .setText(text)
+                        .setRelations(relations)
+                        .build();
 
-            handler.addPage(page);
-        });
+                handler.addPage(page);
+            });
+        }
     }
 
     public Set<Long> getTotalIds() {
