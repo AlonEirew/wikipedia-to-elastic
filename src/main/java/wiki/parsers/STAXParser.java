@@ -62,11 +62,16 @@ public class STAXParser implements IWikiParser {
     }
 
 
+    /**
+     * Starting point of the parsing process of the wikipedia xml dump
+     * @param inputStream to the wikipedia dump file
+     */
     @Override
     public void parse(InputStream inputStream) {
         try {
             XMLInputFactory factory = XMLInputFactory.newInstance();
             XMLEventReader reader = factory.createXMLEventReader(inputStream);
+            // Go over the xml element and search for <page> element
             while (reader.hasNext()) {
                 final XMLEvent event = reader.nextEvent();
                 if (event.isStartElement() && event.asStartElement().getName()
@@ -98,6 +103,12 @@ public class STAXParser implements IWikiParser {
         }
     }
 
+    /**
+     * Parse xml "page" element (represent a full wikipedia page with attributes)
+     * Extract the main attributes of {title, redirect, id, text}
+     * @param reader
+     * @throws XMLStreamException
+     */
     private void parsePage(final XMLEventReader reader) throws XMLStreamException {
         String title = null;
         long id = -1;
@@ -145,21 +156,29 @@ public class STAXParser implements IWikiParser {
         }
     }
 
+    /**
+     * Processing the page in a separate thread (extracting relations and adding to persistence queue)
+     */
     private void handlePage(String title, long id, String text, String redirect) {
         String titleLow = title.toLowerCase();
+        // If page is a meta data page, don't process it
         if(Arrays.stream(FILTER_TITLES).parallel().anyMatch(titleLow::contains)) {
             LOGGER.info("Skipping page processing of- " + title);
         } else {
             this.executorService.submit(() -> {
                 LOGGER.info("prepare to commit page with id-" + id + ", title-" + title);
                 WikiParsedPageRelations relations;
+                // Redirect pages text are not processed (can be found in the underline redirected page)
                 if (redirect == null || redirect.isEmpty()) {
                     if (this.normalize) {
+                        // Building the relations and norm relations object
                         relations = new WikiParsedPageRelationsBuilder().buildFromWikipediaPageText(text);
                     } else {
+                        // Building only the relations object
                         relations = new WikiParsedPageRelationsBuilder().buildFromWikipediaPageTextNoNormalization(text);
                     }
                 } else {
+                    // Empty relations for redirect pages (Relations can be found in the underline redirected page)
                     relations = new WikiParsedPageRelationsBuilder().build();
                 }
 
@@ -171,6 +190,7 @@ public class STAXParser implements IWikiParser {
                         .setRelations(relations)
                         .build();
 
+                // Adding the page to the elastic search queue handler
                 handler.addPage(page);
             });
         }

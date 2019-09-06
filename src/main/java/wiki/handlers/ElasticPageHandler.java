@@ -43,6 +43,11 @@ public class ElasticPageHandler implements IPageHandler {
         return false;
     }
 
+    /**
+     * Add page to the handler queue, once queue is full (configuration in conf.json) the queue is persisted to elastic
+     * and cleared
+     * @param page
+     */
     @Override
     public void addPage(WikiParsedPage page) {
         synchronized (lock) {
@@ -64,9 +69,15 @@ public class ElasticPageHandler implements IPageHandler {
                 this.pages.clear();
                 elasticApi.addBulkAsnc(this.listener, this.indexName, this.docType, copyPages);
             }
+    /**
+     * persist queue pages to elastic search
+     */
         }
     }
 
+    /**
+     * Should be called from finally, will persist any remain pages in the queue in case queue < bulkSize
+     */
     @Override
     public void flushRemains() {
         if (this.pages != null) {

@@ -53,12 +53,17 @@ public class WikiToElasticMain {
         }
     }
 
+    /**
+     * Start the main process of parsing the wikipedia dump file, create resources and handlers for executing the task
+     * @param configuration <a href="https://github.com/AlonEirew/wikipedia-to-elastic/blob/master/conf.json">conf.json file</a>
+     * @throws IOException
+     */
     static void startProcess(WikiToElasticConfiguration configuration) throws IOException {
         RestHighLevelClient client;
         InputStream inputStream = null;
         STAXParser parser = null;
         IPageHandler pageHandler = null;
-        STAXParser.DeleteUpdateMode mode = STAXParser.DeleteUpdateMode.NA;
+        STAXParser.DeleteUpdateMode mode;
         try(Scanner reader = new Scanner(System.in)) {
             LOGGER.info("Reading wikidump: " + configuration.getWikiDump());
             File wikifile = new File(configuration.getWikiDump());
@@ -82,7 +87,7 @@ public class WikiToElasticMain {
                 if(ans.equalsIgnoreCase("d") || ans.equalsIgnoreCase("delete")) {
                     elasicApi.deleteIndex(configuration.getIndexName());
 
-                    // Create the index
+                    // Create the elastic search index
                     elasicApi.createIndex(configuration);
                     mode = STAXParser.DeleteUpdateMode.DELETE;
                 } else if(ans.equalsIgnoreCase("u") || ans.equalsIgnoreCase("update")) {
