@@ -59,7 +59,7 @@ public class WikiToElasticMain {
      * @throws IOException
      */
     static void startProcess(WikiToElasticConfiguration configuration) throws IOException {
-        RestHighLevelClient client;
+        RestHighLevelClient client = null;
         InputStream inputStream = null;
         STAXParser parser = null;
         IPageHandler pageHandler = null;
@@ -127,6 +127,10 @@ public class WikiToElasticMain {
                     LOGGER.info("*** Total id's committed=" + ((ElasticPageHandler) pageHandler).getTotalIdsCommitted());
                     LOGGER.info("*** In commit queue=" + ((ElasticPageHandler) pageHandler).getPagesQueueSize() + " (should be 0)");
                 }
+            }
+            if(client != null) {
+                LOGGER.info("Closing RestHighLevelClient..");
+                client.close();
             }
         }
     }

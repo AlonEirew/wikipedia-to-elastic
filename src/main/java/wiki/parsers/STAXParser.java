@@ -86,14 +86,15 @@ public class STAXParser implements IWikiParser {
     }
 
     public void shutDownPool() {
+        LOGGER.info("Shutting down thread pool and preparing to close process...");
         this.executorService.shutdown(); // Disable new tasks from being submitted
         try {
             // Wait a while for existing tasks to terminate
-            if (!this.executorService.awaitTermination(60, TimeUnit.SECONDS)) {
+            if (!this.executorService.awaitTermination(5, TimeUnit.MINUTES)) {
                 this.executorService.shutdownNow(); // Cancel currently executing tasks
                 // Wait a while for tasks to respond to being cancelled
                 if (!this.executorService.awaitTermination(60, TimeUnit.SECONDS))
-                    System.err.println("Pool did not terminate");
+                    LOGGER.error("Pool did not terminate");
             }
         } catch (InterruptedException ie) {
             // (Re-)Cancel if current thread also interrupted
