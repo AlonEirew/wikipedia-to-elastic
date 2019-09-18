@@ -30,7 +30,7 @@ For more information and examples check this related <a href="https://www.intel.
 
 ### Getting the index with Docker
 This is the preferred and fastest way to get the elastic index locally.<br/>
-The index on Docker Hub is updated with wikipedia pages till the beginning of 2018.<br/>
+The index on Docker Hub is updated with wikipedia pages till August 2019.<br/>
 
 #### Docker Prerequisites
 1) Before starting this one-time process, make sure docker disk image size (*in your Docker Engine Preferences*) is not limited under 150GB.
@@ -47,7 +47,7 @@ in order to verify you have the right value (i.e 262144), run:
 
 #### Get Image and Build Container
 
-1) Pull the image and run it (pulled image is 11GB)
+1) Pull the latest image and run it (pulled image is 11GB)
 
     `#>docker pull aeirew/elastic-wiki`
     
@@ -72,7 +72,7 @@ in order to create and export the wiki data into the Elastic index (which takes 
 
    To test/query, you can run from terminal:
    
-    `curl -XGET 'http://localhost:9200/enwiki_v2/_search?pretty=true' -H 'Content-Type: application/json' -d '{"size": 5, "query": {"match_phrase": { "title.near_match": "Alan Turing"}}}'`
+    `curl -XGET 'http://localhost:9200/enwiki_v3/_search?pretty=true' -H 'Content-Type: application/json' -d '{"size": 5, "query": {"match_phrase": { "title.near_match": "Alan Turing"}}}'`
     
    This should return a wikipedia page on Alan Turing.
 
@@ -130,7 +130,7 @@ Once process has finished, you should see in your ElasticSearch selected index, 
 **Page Example (Extracted from Wikipedia disambiguation page):**
 ```json
 {
-  "_index": "enwiki_v2",
+  "_index": "enwiki_v3",
   "_type": "wikipage",
   "_id": "40573",
   "_version": 1,
@@ -180,7 +180,7 @@ Once process has finished, you should see in your ElasticSearch selected index, 
 **Page Example (Extracted from Wikipedia redirect page):**
 ```json
 {
-  "_index": "enwiki_v2",
+  "_index": "enwiki_v3",
   "_type": "wikipage",
   "_id": "2577248",
   "_version": 1,
