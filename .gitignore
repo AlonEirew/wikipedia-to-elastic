@@ -1,12 +1,9 @@
 /.gradle/*
 /.idea/*
-/gradle/*
 /logs/*
 /out/*
 /build/*
 .DS_Store
-gradlew
-gradlew.bat
 /dumps/enwiki-latest-pages-articles.xml.bz2
 /dumps/enwiki-latest-pages-articles13.xml-p5040438p6197593.bz2
 /dumps/afwiki-latest-pages-articles.xml.bz2
