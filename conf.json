@@ -1,14 +1,15 @@
 {
-  "indexName" : "enwiki_test",
-  "docType" : "wikipage",
-  "normalizeFields" : "true",
+  "indexName": "enwiki_test",
+  "docType": "wikipage",
+  "normalizeFields": true,
+  "extractRelationFields": true,
   "insertBulkSize": 100,
-  "mapping" : "mapping.json",
-  "setting" : "es_map_settings.json",
-  "host" : "localhost",
-  "wikiDump" : "dumps/smallwiki-latest-pages-articles.xml.bz2",
-  "port" : 9200,
-  "scheme" : "http",
-  "shards" : 1,
-  "replicas" : 0
+  "mapping": "mapping.json",
+  "setting": "en_map_settings.json",
+  "host": "localhost",
+  "wikiDump": "dumps/smallwiki-latest-pages-articles.xml.bz2",
+  "port": 9200,
+  "scheme": "http",
+  "shards": 1,
+  "replicas": 0
 }
