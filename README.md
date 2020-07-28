@@ -7,7 +7,7 @@
 # Wikipedia to ElasticSearch
 
 This is a knowledge resource based on wikipedia. <br/>
-But also a multi-lingual parsing mechanism that enables parsing of Wikipedia, Wikinews, Wikidata and other Wikimedia .bz2 dumps into an ElasticSearch index.
+But also a multilingual parsing mechanism that enables parsing of Wikipedia, Wikinews, Wikidata and other Wikimedia .bz2 dumps into an ElasticSearch index.
 
 Project goal - Use 3 different types of Wikipedia pages (Redirect/Disambiguation/Title) in order to extract 6 different 
 semantic features for tasks such as Identifying Semantic Relations, Entity Linking, Cross Document Co-Reference, Knowledge Graphs, Summarization and other.
@@ -16,7 +16,7 @@ Integrated with Intel NLP Framework <a href="https://github.com/NervanaSystems/n
 
 For more information and examples check this related <a href="https://www.intel.ai/extracting-semantic-relations-using-external-knowledge-resources-with-nlp-architect/#gs.12xroe">blog post</a>.
 
-Current supported languages: *{English, French}*
+Current supported languages: *{English, French, Spanish}*
 
 #### Extracted Relations Types and Features (only English version)
 
@@ -82,10 +82,11 @@ in order to create and export the wiki data into the Elastic index (which takes 
 
 ### Building the index From Source
 
-**Disclimer:** Processing Wikipedia latest full dump (15GB .bz2 AND 66GB unpacked as .xml) including extraction of relations fields, normalization and lemmatization of text, 
+**Disclimer:** Processing English Wikipedia latest full dump (15GB .bz2 AND 66GB unpacked as .xml) including extraction of relations fields, normalization and lemmatization of text, 
 will take about **5 days** (tested on MacBook pro, using stanford parser to extract relations, normalize and lemmatize the data).<br/>
-In case of using this data in order to identify semantic relations between phrases at run time, It is recommended to normalize the fields for better results, 
-in case not needed or for a much faster data export into elastic **(5 hours)**, set normalizeFields/extractRelationFields to false in `conf.json`, as shown in "Project Configuration Files".<br />
+In case of using this data in order to identify semantic relations between phrases at run time, It is recommended to normalize the fields for better results. 
+
+In case relation fields norm not needed or relations not needed all together, set normalizeFields/extractRelationFields to false in `conf.json` (as shown in "Project Configuration Files"), for a much faster data export into elastic **(< 5 hours)**.<br />
 
 You might want to consider using the Docker Image to save that time
 
@@ -95,7 +96,7 @@ Use this process as well (set extractRelationFields to false as it is not suppor
 ### Requisites
 * Java 1.8
 * ElasticSearch 6.2 (<a href=https://www.elastic.co/downloads/elasticsearch>Installation Guide</a>)
-* Wikipedia xml.bz2 dump file (<a href=https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles.xml.bz2>download enwiki latest dump xml</a>)
+* Wikipedia xml.bz2 dump file in required language (English for example<a href=https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles.xml.bz2>download enwiki latest dump xml</a>)
 
 ### Project Configuration Files
 * `src/main/resources/conf.json` - basic process configuration
@@ -115,7 +116,7 @@ Use this process as well (set extractRelationFields to false as it is not suppor
     "replicas" : 0 (Number of Elastic replicas to use)
 ```
 * `src/main/resources/mapping.json` - Elastic wiki index mapping (Should probably stay unchanged)
-* `src/main/resources/es_map_settings.json` - Elastic index settings (Should probably stay unchanged)
+* `src/main/resources/{en,es,fr}_map_settings.json` - Elastic index settings (Should probably stay unchanged)
 
 * Make sure Elastic process is running and active on your host (if running Elastic locally your IP is <a href="http://localhost:9200/">http://localhost:9200/</a>)
 * Checkout/Clone the repository
