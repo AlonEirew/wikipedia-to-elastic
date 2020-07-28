@@ -44,13 +44,9 @@ public class WikiToElasticUtils {
         try {
             if(fileName != null) {
                 URI resource = WikiToElasticUtils.class.getClassLoader().getResource(fileName).toURI();
-                if(resource != null) {
-                    fileContent = IOUtils.toString(resource, "UTF-8");
-                }
+                fileContent = IOUtils.toString(resource, StandardCharsets.UTF_8);
             }
-        } catch (IOException e) {
-            LOGGER.error("Failed loading file-" + fileName, e);
-        } catch (URISyntaxException e) {
+        } catch (IOException | URISyntaxException e) {
             LOGGER.error("Failed loading file-" + fileName, e);
         }
 

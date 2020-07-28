@@ -78,14 +78,15 @@ in order to create and export the wiki data into the Elastic index (which takes 
 
 ### Building the index From Source
 
-**Disclimer:** Processing Wikipedia latest full dump (15GB .bz2 AND 66GB unpacked as .xml) including the normalization and lemmatization of text, 
+**Disclimer:** Processing Wikipedia latest full dump (15GB .bz2 AND 66GB unpacked as .xml) including extraction of relations fields, normalization and lemmatization of text, 
 will take about **5 days** (tested on MacBook pro, using stanford parser to extract relations, normalize and lemmatize the data).<br/>
 In case of using this data in order to identify semantic relations between phrases at run time, It is recommended to normalize the fields for better results, 
-in case not needed or for a much faster data export into elastic **(5 hours)**, set normalize to false in `conf.json`, as shown in "Project Configuration Files".<br />
+in case not needed or for a much faster data export into elastic **(5 hours)**, set normalizeFields/extractRelationFields to false in `conf.json`, as shown in "Project Configuration Files".<br />
 
 You might want to consider using the Docker Image to save that time
 
-If require to parse other Wiki dumps such as Wikinews, Wikidata, and so on, you can use this process as well, to port the .xml data pages into elastic index for fast queries.
+If require parsing other Wiki dumps such as Wikinews, Wikidata, or extraction of Wikipedia dumps in other languages (fr, es, de, etc.),
+Use this process as well (set extractRelationFields to false as it is not supported) or download the existing multi-lingual docker images.
 
 ### Requisites
 * Java 1.8
@@ -95,18 +96,19 @@ If require to parse other Wiki dumps such as Wikinews, Wikidata, and so on, you 
 ### Project Configuration Files
 * `src/main/resources/conf.json` - basic process configuration
 ```
-    "indexName" : "enwiki_v3" #Set your desired Elastic Search index name  
-    "docType" : "wikipage" #Set your desired Elastic Search documnent type
-    "normalizeFields" : "true" #Weather to run normalization of fields while processing the data
-    "insertBulkSize": 100 #Number of pages to bulk insert to elastic search every iteration (found this number to give best preformence)
-    "mapping" : "mapping.json" #Elastic Mapping file (should point to src/main/resources/mapping.json)
-    "setting" : "es_map_settings.json" #Elastic Setting file (should point to src/main/resources/es_map_settings.json)
-    "host" : "localhost" #Elastic host (were Elastic instance is installed and running)
-    "port" : 9200 #Elastic port (host port were Elastic is installed and running, elastic defualt is 9200)
-    "wikiDump" : "dumps/enwiki-latest-pages-articles.xml.bz2" #WikiMedia .bz2 downloaded dump file location
-    "scheme" : "http" #Elastic host schema (should probebly stay unchanged)
-    "shards" : 1 #Number of Elastic shards to use
-    "replicas" : 0 #Number of Elastic replicas to use
+    "indexName" : "enwiki_v3" (Set your desired Elastic Search index name)  
+    "docType" : "wikipage" (Set your desired Elastic Search documnent type)
+    "normalizeFields" : true (Weather to run normalization of fields while processing the data)
+    "extractRelationFields" : true (Weather to extract relations fields while processing the data, support only english wikipedia)
+    "insertBulkSize": 100 (Number of pages to bulk insert to elastic search every iteration (found this number to give best preformence))
+    "mapping" : "mapping.json" (Elastic Mapping file, should point to src/main/resources/mapping.json)
+    "setting" : "en_map_settings.json" (Elastic Setting file))
+    "host" : "localhost" (Elastic host, were Elastic instance is installed and running)
+    "port" : 9200 (Elastic port, host port were Elastic is installed and running, elastic defualt is set to 9200)
+    "wikiDump" : "dumps/enwiki-latest-pages-articles.xml.bz2" (WikiMedia .bz2 downloaded dump file location)
+    "scheme" : "http" (Elastic host schema, should probebly stay unchanged)
+    "shards" : 1 (Number of Elastic shards to use)
+    "replicas" : 0 (Number of Elastic replicas to use)
 ```
 * `src/main/resources/mapping.json` - Elastic wiki index mapping (Should probably stay unchanged)
 * `src/main/resources/es_map_settings.json` - Elastic index settings (Should probably stay unchanged)

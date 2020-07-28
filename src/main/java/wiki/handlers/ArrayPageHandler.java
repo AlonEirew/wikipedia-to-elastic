@@ -6,6 +6,7 @@ package wiki.handlers;
 
 import wiki.data.WikiParsedPage;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,10 +16,7 @@ public class ArrayPageHandler implements IPageHandler {
 
     @Override
     public boolean isPageExists(String pageId) {
-        if(pages.contains(pageId)) {
-            return true;
-        }
-        return false;
+        return pages.contains(pageId);
     }
 
     @Override
@@ -33,11 +31,6 @@ public class ArrayPageHandler implements IPageHandler {
 
     }
 
-    @Override
-    public void flushRemains() {
-
-    }
-
     public List<WikiParsedPage> getPages() {
         return this.pages;
     }
@@ -47,5 +40,9 @@ public class ArrayPageHandler implements IPageHandler {
         return "ArrayPageHandler{" +
                 "pages=" + pages +
                 '}';
+    }
+
+    @Override
+    public void close() throws IOException {
     }
 }

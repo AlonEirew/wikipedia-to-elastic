@@ -16,11 +16,17 @@ import org.elasticsearch.action.index.IndexResponse;
 public class ElasticBulkDocCreateListener implements ActionListener<BulkResponse> {
 
     private final static Logger LOGGER = LogManager.getLogger(ElasticDocCreateListener.class);
+    private final ElasticAPI elasicApi;
+
+    public ElasticBulkDocCreateListener(ElasticAPI elasicApi) {
+        this.elasicApi = elasicApi;
+    }
 
     @Override
     public void onResponse(BulkResponse bulkResponse) {
+        this.elasicApi.releaseSemaphore();
         StringBuilder sb = new StringBuilder();
-        sb.append("Bulk Created/Updated ids: [");
+        sb.append("Bulk Created/Updated done successfully, ids: [");
         for (BulkItemResponse bulkItemResponse : bulkResponse) {
             DocWriteResponse itemResponse = bulkItemResponse.getResponse();
 
@@ -41,6 +47,7 @@ public class ElasticBulkDocCreateListener implements ActionListener<BulkResponse
 
     @Override
     public void onFailure(Exception e) {
+        this.elasicApi.releaseSemaphore();
         LOGGER.error("Failed to commit some pages", e);
     }
 }

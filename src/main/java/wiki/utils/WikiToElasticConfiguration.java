@@ -13,10 +13,8 @@ import java.lang.reflect.Type;
 
 public class WikiToElasticConfiguration {
 
-    private final static Logger LOGGER = LogManager.getLogger(WikiToElasticConfiguration.class);
-
     public static final Type CONFIGURATION_TYPE = new TypeToken<WikiToElasticConfiguration>() {}.getType();
-    public static final Gson gson = new Gson();
+    public static final Gson GSON = new Gson();
 
     private String indexName;
     private String docType;
@@ -30,6 +28,7 @@ public class WikiToElasticConfiguration {
     private int replicas;
     private int insertBulkSize;
     private boolean normalizeFields;
+    private boolean extractRelationFields;
 
     private transient String mappingFileContent = null;
     private transient String settingFileContent = null;
@@ -128,6 +127,14 @@ public class WikiToElasticConfiguration {
 
     public void setNormalizeFields(boolean normalizeFields) {
         this.normalizeFields = normalizeFields;
+    }
+
+    public boolean isExtractRelationFields() {
+        return extractRelationFields;
+    }
+
+    public void setExtractRelationFields(boolean extractRelationFields) {
+        this.extractRelationFields = extractRelationFields;
     }
 
     public String getMappingFileContent() {

@@ -14,8 +14,15 @@ public class ElasticDocCreateListener implements ActionListener<IndexResponse> {
 
     private final static Logger LOGGER = LogManager.getLogger(ElasticDocCreateListener.class);
 
+    private final ElasticAPI elasicApi;
+
+    public ElasticDocCreateListener(ElasticAPI elasicApi) {
+        this.elasicApi = elasicApi;
+    }
+
     @Override
     public void onResponse(IndexResponse indexResponse) {
+        this.elasicApi.releaseSemaphore();
         String index = indexResponse.getIndex();
         String id = indexResponse.getId();
         if (indexResponse.getResult() == DocWriteResponse.Result.CREATED) {
@@ -27,6 +34,7 @@ public class ElasticDocCreateListener implements ActionListener<IndexResponse> {
 
     @Override
     public void onFailure(Exception e) {
+        this.elasicApi.releaseSemaphore();
         LOGGER.error("failed inserting document with exception!", e);
     }
 }

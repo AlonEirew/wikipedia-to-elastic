@@ -24,7 +24,7 @@ import java.util.*;
 
 public class TestRelationsBuilderAndPageParser {
 
-    private static Gson gson = new Gson();
+    private static final Gson gson = new Gson();
 
     @BeforeClass
     public static void initTests() {
@@ -151,11 +151,12 @@ public class TestRelationsBuilderAndPageParser {
         String text = "'''Alabama''' is a [[U.S. state|state]] in the [[Southern United States|southeastern region]] of the [[United States]]. It is bordered by [[Tennessee]] to the north, [[Georgia (U.S. state)|Georgia]] to the east, [[Florida]] and the [[Gulf of Mexico]] to the south, and [[Mississippi]] to the west. Alabama is the [[List of U.S. states and territories by area|30th largest by area]] and the [[List of U.S. states and territories by population|24th-most populous]] of the [[List of U.S. states|U.S. states]]. With a total of {{convert|1500|mi|km}} of [[inland waterway]]s, Alabama has among the most of any state.<ref>{{cite web|title=Alabama Transportation Overview|url=https://www.edpa.org/wp-content/uploads/Alabama-Transportation-Overview-1.pdf|publisher=Economic Development Partnership of Alabama|accessdate=21 January 2017}}</ref>\n";
         String firstPar = WikiPageParser.extractFirstPageParagraph(text);
         final BeCompRelationResult jimResultSet = beCompExtractor.extract(firstPar);
-        System.out.println(jimResultSet.getBeCompRelations().toArray());
+        System.out.println(Arrays.toString(jimResultSet.getBeCompRelations().toArray()));
     }
 
     public static String getFileJsonContant(String fileName) {
         InputStream inputStreamNlp = TestRelationsBuilderAndPageParser.class.getClassLoader().getResourceAsStream(fileName);
+        assert inputStreamNlp != null;
         JsonObject inputJsonNlp = gson.fromJson(new InputStreamReader(inputStreamNlp), JsonObject.class);
         String text = inputJsonNlp.get("text").getAsString();
         return text;
@@ -164,6 +165,7 @@ public class TestRelationsBuilderAndPageParser {
     public static List<String> getFileJsonListContant(String fileName) {
         List<String> resultList = new ArrayList<>();
         InputStream inputStreamNlp = TestRelationsBuilderAndPageParser.class.getClassLoader().getResourceAsStream(fileName);
+        assert inputStreamNlp != null;
         JsonArray inputJsonNlp = gson.fromJson(new InputStreamReader(inputStreamNlp), JsonArray.class);
         for(JsonElement elem : inputJsonNlp) {
             String text = elem.getAsJsonObject().get("text").getAsString();
@@ -174,12 +176,11 @@ public class TestRelationsBuilderAndPageParser {
 
     private WikiParsedPageRelations getFileRelationContant(String fileName) {
         InputStream resultStream = TestRelationsBuilderAndPageParser.class.getClassLoader().getResourceAsStream(fileName);
-        WikiParsedPageRelations jsonResult = gson.fromJson(new InputStreamReader(resultStream), WikiParsedPageRelations.class);
-        return jsonResult;
+        assert resultStream != null;
+        return gson.fromJson(new InputStreamReader(resultStream), WikiParsedPageRelations.class);
     }
 
     private void writeResultToFile(String fileLocation, WikiParsedPageRelations relations) throws IOException {
         FileUtils.write(new File(fileLocation), gson.toJson(relations), "UTF-8");
     }
-
 }

@@ -29,23 +29,28 @@ import wiki.utils.WikiToElasticConfiguration;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.Semaphore;
 
-public class ElasticAPI implements IElasticAPI {
+public class ElasticAPI {
 
     private final static Logger LOGGER = LogManager.getLogger(ElasticAPI.class);
+    private final static int MAX_AVAILABLE = 10;
 
+    // Limit the number of threads accessing elastic in parallel
+    private final Semaphore available = new Semaphore(MAX_AVAILABLE, true);
     private final RestHighLevelClient client;
 
     public ElasticAPI(RestHighLevelClient client) {
         this.client = client;
     }
 
-    @Override
     public DeleteIndexResponse deleteIndex(String indexName) {
         DeleteIndexResponse deleteIndexResponse = null;
         try {
             DeleteIndexRequest delRequest = new DeleteIndexRequest(indexName);
+            this.available.acquire();
             deleteIndexResponse = this.client.indices().delete(delRequest);
+            this.available.release();
             LOGGER.info("Index " + indexName + " deleted successfully: " + deleteIndexResponse.isAcknowledged());
         } catch (ElasticsearchException ese) {
             if (ese.status() == RestStatus.NOT_FOUND) {
@@ -53,14 +58,13 @@ public class ElasticAPI implements IElasticAPI {
             } else {
                 LOGGER.debug(ese);
             }
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             LOGGER.debug(e);
         }
 
         return deleteIndexResponse;
     }
 
-    @Override
     public CreateIndexResponse createIndex(WikiToElasticConfiguration configuration) {
         CreateIndexResponse createIndexResponse = null;
         try {
@@ -84,17 +88,23 @@ public class ElasticAPI implements IElasticAPI {
             if(mappingFileContent != null && !mappingFileContent.isEmpty()) {
                 crRequest.mapping(configuration.getDocType(), mappingFileContent, XContentType.JSON);
             }
+
+            this.available.acquire();
             createIndexResponse = this.client.indices().create(crRequest);
+            this.available.release();
 
             LOGGER.info("Index " + configuration.getIndexName() + " created successfully: " + createIndexResponse.isAcknowledged());
-        } catch(IOException ex) {
+        } catch(IOException | InterruptedException ex) {
             LOGGER.error(ex);
         }
 
         return createIndexResponse;
     }
 
-    @Override
+    public synchronized void releaseSemaphore() {
+        this.available.release();
+    }
+
     public void addDocAsnc(ActionListener<IndexResponse> listener, String indexName, String indexType, WikiParsedPage page) {
         if(isValidRequest(indexName, indexType, page)) {
             IndexRequest indexRequest = createIndexRequest(
@@ -102,12 +112,18 @@ public class ElasticAPI implements IElasticAPI {
                     indexType,
                     page);
 
+            try {
+                // release will happen from listener (async)
+                this.available.acquire();
+            } catch (InterruptedException e) {
+                LOGGER.debug(e);
+            }
+
             this.client.indexAsync(indexRequest, listener);
             LOGGER.trace("Doc with Id " + page.getId() + " will be created asynchronously");
         }
     }
 
-    @Override
     public IndexResponse addDoc(String indexName, String indexType, WikiParsedPage page) {
         IndexResponse res = null;
 
@@ -118,17 +134,17 @@ public class ElasticAPI implements IElasticAPI {
                         indexType,
                         page);
 
-
+                this.available.acquire();
                 res = this.client.index(indexRequest);
+                this.available.release();
             }
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
 
         return res;
     }
 
-    @Override
     public void addBulkAsnc(ActionListener<BulkResponse> listener, String indexName, String indexType, List<WikiParsedPage> pages) {
         BulkRequest bulkRequest = new BulkRequest();
 
@@ -141,12 +157,17 @@ public class ElasticAPI implements IElasticAPI {
             }
         }
 
+        try {
+            // release will happen from listener (async)
+            this.available.acquire();
+        } catch (InterruptedException e) {
+            LOGGER.debug(e);
+        }
 
         this.client.bulkAsync(bulkRequest, listener);
         LOGGER.debug("Bulk insert will be created asynchronously");
     }
 
-    @Override
     public boolean isDocExists(String indexName, String indexType, String docId) {
         GetRequest getRequest = new GetRequest(
                 indexName,
@@ -154,28 +175,25 @@ public class ElasticAPI implements IElasticAPI {
                 docId);
 
         try {
+            this.available.acquire();
             GetResponse getResponse = this.client.get(getRequest);
+            this.available.release();
             if (getResponse.isExists()) {
                 return true;
             }
-        } catch (ElasticsearchStatusException e) {
-            LOGGER.error(e);
-        }
-        catch (IOException e) {
+        } catch (ElasticsearchStatusException | IOException | InterruptedException e) {
             LOGGER.error(e);
         }
 
         return false;
     }
 
-    @Override
     public boolean isIndexExists(String indexName) {
         boolean ret = false;
         try {
             OpenIndexRequest openIndexRequest = new OpenIndexRequest(indexName);
             ret = client.indices().open(openIndexRequest).isAcknowledged();
-        } catch (ElasticsearchStatusException ex) {
-        } catch (IOException e) {
+        } catch (ElasticsearchStatusException | IOException ignored) {
         }
 
         return ret;
@@ -187,7 +205,7 @@ public class ElasticAPI implements IElasticAPI {
                 indexType,
                 String.valueOf(page.getId()));
 
-        indexRequest.source(WikiToElasticConfiguration.gson.toJson(page), XContentType.JSON);
+        indexRequest.source(WikiToElasticConfiguration.GSON.toJson(page), XContentType.JSON);
 
         return indexRequest;
     }

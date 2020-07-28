@@ -28,10 +28,12 @@ public class WikiPageParser {
     public static void initResources() {
         if(STOP_WORDS == null) {
             try (InputStream resource = WikiPageParser.class.getClassLoader().getResourceAsStream("stop_words_en.json")) {
-                Type type = new TypeToken<HashSet<String>>() {
-                }.getType();
-                Gson gson = new Gson();
-                STOP_WORDS = gson.fromJson(new InputStreamReader(resource), type);
+                if(resource != null) {
+                    Type type = new TypeToken<HashSet<String>>() {
+                    }.getType();
+                    Gson gson = new Gson();
+                    STOP_WORDS = gson.fromJson(new InputStreamReader(resource), type);
+                }
             } catch (IOException e) {
                 LOGGER.error("failed to load STOP_WORDS", e);
             }
@@ -107,9 +109,7 @@ public class WikiPageParser {
 
         String firstParagraphRemJson = removeJsonTags(firstParagraph);
         String firstParagraphCleanLinks = normTextLinks(firstParagraphRemJson);
-        String firstParagraphCleanUrl = cleanUrlPattern(firstParagraphCleanLinks);
-
-        return firstParagraphCleanUrl;
+        return cleanUrlPattern(firstParagraphCleanLinks);
     }
 
     private static String cleanUrlPattern(String textToClean) {
@@ -118,7 +118,7 @@ public class WikiPageParser {
         while (m.find()) {
             try {
                 textToClean = textToClean.replaceAll(m.group(0), "").trim();
-            } catch (Exception e) { }
+            } catch (Exception ignored) { }
         }
         return textToClean;
     }
@@ -183,7 +183,7 @@ public class WikiPageParser {
                 return text;
             }
 
-            buff = buff.delete(start, end + parenthesisTypeEnd.length());
+            buff.delete(start, end + parenthesisTypeEnd.length());
             text = buff.toString();
         }
 

@@ -12,6 +12,7 @@ import wiki.data.WikiParsedPageBuilder;
 import wiki.data.WikiParsedPageRelations;
 import wiki.data.WikiParsedPageRelationsBuilder;
 import wiki.handlers.IPageHandler;
+import wiki.utils.WikiToElasticConfiguration;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
@@ -39,6 +40,7 @@ public class STAXParser implements IWikiParser {
     private final ExecutorService executorService;
     private final Set<Long> totalIds = new HashSet<>();
     private boolean normalize;
+    private boolean extractFields;
     private DeleteUpdateMode deleteUpdateMode;
 
 
@@ -46,13 +48,15 @@ public class STAXParser implements IWikiParser {
         this.executorService = initExecuterService();
         this.handler = handler;
         this.normalize = true;
+        this.extractFields = true;
         this.deleteUpdateMode = DeleteUpdateMode.NA;
     }
 
-    public STAXParser(IPageHandler handler, boolean normalize, DeleteUpdateMode mode) {
+    public STAXParser(IPageHandler handler, WikiToElasticConfiguration config, DeleteUpdateMode mode) {
         this(handler);
-        this.normalize = normalize;
+        this.normalize = config.isNormalizeFields();
         this.deleteUpdateMode = mode;
+        this.extractFields = config.isExtractRelationFields();
     }
 
     private ExecutorService initExecuterService() {
@@ -132,7 +136,7 @@ public class STAXParser implements IWikiParser {
                         break;
                     case ID_ELEMENT:
                         if(id == -1) {
-                            id = Long.valueOf(reader.getElementText());
+                            id = Long.parseLong(reader.getElementText());
                             totalIds.add(id);
                         }
                         break;
@@ -146,14 +150,16 @@ public class STAXParser implements IWikiParser {
             }
         }
 
-        if(this.deleteUpdateMode == DeleteUpdateMode.UPDATE) {
-            if(this.handler.isPageExists(String.valueOf(id))) {
-                LOGGER.info("Page with id-" + id + ", title-" + title + ", already exist, moving on...");
+        if(title != null) {
+            if (this.deleteUpdateMode == DeleteUpdateMode.UPDATE) {
+                if (this.handler.isPageExists(String.valueOf(id))) {
+                    LOGGER.info("Page with id-" + id + ", title-" + title + ", already exist, moving on...");
+                } else {
+                    handlePage(title, id, text, redirect);
+                }
             } else {
                 handlePage(title, id, text, redirect);
             }
-        } else {
-            handlePage(title, id, text, redirect);
         }
     }
 
@@ -170,7 +176,7 @@ public class STAXParser implements IWikiParser {
                 LOGGER.info("prepare to commit page with id-" + id + ", title-" + title);
                 WikiParsedPageRelations relations;
                 // Redirect pages text are not processed (can be found in the underline redirected page)
-                if (redirect == null || redirect.isEmpty()) {
+                if (this.extractFields && (redirect == null || redirect.isEmpty())) {
                     if (this.normalize) {
                         // Building the relations and norm relations object
                         relations = new WikiParsedPageRelationsBuilder().buildFromWikipediaPageText(text);

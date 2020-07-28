@@ -12,8 +12,6 @@ import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import wiki.data.relations.BeCompRelationExtractor;
 import wiki.elastic.ElasticAPI;
-import wiki.elastic.ElasticBulkDocCreateListener;
-import wiki.elastic.IElasticAPI;
 import wiki.handlers.ElasticPageHandler;
 import wiki.handlers.IPageHandler;
 import wiki.parsers.STAXParser;
@@ -32,18 +30,16 @@ public class WikiToElasticMain {
         try(InputStream resource = new FileInputStream(new File("conf.json"));
             JsonReader reader = new JsonReader(new InputStreamReader(resource))) {
             LOGGER.info("Starting export Wiki dump to elastic process");
-            if(resource != null) {
-                WikiToElasticConfiguration configuration = WikiToElasticConfiguration.gson.fromJson(reader, WikiToElasticConfiguration.CONFIGURATION_TYPE);
-                WikiPageParser.initResources();
-                BeCompRelationExtractor.initResources();
-                LOGGER.info("Process configuration loaded");
+            WikiToElasticConfiguration configuration = WikiToElasticConfiguration.GSON.fromJson(reader, WikiToElasticConfiguration.CONFIGURATION_TYPE);
+            WikiPageParser.initResources();
+            BeCompRelationExtractor.initResources();
+            LOGGER.info("Process configuration loaded");
 
-                long startTime = System.currentTimeMillis();
-                startProcess(configuration);
-                long endTime = System.currentTimeMillis();
+            long startTime = System.currentTimeMillis();
+            startProcess(configuration);
+            long endTime = System.currentTimeMillis();
 
-                LOGGER.info("Process Done, took:" + (endTime - startTime) + "ms");
-            }
+            LOGGER.info("Process Done, took:" + (endTime - startTime) + "ms");
         } catch (FileNotFoundException e) {
             LOGGER.error("Failed to start process", e);
         } catch (IOException e) {
@@ -77,11 +73,11 @@ public class WikiToElasticMain {
                                         configuration.getPort(),
                                         configuration.getScheme())));
 
-                IElasticAPI elasicApi = new ElasticAPI(client);
+                ElasticAPI elasicApi = new ElasticAPI(client);
 
                 // Delete if index already exists
                 System.out.println("Would you like to clean & delete index (if exists) \"" + configuration.getIndexName() +
-                        "\" or update (new pages) in it [D(Delete)/U(Update)");
+                        "\" or update (new pages) in it [D(Delete)/U(Update)]");
 
                 String ans = reader.nextLine(); // Scans the next token of the input as an int.
                 if(ans.equalsIgnoreCase("d") || ans.equalsIgnoreCase("delete")) {
@@ -102,12 +98,10 @@ public class WikiToElasticMain {
                     return;
                 }
 
-                ElasticBulkDocCreateListener listener = new ElasticBulkDocCreateListener();
-
                 // Start parsing the xml and adding pages to elastic
-                pageHandler = new ElasticPageHandler(elasicApi, listener, configuration);
+                pageHandler = new ElasticPageHandler(elasicApi, configuration);
 
-                parser = new STAXParser(pageHandler, configuration.isNormalizeFields(), mode);
+                parser = new STAXParser(pageHandler, configuration, mode);
                 parser.parse(inputStream);
             } else {
                 LOGGER.error("Cannot find dump file-" + wikifile.getAbsolutePath());
@@ -122,11 +116,9 @@ public class WikiToElasticMain {
             if(parser != null) {
                 LOGGER.info("*** Total id's extracted=" + parser.getTotalIds().size());
                 parser.shutDownPool();
-                if(pageHandler != null) {
-                    pageHandler.flushRemains();
-                    LOGGER.info("*** Total id's committed=" + ((ElasticPageHandler) pageHandler).getTotalIdsCommitted());
-                    LOGGER.info("*** In commit queue=" + ((ElasticPageHandler) pageHandler).getPagesQueueSize() + " (should be 0)");
-                }
+                pageHandler.close();
+                LOGGER.info("*** Total id's committed=" + ((ElasticPageHandler) pageHandler).getTotalIdsCommitted());
+                LOGGER.info("*** In commit queue=" + ((ElasticPageHandler) pageHandler).getPagesQueueSize() + " (should be 0)");
             }
             if(client != null) {
                 LOGGER.info("Closing RestHighLevelClient..");

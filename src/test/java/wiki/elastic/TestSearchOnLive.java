@@ -36,11 +36,11 @@ public class TestSearchOnLive {
         }
     }
 
-    @Test
+//    @Test
     public void testPutAndSearchDocOnElastic() throws InterruptedException, IOException {
         // Create/Add Page
         // Listener
-        ActionListener<IndexResponse> listener = new ElasticDocCreateListener();
+        ActionListener<IndexResponse> listener = new ElasticDocCreateListener(this.elasicApi);
 
         // Create page
         WikiParsedPage page = createRealPages();

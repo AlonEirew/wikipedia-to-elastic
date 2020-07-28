@@ -18,14 +18,12 @@ import org.junit.Test;
 import wiki.data.WikiParsedPage;
 import wiki.data.WikiParsedPageBuilder;
 import wiki.utils.WikiToElasticConfiguration;
-import wiki.utils.TestWikiToElasticUtils;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -42,7 +40,7 @@ public class TestElasticAPI {
         if(this.configuration == null && url != null) {
             String file = url.getFile();
             JsonReader reader = new JsonReader(new FileReader(file));
-            this.configuration = WikiToElasticConfiguration.gson.fromJson(reader, WikiToElasticConfiguration.CONFIGURATION_TYPE);
+            this.configuration = WikiToElasticConfiguration.GSON.fromJson(reader, WikiToElasticConfiguration.CONFIGURATION_TYPE);
         }
 
         // init elastic client
@@ -66,7 +64,7 @@ public class TestElasticAPI {
     public void testPutDocOnElastic() throws IOException, InterruptedException {
         // Create/Add Page
         // Listener
-        ActionListener<IndexResponse> listener = new ElasticDocCreateListener();
+        ActionListener<IndexResponse> listener = new ElasticDocCreateListener(this.elasicApi);
 
         // Create page
         List<WikiParsedPage> testPages = createTestPages();
@@ -83,7 +81,7 @@ public class TestElasticAPI {
     public void testPutBulkOnElastic() throws IOException, InterruptedException {
         // Create/Add Page
         // Listener
-        ActionListener<BulkResponse> listener = new ElasticBulkDocCreateListener();
+        ActionListener<BulkResponse> listener = new ElasticBulkDocCreateListener(this.elasicApi);
 
         // Create page
         List<WikiParsedPage> testPages = createTestPages();
@@ -99,7 +97,7 @@ public class TestElasticAPI {
     public void testIsDocExist() throws InterruptedException {
         // Create page
         List<WikiParsedPage> testPages = createTestPages();
-        ActionListener<BulkResponse> listener = new ElasticBulkDocCreateListener();
+        ActionListener<BulkResponse> listener = new ElasticBulkDocCreateListener(this.elasicApi);
         this.elasicApi.addBulkAsnc(listener, this.configuration.getIndexName(), this.configuration.getDocType(), testPages);
 
         Thread.sleep(2000);
@@ -140,7 +138,7 @@ public class TestElasticAPI {
         return wikiPages;
     }
 
-    private void searchCreatedIndex(WikiToElasticConfiguration configuration, RestHighLevelClient client, IElasticAPI elasicApi) throws IOException {
+    private void searchCreatedIndex(WikiToElasticConfiguration configuration, RestHighLevelClient client, ElasticAPI elasicApi) throws IOException {
         // Search page
         SearchRequest searchRequest = new SearchRequest(configuration.getIndexName());
         searchRequest.types(configuration.getDocType());
