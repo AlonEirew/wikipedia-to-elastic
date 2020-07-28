@@ -7,7 +7,7 @@
 # Wikipedia to ElasticSearch
 
 This is a knowledge resource based on wikipedia. <br/>
-But also a parsing mechanism that enables parsing of Wikipedia, Wikinews, Wikidata and other Wikimedia .bz2 dumps into an ElasticSearch index.
+But also a multi-lingual parsing mechanism that enables parsing of Wikipedia, Wikinews, Wikidata and other Wikimedia .bz2 dumps into an ElasticSearch index.
 
 Project goal - Use 3 different types of Wikipedia pages (Redirect/Disambiguation/Title) in order to extract 6 different 
 semantic features for tasks such as Identifying Semantic Relations, Entity Linking, Cross Document Co-Reference, Knowledge Graphs, Summarization and other.
@@ -16,7 +16,9 @@ Integrated with Intel NLP Framework <a href="https://github.com/NervanaSystems/n
 
 For more information and examples check this related <a href="https://www.intel.ai/extracting-semantic-relations-using-external-knowledge-resources-with-nlp-architect/#gs.12xroe">blog post</a>.
 
-#### Extracted Relations Types and Features
+Current supported languages: *{English, French}*
+
+#### Extracted Relations Types and Features (only English version)
 
 * Redirect Links - See details at <a href="https://en.wikipedia.org/wiki/Wikipedia:Redirect">Wikipedia Redirect</a>
 * Disambiguation Links - See details at <a href="https://en.wikipedia.org/wiki/Category:Disambiguation_pages">Wikipedia Disambiguation</a>
@@ -76,6 +78,8 @@ in order to create and export the wiki data into the Elastic index (which takes 
     
    This should return a wikipedia page on Alan Turing.
 
+***
+
 ### Building the index From Source
 
 **Disclimer:** Processing Wikipedia latest full dump (15GB .bz2 AND 66GB unpacked as .xml) including extraction of relations fields, normalization and lemmatization of text, 
@@ -102,7 +106,7 @@ Use this process as well (set extractRelationFields to false as it is not suppor
     "extractRelationFields" : true (Weather to extract relations fields while processing the data, support only english wikipedia)
     "insertBulkSize": 100 (Number of pages to bulk insert to elastic search every iteration (found this number to give best preformence))
     "mapping" : "mapping.json" (Elastic Mapping file, should point to src/main/resources/mapping.json)
-    "setting" : "en_map_settings.json" (Elastic Setting file))
+    "setting" : "en_map_settings.json" (Elastic Setting file, current support {en, fr})
     "host" : "localhost" (Elastic host, were Elastic instance is installed and running)
     "port" : 9200 (Elastic port, host port were Elastic is installed and running, elastic defualt is set to 9200)
     "wikiDump" : "dumps/enwiki-latest-pages-articles.xml.bz2" (WikiMedia .bz2 downloaded dump file location)
@@ -125,9 +129,24 @@ Use this process as well (set extractRelationFields to false as it is not suppor
 * Run the process from command line:<br/>
 `java -Xmx6000m -DentityExpansionLimit=2147480000 -DtotalEntitySizeLimit=2147480000 -Djdk.xml.totalEntitySizeLimit=2147480000 -jar build/distributions/WikipediaToElastic-1.0/WikipediaToElastic-1.0.jar`
 
+* To test/query, you can run from terminal:<br/>
+`curl -XGET 'http://localhost:9200/enwiki_v3/_search?pretty=true' -H 'Content-Type: application/json' -d '{"size": 5, "query": {"match_phrase": { "title.near_match": "Alan Turing"}}}'`
+
+This should return a wikipedia page on Alan Turing.
+
+***
+
+### Elastic Page Query
+
+Once process is complete, two main query options are available (for more details and title query options, see `mapping.json`):<br/>
+* title.near_match - a fuzzy search on the title
+* title.keyword - exact match
+
+***
+
 ### Generated Elastic Page Example
 
-Once process has finished, you should see in your ElasticSearch selected index, pages that have been created with the following structures (also see "Created Fields Attributes" for more details):   
+Pages that have been created with the following structures (also see "Created Fields Attributes" for more details):   
 
 **Page Example (Extracted from Wikipedia disambiguation page):**
 ```json

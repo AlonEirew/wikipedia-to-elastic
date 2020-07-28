@@ -39,12 +39,9 @@ public class TestSearchOnLive {
 //    @Test
     public void testPutAndSearchDocOnElastic() throws InterruptedException, IOException {
         // Create/Add Page
-        // Listener
-        ActionListener<IndexResponse> listener = new ElasticDocCreateListener(this.elasicApi);
-
         // Create page
         WikiParsedPage page = createRealPages();
-        this.elasicApi.addDocAsnc(listener, "enwiki_v2", "wikipage", page);
+        this.elasicApi.addDocAsnc("enwiki_v2", "wikipage", page);
 
         // Search page
         SearchRequest searchRequest = new SearchRequest("enwiki_v2");

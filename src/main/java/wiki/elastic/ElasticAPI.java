@@ -105,7 +105,7 @@ public class ElasticAPI {
         this.available.release();
     }
 
-    public void addDocAsnc(ActionListener<IndexResponse> listener, String indexName, String indexType, WikiParsedPage page) {
+    public void addDocAsnc(String indexName, String indexType, WikiParsedPage page) {
         if(isValidRequest(indexName, indexType, page)) {
             IndexRequest indexRequest = createIndexRequest(
                     indexName,
@@ -115,12 +115,23 @@ public class ElasticAPI {
             try {
                 // release will happen from listener (async)
                 this.available.acquire();
+                ElasticDocCreateListener listener = new ElasticDocCreateListener(indexRequest, this);
+                this.client.indexAsync(indexRequest, listener);
+                LOGGER.trace("Doc with Id " + page.getId() + " will be created asynchronously");
             } catch (InterruptedException e) {
                 LOGGER.debug(e);
             }
+        }
+    }
 
+    public void retryAddDoc(IndexRequest indexRequest, ElasticDocCreateListener listener) {
+        try {
+            // release will happen from listener (async)
+            this.available.acquire();
             this.client.indexAsync(indexRequest, listener);
-            LOGGER.trace("Doc with Id " + page.getId() + " will be created asynchronously");
+            LOGGER.trace("Doc with Id " + indexRequest.id() + " will retry asynchronously");
+        } catch (InterruptedException e) {
+            LOGGER.debug(e);
         }
     }
 
@@ -145,7 +156,7 @@ public class ElasticAPI {
         return res;
     }
 
-    public void addBulkAsnc(ActionListener<BulkResponse> listener, String indexName, String indexType, List<WikiParsedPage> pages) {
+    public void addBulkAsnc(String indexName, String indexType, List<WikiParsedPage> pages) {
         BulkRequest bulkRequest = new BulkRequest();
 
         if(pages != null) {
@@ -160,12 +171,23 @@ public class ElasticAPI {
         try {
             // release will happen from listener (async)
             this.available.acquire();
+            ElasticBulkDocCreateListener listener = new ElasticBulkDocCreateListener(bulkRequest, this);
+            this.client.bulkAsync(bulkRequest, listener);
+            LOGGER.debug("Bulk insert will be created asynchronously");
         } catch (InterruptedException e) {
-            LOGGER.debug(e);
+            LOGGER.error("Failed to acquire semaphore, lost bulk insert!", e);
         }
+    }
 
-        this.client.bulkAsync(bulkRequest, listener);
-        LOGGER.debug("Bulk insert will be created asynchronously");
+    public void retryAddBulk(BulkRequest bulkRequest, ElasticBulkDocCreateListener listener) {
+        try {
+            // release will happen from listener (async)
+            this.available.acquire();
+            this.client.bulkAsync(bulkRequest, listener);
+            LOGGER.debug("Bulk insert retry");
+        } catch (InterruptedException e) {
+            LOGGER.error("Failed to acquire semaphore, lost bulk insert!", e);
+        }
     }
 
     public boolean isDocExists(String indexName, String indexType, String docId) {

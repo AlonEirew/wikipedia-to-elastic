@@ -67,8 +67,7 @@ public class ElasticPageHandler implements IPageHandler {
                 List<WikiParsedPage> copyPages = new ArrayList<>(this.pages);
                 totalIdsCommitted += this.pages.size();
                 this.pages.clear();
-                ElasticBulkDocCreateListener listener = new ElasticBulkDocCreateListener(this.elasticApi);
-                elasticApi.addBulkAsnc(listener, this.indexName, this.docType, copyPages);
+                elasticApi.addBulkAsnc(this.indexName, this.docType, copyPages);
             }
         }
     }

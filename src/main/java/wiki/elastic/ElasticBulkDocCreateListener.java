@@ -10,15 +10,23 @@ import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.DocWriteRequest;
 import org.elasticsearch.action.DocWriteResponse;
 import org.elasticsearch.action.bulk.BulkItemResponse;
+import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexResponse;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ElasticBulkDocCreateListener implements ActionListener<BulkResponse> {
 
     private final static Logger LOGGER = LogManager.getLogger(ElasticDocCreateListener.class);
-    private final ElasticAPI elasicApi;
+    private final static int MAX_RETRY = 3;
 
-    public ElasticBulkDocCreateListener(ElasticAPI elasicApi) {
+    private final AtomicInteger count =  new AtomicInteger();
+    private final ElasticAPI elasicApi;
+    private final BulkRequest bulkRequest;
+
+    public ElasticBulkDocCreateListener(BulkRequest bulkRequest, ElasticAPI elasicApi) {
+        this.bulkRequest = bulkRequest;
         this.elasicApi = elasicApi;
     }
 
@@ -48,6 +56,11 @@ public class ElasticBulkDocCreateListener implements ActionListener<BulkResponse
     @Override
     public void onFailure(Exception e) {
         this.elasicApi.releaseSemaphore();
-        LOGGER.error("Failed to commit some pages", e);
+        LOGGER.error("Failed to commit some pages with exception=" + e.getMessage());
+        if (count.incrementAndGet() < MAX_RETRY) {
+            this.elasicApi.retryAddBulk(this.bulkRequest, this);
+        } else {
+            LOGGER.error("Failed, max retry exceeded, throwing request!");
+        }
     }
 }

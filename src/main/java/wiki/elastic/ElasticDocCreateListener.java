@@ -8,15 +8,22 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.DocWriteResponse;
+import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ElasticDocCreateListener implements ActionListener<IndexResponse> {
 
     private final static Logger LOGGER = LogManager.getLogger(ElasticDocCreateListener.class);
+    private final static int MAX_RETRY = 3;
 
+    private final AtomicInteger count =  new AtomicInteger();
     private final ElasticAPI elasicApi;
+    private final IndexRequest indexRequest;
 
-    public ElasticDocCreateListener(ElasticAPI elasicApi) {
+    public ElasticDocCreateListener(IndexRequest indexRequest, ElasticAPI elasicApi) {
+        this.indexRequest = indexRequest;
         this.elasicApi = elasicApi;
     }
 
@@ -35,6 +42,11 @@ public class ElasticDocCreateListener implements ActionListener<IndexResponse> {
     @Override
     public void onFailure(Exception e) {
         this.elasicApi.releaseSemaphore();
-        LOGGER.error("failed inserting document with exception!", e);
+        LOGGER.error("failed inserting document with exception=" + e.getMessage());
+        if (count.incrementAndGet() < MAX_RETRY) {
+            this.elasicApi.retryAddDoc(indexRequest, this);
+        } else {
+            LOGGER.error("Failed, max retry exceeded, throwing request!");
+        }
     }
 }

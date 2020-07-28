@@ -63,13 +63,10 @@ public class TestElasticAPI {
     @Test
     public void testPutDocOnElastic() throws IOException, InterruptedException {
         // Create/Add Page
-        // Listener
-        ActionListener<IndexResponse> listener = new ElasticDocCreateListener(this.elasicApi);
-
         // Create page
         List<WikiParsedPage> testPages = createTestPages();
         for (WikiParsedPage page : testPages) {
-            this.elasicApi.addDocAsnc(listener, this.configuration.getIndexName(), this.configuration.getDocType(), page);
+            this.elasicApi.addDocAsnc(this.configuration.getIndexName(), this.configuration.getDocType(), page);
         }
 
         // Need to wait for index to be searchable
@@ -80,13 +77,10 @@ public class TestElasticAPI {
     @Test
     public void testPutBulkOnElastic() throws IOException, InterruptedException {
         // Create/Add Page
-        // Listener
-        ActionListener<BulkResponse> listener = new ElasticBulkDocCreateListener(this.elasicApi);
-
         // Create page
         List<WikiParsedPage> testPages = createTestPages();
 
-        this.elasicApi.addBulkAsnc(listener, this.configuration.getIndexName(), this.configuration.getDocType(), testPages);
+        this.elasicApi.addBulkAsnc(this.configuration.getIndexName(), this.configuration.getDocType(), testPages);
 
         Thread.sleep(2000);
 
@@ -97,8 +91,7 @@ public class TestElasticAPI {
     public void testIsDocExist() throws InterruptedException {
         // Create page
         List<WikiParsedPage> testPages = createTestPages();
-        ActionListener<BulkResponse> listener = new ElasticBulkDocCreateListener(this.elasicApi);
-        this.elasicApi.addBulkAsnc(listener, this.configuration.getIndexName(), this.configuration.getDocType(), testPages);
+        this.elasicApi.addBulkAsnc(this.configuration.getIndexName(), this.configuration.getDocType(), testPages);
 
         Thread.sleep(2000);
 
