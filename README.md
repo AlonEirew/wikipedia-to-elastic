@@ -7,10 +7,7 @@
 # Wikipedia to ElasticSearch
 
 This is a knowledge resource based on wikipedia. <br/>
-But also a multilingual parsing mechanism that enables parsing of Wikipedia, Wikinews, Wikidata and other Wikimedia .bz2 dumps into an ElasticSearch index.
-
-Project goal - Use 3 different types of Wikipedia pages (Redirect/Disambiguation/Title) in order to extract 6 different 
-semantic features for tasks such as Identifying Semantic Relations, Entity Linking, Cross Document Co-Reference, Knowledge Graphs, Summarization and other.
+But also a *multilingual* parsing mechanism that enables parsing of Wikipedia, Wikinews, Wikidata and other Wikimedia .bz2 dumps into an ElasticSearch index.
 
 Integrated with Intel NLP Framework <a href="https://github.com/NervanaSystems/nlp-architect">NLP Architect</a>
 
@@ -19,6 +16,8 @@ For more information and examples check this related <a href="https://www.intel.
 Current supported languages: *{English, French, Spanish}*
 
 #### Extracted Relations Types and Features (only English version)
+Use 3 different types of Wikipedia pages (Redirect/Disambiguation/Title) in order to extract 6 different 
+semantic features for tasks such as Identifying Semantic Relations, Entity Linking, Cross Document Co-Reference, Knowledge Graphs, Summarization and other.
 
 * Redirect Links - See details at <a href="https://en.wikipedia.org/wiki/Wikipedia:Redirect">Wikipedia Redirect</a>
 * Disambiguation Links - See details at <a href="https://en.wikipedia.org/wiki/Category:Disambiguation_pages">Wikipedia Disambiguation</a>
@@ -49,26 +48,29 @@ in order to verify you have the right value (i.e 262144), run:
 
 #### Get Image and Build Container
 
-1) Pull the latest image and run it (pulled image is 11GB)
+* Pull the latest image, use one of those commands (dump year):
 
-    `#>docker pull aeirew/elastic-wiki`
-    
+    `#>docker pull aeirew/elastic-wiki` // To pull English (2019)
+    `#>docker pull aeirew/elastic-wiki-fr` // To pull French (2020)
+
+* Once pulled, run it: 
+   
     `#>docker run -d -p 9200:9200 -p 9300:9300 aeirew/elastic-wiki`
 
-2) The Elastic container index is still empty, all data is in a compressed file within the image,
+* The Elastic container index is still empty, all data is in a compressed file within the image,
 in order to create and export the wiki data into the Elastic index (which takes a while) run the following command
 
     `#>docker exec <REPLACE_WITH_RUNNING_CONTAINER_ID> /tmp/build.sh`
     
-3) Save to new image (after done you can delete the original aeirew/elastic-wiki image, in order to save disk space)
+* Save to new image (after done you can delete the original aeirew/elastic-wiki image, in order to save disk space)
 
     `#>docker commit <CONTAINER_ID> <IMAGE_NEW_NAME>`
     
-4) after saving stop the running container with 
+* after saving stop the running container with 
 
     `#>docker stop <CONTAINER_ID>`
 
-5) That's it! now you can run your created image
+* That's it! now you can run your created image
 
     `#>docker run -d -p 9200:9200 -p 9300:9300 <IMAGE_NEW_NAME>`
 
@@ -86,7 +88,7 @@ in order to create and export the wiki data into the Elastic index (which takes 
 will take about **5 days** (tested on MacBook pro, using stanford parser to extract relations, normalize and lemmatize the data).<br/>
 In case of using this data in order to identify semantic relations between phrases at run time, It is recommended to normalize the fields for better results. 
 
-In case relation fields norm not needed or relations not needed all together, set normalizeFields/extractRelationFields to false in `conf.json` (as shown in "Project Configuration Files"), for a much faster data export into elastic **(< 5 hours)**.<br />
+In case relation fields norm not needed or relations not needed all together, set normalizeFields/extractRelationFields to false in `conf.json` (as shown in "Project Configuration Files"), for a much faster data export into elastic **(< 2 hours)**.<br />
 
 You might want to consider using the Docker Image to save that time
 
@@ -107,7 +109,7 @@ Use this process as well (set extractRelationFields to false as it is not suppor
     "extractRelationFields" : true (Weather to extract relations fields while processing the data, support only english wikipedia)
     "insertBulkSize": 100 (Number of pages to bulk insert to elastic search every iteration (found this number to give best preformence))
     "mapping" : "mapping.json" (Elastic Mapping file, should point to src/main/resources/mapping.json)
-    "setting" : "en_map_settings.json" (Elastic Setting file, current support {en, fr})
+    "setting" : "en_map_settings.json" (Elastic Setting file, current support {en, fr, es})
     "host" : "localhost" (Elastic host, were Elastic instance is installed and running)
     "port" : 9200 (Elastic port, host port were Elastic is installed and running, elastic defualt is set to 9200)
     "wikiDump" : "dumps/enwiki-latest-pages-articles.xml.bz2" (WikiMedia .bz2 downloaded dump file location)
