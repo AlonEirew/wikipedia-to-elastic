@@ -13,7 +13,7 @@ Integrated with Intel NLP Framework <a href="https://github.com/NervanaSystems/n
 
 For more information and examples check this related <a href="https://www.intel.ai/extracting-semantic-relations-using-external-knowledge-resources-with-nlp-architect/#gs.12xroe">blog post</a>.
 
-Current supported languages: *{English, French, Spanish}*
+Current supported languages: *{English, French, Spanish, Deutsch}*
 
 #### Extracted Relations Types and Features (only English version)
 Use 3 different types of Wikipedia pages (Redirect/Disambiguation/Title) in order to extract 6 different 
@@ -48,10 +48,11 @@ in order to verify you have the right value (i.e 262144), run:
 
 #### Get Image and Build Container
 
-* Pull the latest image, use one of those commands (dump year):
+* Pull the latest image, use one of those commands (processed dum year):
 
-    `#>docker pull aeirew/elastic-wiki` // To pull English (2019)
-    `#>docker pull aeirew/elastic-wiki-fr` // To pull French (2020)
+    `#>docker pull aeirew/elastic-wiki` // Pull English (2019) <br/>
+    `#>docker pull aeirew/elastic-wiki-fr` // Pull French (2020) <br/>
+    `#>docker pull aeirew/elastic-wiki-es` // Pull Spanish (2020) <br/>
 
 * Once pulled, run it: 
    
@@ -109,7 +110,7 @@ Use this process as well (set extractRelationFields to false as it is not suppor
     "extractRelationFields" : true (Weather to extract relations fields while processing the data, support only english wikipedia)
     "insertBulkSize": 100 (Number of pages to bulk insert to elastic search every iteration (found this number to give best preformence))
     "mapping" : "mapping.json" (Elastic Mapping file, should point to src/main/resources/mapping.json)
-    "setting" : "en_map_settings.json" (Elastic Setting file, current support {en, fr, es})
+    "setting" : "en_map_settings.json" (Elastic Setting file, current support {en, fr, es, de})
     "host" : "localhost" (Elastic host, were Elastic instance is installed and running)
     "port" : 9200 (Elastic port, host port were Elastic is installed and running, elastic defualt is set to 9200)
     "wikiDump" : "dumps/enwiki-latest-pages-articles.xml.bz2" (WikiMedia .bz2 downloaded dump file location)
@@ -118,7 +119,7 @@ Use this process as well (set extractRelationFields to false as it is not suppor
     "replicas" : 0 (Number of Elastic replicas to use)
 ```
 * `src/main/resources/mapping.json` - Elastic wiki index mapping (Should probably stay unchanged)
-* `src/main/resources/{en,es,fr}_map_settings.json` - Elastic index settings (Should probably stay unchanged)
+* `src/main/resources/{en,es,fr,de}_map_settings.json` - Elastic index settings (Should probably stay unchanged)
 
 * Make sure Elastic process is running and active on your host (if running Elastic locally your IP is <a href="http://localhost:9200/">http://localhost:9200/</a>)
 * Checkout/Clone the repository
@@ -142,8 +143,9 @@ This should return a wikipedia page on Alan Turing.
 ### Elastic Page Query
 
 Once process is complete, two main query options are available (for more details and title query options, see `mapping.json`):<br/>
-* title.near_match - a fuzzy search on the title
+* title.plain - fuzzy search (sorted)
 * title.keyword - exact match
+
 
 ***
 
