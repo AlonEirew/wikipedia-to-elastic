@@ -15,6 +15,8 @@ RUN apt-get update && apt-get install -y \
     nodejs
 
 RUN /usr/share/elasticsearch/bin/elasticsearch-plugin install analysis-icu
+RUN /usr/share/elasticsearch/bin/elasticsearch-plugin install analysis-smartcn
+
 RUN npm install elasticdump -g
 
 COPY elastic-dump.7z /tmp/elastic-dump.7z

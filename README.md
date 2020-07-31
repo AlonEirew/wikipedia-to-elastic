@@ -13,7 +13,7 @@ Integrated with Intel NLP Framework <a href="https://github.com/NervanaSystems/n
 
 For more information and examples check this related <a href="https://www.intel.ai/extracting-semantic-relations-using-external-knowledge-resources-with-nlp-architect/#gs.12xroe">blog post</a>.
 
-Current supported languages: *{English, French, Spanish, Deutsch}*
+Current supported languages: *{English, French, Spanish, German, Chinese}*
 
 #### Extracted Relations Types and Features (only English version)
 Use 3 different types of Wikipedia pages (Redirect/Disambiguation/Title) in order to extract 6 different 
@@ -53,6 +53,7 @@ in order to verify you have the right value (i.e 262144), run:
     `#>docker pull aeirew/elastic-wiki` // Pull English (2019) <br/>
     `#>docker pull aeirew/elastic-wiki-fr` // Pull French (2020) <br/>
     `#>docker pull aeirew/elastic-wiki-es` // Pull Spanish (2020) <br/>
+    `#>docker pull aeirew/elastic-wiki-de` // Pull German (2020) <br/>
 
 * Once pulled, run it: 
    
@@ -110,7 +111,7 @@ Use this process as well (set extractRelationFields to false as it is not suppor
     "extractRelationFields" : true (Weather to extract relations fields while processing the data, support only english wikipedia)
     "insertBulkSize": 100 (Number of pages to bulk insert to elastic search every iteration (found this number to give best preformence))
     "mapping" : "mapping.json" (Elastic Mapping file, should point to src/main/resources/mapping.json)
-    "setting" : "en_map_settings.json" (Elastic Setting file, current support {en, fr, es, de})
+    "setting" : "en_map_settings.json" (Elastic Setting file, current support {en, fr, es, de, zh})
     "host" : "localhost" (Elastic host, were Elastic instance is installed and running)
     "port" : 9200 (Elastic port, host port were Elastic is installed and running, elastic defualt is set to 9200)
     "wikiDump" : "dumps/enwiki-latest-pages-articles.xml.bz2" (WikiMedia .bz2 downloaded dump file location)
