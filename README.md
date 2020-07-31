@@ -54,9 +54,8 @@ in order to verify you have the right value (i.e 262144), run:
     `#>docker pull aeirew/elastic-wiki-fr` // French (2020) <br/>
     `#>docker pull aeirew/elastic-wiki-es` // Spanish (2020) <br/>
     `#>docker pull aeirew/elastic-wiki-de` // German (2020) <br/>
-    `#>docker pull aeirew/elastic-wiki-zh` // Chinese (2020) <br/>
 
-* Once pulled, run it: 
+* Once pulled, run it (all commands below use the English docker image, replace with the actual pulled image): 
    
     `#>docker run -d -p 9200:9200 -p 9300:9300 aeirew/elastic-wiki`
 
@@ -89,11 +88,9 @@ in order to create and export the wiki data into the Elastic index (which takes 
 
 **Disclimer:** Processing English Wikipedia latest full dump (15GB .bz2 AND 66GB unpacked as .xml) including extraction of relations fields, normalization and lemmatization of text, 
 will take about **5 days** (tested on MacBook pro, using stanford parser to extract relations, normalize and lemmatize the data).<br/>
-In case of using this data in order to identify semantic relations between phrases at run time, It is recommended to normalize the fields for better results. 
+In case of using this data in order to identify semantic relations between phrases at run time, It is recommended to normalize the fields for better results, thus, consider using the 'en' Docker Image to save that time. 
 
 In case relation fields norm not needed or relations not needed all together, set normalizeFields/extractRelationFields to false in `conf.json` (as shown in "Project Configuration Files"), for a much faster data export into elastic **(< 2 hours)**.<br />
-
-You might want to consider using the Docker Image to save that time
 
 If require parsing other Wiki dumps such as Wikinews, Wikidata, or extraction of Wikipedia dumps in other languages (fr, es, de, etc.),
 Use this process as well (set extractRelationFields to false as it is not supported) or download the existing multi-lingual docker images.
