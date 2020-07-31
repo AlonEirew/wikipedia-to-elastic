@@ -48,12 +48,13 @@ in order to verify you have the right value (i.e 262144), run:
 
 #### Get Image and Build Container
 
-* Pull the latest image, use one of those commands (processed dum year):
+* Pull the latest image, use *one* of those commands (processed dump year):
 
-    `#>docker pull aeirew/elastic-wiki` // Pull English (2019) <br/>
-    `#>docker pull aeirew/elastic-wiki-fr` // Pull French (2020) <br/>
-    `#>docker pull aeirew/elastic-wiki-es` // Pull Spanish (2020) <br/>
-    `#>docker pull aeirew/elastic-wiki-de` // Pull German (2020) <br/>
+    `#>docker pull aeirew/elastic-wiki` // English (2019) <br/>
+    `#>docker pull aeirew/elastic-wiki-fr` // French (2020) <br/>
+    `#>docker pull aeirew/elastic-wiki-es` // Spanish (2020) <br/>
+    `#>docker pull aeirew/elastic-wiki-de` // German (2020) <br/>
+    `#>docker pull aeirew/elastic-wiki-zh` // Chinese (2020) <br/>
 
 * Once pulled, run it: 
    
