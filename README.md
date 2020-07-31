@@ -118,7 +118,7 @@ Use this process as well (set extractRelationFields to false as it is not suppor
     "replicas" : 0 (Number of Elastic replicas to use)
 ```
 * `src/main/resources/mapping.json` - Elastic wiki index mapping (Should probably stay unchanged)
-* `src/main/resources/{en,es,fr,de}_map_settings.json` - Elastic index settings (Should probably stay unchanged)
+* `src/main/resources/{en,es,fr,de,zh}_map_settings.json` - Elastic index settings (Should probably stay unchanged)
 
 * Make sure Elastic process is running and active on your host (if running Elastic locally your IP is <a href="http://localhost:9200/">http://localhost:9200/</a>)
 * Checkout/Clone the repository
