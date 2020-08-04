@@ -1,5 +1,6 @@
 package wiki.data.relations;
 
+import wiki.utils.LangConfiguration;
 import wiki.utils.WikiPageParser;
 
 import java.util.Arrays;
@@ -10,19 +11,26 @@ import java.util.regex.Pattern;
 
 public class CategoryRelationExtractor implements IRelationsExtractor<Set<String>> {
 
-    private static final String DISAMBIGUATION_TITLE = "(disambiguation)";
+    private static String disambiguationTitle;
 
-    private static final String CAT_REGEX = "\\[\\[Category:(.*)\\]\\]";
-    private static final Pattern CAT_PATTERN = Pattern.compile(CAT_REGEX);
+    private static Pattern catPattern;
+    private static Pattern disPattern;
 
-    private static final String DIS_REGEX = "^\\{\\{(disambig.*|Disambig.*)\\}\\}$";
-    private static final Pattern DIS_PATTERN = Pattern.compile(DIS_REGEX);
+    public static void initResources(LangConfiguration lang) {
+        disambiguationTitle = "(" + lang.getDisambiguation() + ")";
+
+        String catRegex = "\\[\\[" + lang.getCategory() + ":(.*)\\]\\]";
+        catPattern = Pattern.compile(catRegex);
+
+        String disRegex = "^\\{\\{(" + lang.getDisambiguation().toLowerCase() + "|" + lang.getDisambiguation() + ").*\\}\\}$";
+        disPattern = Pattern.compile(disRegex);
+    }
 
     @Override
     public Set<String> extract(String line) {
         Set<String> categories = new HashSet<>();
         if (line != null && !line.isEmpty()) {
-            Matcher catMatch = CAT_PATTERN.matcher(line);
+            Matcher catMatch = catPattern.matcher(line);
             while (catMatch.find()) {
                 String cat = catMatch.group(1);
                 cat = trimDisambig(cat);
@@ -30,7 +38,7 @@ public class CategoryRelationExtractor implements IRelationsExtractor<Set<String
                 categories.add(cat);
             }
 
-            Matcher disMatch = DIS_PATTERN.matcher(line);
+            Matcher disMatch = disPattern.matcher(line);
             while (disMatch.find()) {
                 String cat = disMatch.group(1);
                 String[] cats = cat.split("\\|");
@@ -41,8 +49,8 @@ public class CategoryRelationExtractor implements IRelationsExtractor<Set<String
     }
 
     private String trimDisambig(String cat) {
-        if (cat.toLowerCase().contains(DISAMBIGUATION_TITLE)) {
-            cat = cat.replace(DISAMBIGUATION_TITLE, "");
+        if (cat.toLowerCase().contains(disambiguationTitle)) {
+            cat = cat.replace(disambiguationTitle, "");
         }
         return cat;
     }

@@ -8,28 +8,33 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import wiki.WikiToElasticMain;
 import wiki.data.obj.BeCompRelationResult;
 import wiki.data.obj.LinkParenthesisPair;
 import wiki.data.relations.BeCompRelationExtractor;
 import wiki.data.relations.CategoryRelationExtractor;
 import wiki.data.relations.IRelationsExtractor;
 import wiki.data.relations.LinkAndParenthesisRelationExtractor;
+import wiki.utils.LangConfiguration;
 import wiki.utils.WikiPageParser;
+import wiki.utils.WikiToElasticConfiguration;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.*;
 
 public class TestRelationsBuilderAndPageParser {
 
-    private static final Gson gson = new Gson();
+    private static final Gson GSON = new Gson();
 
     @BeforeClass
-    public static void initTests() {
-        WikiPageParser.initResources();
-        BeCompRelationExtractor.initResources();
+    public static void initTests() throws FileNotFoundException {
+        String testConfig = Objects.requireNonNull(WikiToElasticMain.class.getClassLoader().getResource("test_config.json")).getFile();
+        WikiToElasticConfiguration config = GSON.fromJson(new FileReader(testConfig), WikiToElasticConfiguration.class);
+        String langConfigFile = Objects.requireNonNull(WikiToElasticMain.class.getClassLoader().getResource("lang/" + config.getLang() + ".json")).getFile();
+        LangConfiguration langConfiguration = GSON.fromJson(new FileReader(langConfigFile), LangConfiguration.class);
+
+        WikiPageParser.initResources(langConfiguration, config.getLang());
+        BeCompRelationExtractor.initResources(langConfiguration);
     }
 
     @Test
@@ -157,7 +162,7 @@ public class TestRelationsBuilderAndPageParser {
     public static String getFileJsonContant(String fileName) {
         InputStream inputStreamNlp = TestRelationsBuilderAndPageParser.class.getClassLoader().getResourceAsStream(fileName);
         assert inputStreamNlp != null;
-        JsonObject inputJsonNlp = gson.fromJson(new InputStreamReader(inputStreamNlp), JsonObject.class);
+        JsonObject inputJsonNlp = GSON.fromJson(new InputStreamReader(inputStreamNlp), JsonObject.class);
         String text = inputJsonNlp.get("text").getAsString();
         return text;
     }
@@ -166,7 +171,7 @@ public class TestRelationsBuilderAndPageParser {
         List<String> resultList = new ArrayList<>();
         InputStream inputStreamNlp = TestRelationsBuilderAndPageParser.class.getClassLoader().getResourceAsStream(fileName);
         assert inputStreamNlp != null;
-        JsonArray inputJsonNlp = gson.fromJson(new InputStreamReader(inputStreamNlp), JsonArray.class);
+        JsonArray inputJsonNlp = GSON.fromJson(new InputStreamReader(inputStreamNlp), JsonArray.class);
         for(JsonElement elem : inputJsonNlp) {
             String text = elem.getAsJsonObject().get("text").getAsString();
             resultList.add(text);
@@ -177,10 +182,10 @@ public class TestRelationsBuilderAndPageParser {
     private WikiParsedPageRelations getFileRelationContant(String fileName) {
         InputStream resultStream = TestRelationsBuilderAndPageParser.class.getClassLoader().getResourceAsStream(fileName);
         assert resultStream != null;
-        return gson.fromJson(new InputStreamReader(resultStream), WikiParsedPageRelations.class);
+        return GSON.fromJson(new InputStreamReader(resultStream), WikiParsedPageRelations.class);
     }
 
     private void writeResultToFile(String fileLocation, WikiParsedPageRelations relations) throws IOException {
-        FileUtils.write(new File(fileLocation), gson.toJson(relations), "UTF-8");
+        FileUtils.write(new File(fileLocation), GSON.toJson(relations), "UTF-8");
     }
 }

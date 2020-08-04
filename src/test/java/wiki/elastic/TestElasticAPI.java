@@ -1,5 +1,6 @@
 package wiki.elastic;
 
+import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 import org.apache.http.HttpHost;
 import org.elasticsearch.action.ActionListener;
@@ -28,6 +29,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class TestElasticAPI {
+    private static final Gson GSON = new Gson();
 
     private WikiToElasticConfiguration configuration;
     private RestHighLevelClient client;
@@ -36,11 +38,11 @@ public class TestElasticAPI {
 
     @Before
     public void prepareText() throws FileNotFoundException {
-        URL url = TestElasticAPI.class.getClassLoader().getResource("test_conf.json");
+        URL url = TestElasticAPI.class.getClassLoader().getResource("test_config.json");
         if(this.configuration == null && url != null) {
             String file = url.getFile();
             JsonReader reader = new JsonReader(new FileReader(file));
-            this.configuration = WikiToElasticConfiguration.GSON.fromJson(reader, WikiToElasticConfiguration.CONFIGURATION_TYPE);
+            this.configuration = GSON.fromJson(reader, WikiToElasticConfiguration.CONFIGURATION_TYPE);
         }
 
         // init elastic client

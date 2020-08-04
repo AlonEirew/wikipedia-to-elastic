@@ -6,12 +6,12 @@ package wiki.parsers;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.elasticsearch.index.engine.Engine;
 import wiki.data.WikiParsedPage;
 import wiki.data.WikiParsedPageBuilder;
 import wiki.data.WikiParsedPageRelations;
 import wiki.data.WikiParsedPageRelationsBuilder;
 import wiki.handlers.IPageHandler;
+import wiki.utils.LangConfiguration;
 import wiki.utils.WikiToElasticConfiguration;
 
 import javax.xml.namespace.QName;
@@ -30,12 +30,12 @@ public class STAXParser implements IWikiParser {
 
     public enum DeleteUpdateMode {DELETE, UPDATE, NA}
 
-    private static final String[] FILTER_TITLES = {"portal:", "category:", "file:", "wikipedia:", "draft:", "template:"};
+    private final String[] filterTitles;
 
     private final static Logger LOGGER = LogManager.getLogger(STAXParser.class);
 
     private final RejectedExecutionHandler rejectedExecutionHandler = new ThreadPoolExecutor.CallerRunsPolicy();
-    private final BlockingQueue<Runnable> blockingQueue = new ArrayBlockingQueue<Runnable>(100);
+    private final BlockingQueue<Runnable> blockingQueue = new ArrayBlockingQueue<>(100);
     private final IPageHandler handler;
     private final ExecutorService executorService;
     private final Set<Long> totalIds = new HashSet<>();
@@ -44,16 +44,17 @@ public class STAXParser implements IWikiParser {
     private DeleteUpdateMode deleteUpdateMode;
 
 
-    public STAXParser(IPageHandler handler) {
+    public STAXParser(IPageHandler handler, LangConfiguration langConfig) {
         this.executorService = initExecuterService();
         this.handler = handler;
         this.normalize = true;
         this.extractFields = true;
         this.deleteUpdateMode = DeleteUpdateMode.NA;
+        this.filterTitles = langConfig.getTitlesPref().toArray(new String[0]);
     }
 
-    public STAXParser(IPageHandler handler, WikiToElasticConfiguration config, DeleteUpdateMode mode) {
-        this(handler);
+    public STAXParser(IPageHandler handler, WikiToElasticConfiguration config, LangConfiguration langConfig, DeleteUpdateMode mode) {
+        this(handler, langConfig);
         this.normalize = config.isNormalizeFields();
         this.deleteUpdateMode = mode;
         this.extractFields = config.isExtractRelationFields();
@@ -169,7 +170,7 @@ public class STAXParser implements IWikiParser {
     private void handlePage(String title, long id, String text, String redirect) {
         String titleLow = title.toLowerCase();
         // If page is a meta data page, don't process it
-        if(Arrays.stream(FILTER_TITLES).parallel().anyMatch(titleLow::contains)) {
+        if(Arrays.stream(filterTitles).parallel().anyMatch(titleLow::contains)) {
             LOGGER.info("Skipping page processing of- " + title);
         } else {
             this.executorService.submit(() -> {

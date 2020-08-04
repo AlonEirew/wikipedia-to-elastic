@@ -4,17 +4,13 @@
 
 package wiki.utils;
 
-import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.lang.reflect.Type;
 
 public class WikiToElasticConfiguration {
 
     public static final Type CONFIGURATION_TYPE = new TypeToken<WikiToElasticConfiguration>() {}.getType();
-    public static final Gson GSON = new Gson();
 
     private String indexName;
     private String docType;
@@ -29,6 +25,7 @@ public class WikiToElasticConfiguration {
     private int insertBulkSize;
     private boolean normalizeFields;
     private boolean extractRelationFields;
+    private String lang;
 
     private transient String mappingFileContent = null;
     private transient String settingFileContent = null;
@@ -149,5 +146,13 @@ public class WikiToElasticConfiguration {
             this.settingFileContent = WikiToElasticUtils.getFileContent(this.setting);
         }
         return this.settingFileContent;
+    }
+
+    public String getLang() {
+        return lang;
+    }
+
+    public void setLang(String lang) {
+        this.lang = lang;
     }
 }

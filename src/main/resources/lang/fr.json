@@ -1,0 +1,18 @@
+{
+  "disambiguation": "Homonymie",
+  "category": "Catégorie",
+  "name": [
+    "nom",
+    "prénom",
+    "nom de famille"
+  ],
+  "titlesPref": [
+    "portail:",
+    "catégorie:",
+    "fichier:",
+    "wikipédia:",
+    "modèle:",
+    "template:"
+  ],
+  "coreNlpLang": "french"
+}

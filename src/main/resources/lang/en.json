@@ -1,0 +1,18 @@
+{
+  "disambiguation": "Disambiguation",
+  "category": "Category",
+  "name": [
+    "name",
+    "given name",
+    "surname"
+  ],
+  "titlesPref": [
+    "portal:",
+    "category:",
+    "file:",
+    "wikipedia:",
+    "draft:",
+    "template:"
+  ],
+  "coreNlpLang": "english"
+}

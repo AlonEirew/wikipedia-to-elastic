@@ -4,18 +4,17 @@
 
 package wiki.elastic;
 
+import com.google.gson.Gson;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.ElasticsearchStatusException;
-import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
 import org.elasticsearch.action.admin.indices.open.OpenIndexRequest;
 import org.elasticsearch.action.bulk.BulkRequest;
-import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
@@ -34,6 +33,7 @@ import java.util.concurrent.Semaphore;
 public class ElasticAPI {
 
     private final static Logger LOGGER = LogManager.getLogger(ElasticAPI.class);
+    private static final Gson GSON = new Gson();
     private final static int MAX_AVAILABLE = 10;
 
     // Limit the number of threads accessing elastic in parallel
@@ -227,7 +227,7 @@ public class ElasticAPI {
                 indexType,
                 String.valueOf(page.getId()));
 
-        indexRequest.source(WikiToElasticConfiguration.GSON.toJson(page), XContentType.JSON);
+        indexRequest.source(GSON.toJson(page), XContentType.JSON);
 
         return indexRequest;
     }

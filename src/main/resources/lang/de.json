@@ -1,0 +1,18 @@
+{
+  "disambiguation": "Begriffsklärung",
+  "category": "Kategorie",
+  "name": [
+    "name",
+    "vorname",
+    "nachname"
+  ],
+  "titlesPref": [
+    "portal:",
+    "kategorie:",
+    "datei:",
+    "wikipedia:",
+    "draft:",
+    "vorlage:"
+  ],
+  "coreNlpLang": "german"
+}

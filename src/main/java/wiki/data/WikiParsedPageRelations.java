@@ -4,19 +4,19 @@ import java.util.Objects;
 import java.util.Set;
 
 public class WikiParsedPageRelations {
-    private boolean isPartName;
-    private boolean isDisambiguation;
-    private Set<String> disambiguationLinks;
-    private Set<String> categories;
-    private Set<String> aliases;
-    private Set<String> titleParenthesis;
-    private Set<String> beCompRelations;
+    private final boolean isPartName;
+    private final boolean isDisambiguation;
+    private final Set<String> disambiguationLinks;
+    private final Set<String> categories;
+    private final Set<String> aliases;
+    private final Set<String> titleParenthesis;
+    private final Set<String> beCompRelations;
 
-    private Set<String> disambiguationLinksNorm;
-    private Set<String> categoriesNorm;
-    private Set<String> aliasesNorm;
-    private Set<String> titleParenthesisNorm;
-    private Set<String> beCompRelationsNorm;
+    private final Set<String> disambiguationLinksNorm;
+    private final Set<String> categoriesNorm;
+    private final Set<String> aliasesNorm;
+    private final Set<String> titleParenthesisNorm;
+    private final Set<String> beCompRelationsNorm;
 
     public WikiParsedPageRelations(boolean isPartName, boolean isDisambiguation,
                                    Set<String> disambiguationLinks,

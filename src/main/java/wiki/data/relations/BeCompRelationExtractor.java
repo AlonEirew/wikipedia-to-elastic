@@ -7,6 +7,7 @@ import edu.stanford.nlp.pipeline.CoreSentence;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import wiki.data.obj.BeCompRelationResult;
+import wiki.utils.LangConfiguration;
 import wiki.utils.WikiPageParser;
 
 import java.util.LinkedList;
@@ -18,11 +19,16 @@ public class BeCompRelationExtractor implements IRelationsExtractor<BeCompRelati
 
     private static StanfordCoreNLP sPipeline;
 
-    public static void initResources() {
-        if(sPipeline == null) {
-            Properties props = new Properties();
-            props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse");
-            sPipeline = new StanfordCoreNLP(props);
+    public static void initResources(LangConfiguration langConfig) {
+        String lang = langConfig.getCoreNlpLang();
+        if(sPipeline == null && lang != null) {
+            if(lang.equals("english")) {
+                Properties props = new Properties();
+                props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse");
+                sPipeline = new StanfordCoreNLP(props);
+            } else {
+                sPipeline = new StanfordCoreNLP(lang);
+            }
         }
     }
 

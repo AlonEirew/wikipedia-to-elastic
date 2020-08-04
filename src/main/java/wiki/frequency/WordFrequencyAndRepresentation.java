@@ -1,6 +1,7 @@
 package wiki.frequency;
 
 import edu.stanford.nlp.simple.Sentence;
+import wiki.utils.LangConfiguration;
 import wiki.utils.WikiPageParser;
 
 import java.util.HashMap;
@@ -15,8 +16,8 @@ public class WordFrequencyAndRepresentation {
     private Map<String, WordFrequency> docWordsFrequency = new HashMap<>();
     private AtomicInteger docWordsCount = new AtomicInteger(0);
 
-    public WordFrequencyAndRepresentation() {
-        WikiPageParser.initResources();
+    public WordFrequencyAndRepresentation(LangConfiguration langConfig, String lang) {
+        WikiPageParser.initResources(langConfig, lang);
     }
 
     public void countDocFrequency(String docString) {

@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Set;
 
 public class BeCompRelationResult {
-    private Set<String> beCompRelations;
-    private Set<String> beCompRelationsNorm;
+    private final Set<String> beCompRelations;
+    private final Set<String> beCompRelationsNorm;
 
     public BeCompRelationResult() {
         this.beCompRelations = new HashSet<>();

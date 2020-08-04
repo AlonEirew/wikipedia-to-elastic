@@ -1,0 +1,18 @@
+{
+  "disambiguation": "Desambiguación",
+  "category": "Categoría",
+  "name": [
+    "nombre",
+    "nombre de pila",
+    "apellido"
+  ],
+  "titlesPref": [
+    "portal:",
+    "categoría:",
+    "Archivo:",
+    "wikipedia:",
+    "draft:",
+    "Plantilla:"
+  ],
+  "coreNlpLang": "spanish"
+}

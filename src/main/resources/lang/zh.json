@@ -1,0 +1,18 @@
+{
+  "disambiguation": "消歧",
+  "category": "类别",
+  "name": [
+    "名称",
+    "给定的名称",
+    "姓"
+  ],
+  "titlesPref": [
+    "主题:",
+    "category:",
+    "file:",
+    "维基百科:",
+    "草稿:",
+    "template:"
+  ],
+  "coreNlpLang": "chinese"
+}

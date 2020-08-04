@@ -4,13 +4,16 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import edu.stanford.nlp.simple.Sentence;
 import joptsimple.internal.Strings;
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
+import java.net.URL;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -18,21 +21,22 @@ import java.util.regex.Pattern;
 public class WikiPageParser {
     private final static Logger LOGGER = LogManager.getLogger(WikiPageParser.class);
 
-    private static final String[] PART_NAME_CATEGORIES = {"name", "given name", "surname"};
-    private static final String[] DISAMBIGUATION_CATEGORIES = {"disambig", "disambiguation"};
+    private static String[] partNameCategories;
+    private static String disambiguationCategories;
 
     private static final String URL_PATTERN = "(https?://[\\w\\d:#@%/;$()~_?\\+-=\\\\\\.&]*)";
 
-    public static HashSet<String> STOP_WORDS;
+    public static List<String> STOP_WORDS;
 
-    public static void initResources() {
+    public static void initResources(LangConfiguration langConfig, String lang) {
+        partNameCategories = langConfig.getName().toArray(new String[0]);
+        disambiguationCategories = langConfig.getDisambiguation();
+
         if(STOP_WORDS == null) {
-            try (InputStream resource = WikiPageParser.class.getClassLoader().getResourceAsStream("stop_words_en.json")) {
-                if(resource != null) {
-                    Type type = new TypeToken<HashSet<String>>() {
-                    }.getType();
-                    Gson gson = new Gson();
-                    STOP_WORDS = gson.fromJson(new InputStreamReader(resource), type);
+            String stopWordsFile = Objects.requireNonNull(WikiPageParser.class.getClassLoader().getResource("stop_words/" + lang + ".text")).getFile();
+            try {
+                if(stopWordsFile != null) {
+                    STOP_WORDS = FileUtils.readLines(new File(stopWordsFile), "UTF-8");
                 }
             } catch (IOException e) {
                 LOGGER.error("failed to load STOP_WORDS", e);
@@ -43,7 +47,7 @@ public class WikiPageParser {
     public static boolean isPartNameInCategories(Collection<String> categories) {
         if (categories != null) {
             for (String cat : categories) {
-                for (String partName : PART_NAME_CATEGORIES) {
+                for (String partName : partNameCategories) {
                     if (cat.equalsIgnoreCase(partName)) {
                         return true;
                     }
@@ -82,10 +86,8 @@ public class WikiPageParser {
     public static boolean isDisambiguation(Collection<String> categories) {
         if (categories != null) {
             for (String cat : categories) {
-                for (String dis : DISAMBIGUATION_CATEGORIES) {
-                    if (cat.equalsIgnoreCase(dis)) {
-                        return true;
-                    }
+                if (cat.equalsIgnoreCase(disambiguationCategories)) {
+                    return true;
                 }
             }
         }

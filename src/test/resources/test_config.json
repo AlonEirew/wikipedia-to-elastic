@@ -1,8 +1,8 @@
 {
-  "indexName": "enwiki_test",
+  "indexName": "wikitestingindex",
   "docType": "wikipage",
-  "normalizeFields": true,
-  "extractRelationFields": true,
+  "normalizeFields": false,
+  "extractRelationFields": false,
   "insertBulkSize": 100,
   "mapping": "mapping.json",
   "setting": "en_map_settings.json",

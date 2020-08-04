@@ -4,39 +4,45 @@
 
 package wiki;
 
-import com.google.gson.stream.JsonReader;
+import com.google.gson.Gson;
 import org.apache.http.HttpHost;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import wiki.data.relations.BeCompRelationExtractor;
+import wiki.data.relations.CategoryRelationExtractor;
 import wiki.elastic.ElasticAPI;
 import wiki.handlers.ElasticPageHandler;
 import wiki.handlers.IPageHandler;
 import wiki.parsers.STAXParser;
+import wiki.utils.LangConfiguration;
 import wiki.utils.WikiPageParser;
 import wiki.utils.WikiToElasticConfiguration;
 import wiki.utils.WikiToElasticUtils;
 
 import java.io.*;
+import java.util.Objects;
 import java.util.Scanner;
 
 public class WikiToElasticMain {
 
     private final static Logger LOGGER = LogManager.getLogger(WikiToElasticMain.class);
+    private static final Gson GSON = new Gson();
 
     public static void main(String[] args) {
-        try(InputStream resource = new FileInputStream(new File("conf.json"));
-            JsonReader reader = new JsonReader(new InputStreamReader(resource))) {
-            LOGGER.info("Starting export Wiki dump to elastic process");
-            WikiToElasticConfiguration configuration = WikiToElasticConfiguration.GSON.fromJson(reader, WikiToElasticConfiguration.CONFIGURATION_TYPE);
-            WikiPageParser.initResources();
-            BeCompRelationExtractor.initResources();
+        try {
+            WikiToElasticConfiguration config = GSON.fromJson(new FileReader("conf.json"), WikiToElasticConfiguration.class);
+            String langConfigFile = Objects.requireNonNull(WikiToElasticMain.class.getClassLoader().getResource("lang/" + config.getLang() + ".json")).getFile();
+            LangConfiguration langConfiguration = GSON.fromJson(new FileReader(langConfigFile), LangConfiguration.class);
+
+            WikiPageParser.initResources(langConfiguration, config.getLang());
+            BeCompRelationExtractor.initResources(langConfiguration);
+            CategoryRelationExtractor.initResources(langConfiguration);
             LOGGER.info("Process configuration loaded");
 
             long startTime = System.currentTimeMillis();
-            startProcess(configuration);
+            startProcess(config, langConfiguration);
             long endTime = System.currentTimeMillis();
 
             LOGGER.info("Process Done, took:" + (endTime - startTime) + "ms");
@@ -54,7 +60,7 @@ public class WikiToElasticMain {
      * @param configuration <a href="https://github.com/AlonEirew/wikipedia-to-elastic/blob/master/conf.json">conf.json file</a>
      * @throws IOException
      */
-    static void startProcess(WikiToElasticConfiguration configuration) throws IOException {
+    static void startProcess(WikiToElasticConfiguration configuration, LangConfiguration langConfiguration) throws IOException {
         RestHighLevelClient client = null;
         InputStream inputStream = null;
         STAXParser parser = null;
@@ -101,7 +107,7 @@ public class WikiToElasticMain {
                 // Start parsing the xml and adding pages to elastic
                 pageHandler = new ElasticPageHandler(elasicApi, configuration);
 
-                parser = new STAXParser(pageHandler, configuration, mode);
+                parser = new STAXParser(pageHandler, configuration, langConfiguration, mode);
                 parser.parse(inputStream);
             } else {
                 LOGGER.error("Cannot find dump file-" + wikifile.getAbsolutePath());
