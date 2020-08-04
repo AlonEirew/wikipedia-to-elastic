@@ -1,6 +1,7 @@
 {
   "disambiguation": "Desambiguación",
   "category": "Categoría",
+  "redirect" : "REDIRECCIÓN",
   "name": [
     "nombre",
     "nombre de pila",
@@ -14,5 +15,5 @@
     "draft:",
     "Plantilla:"
   ],
-  "coreNlpLang": "spanish"
+  "coreNlpLang": "StanfordCoreNLP-spanish.properties"
 }

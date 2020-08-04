@@ -5,6 +5,7 @@ import java.util.List;
 public class LangConfiguration {
     private String disambiguation;
     private String category;
+    private String redirect;
     private List<String> name;
     private List<String> titlesPref;
     private String coreNlpLang;
@@ -23,6 +24,14 @@ public class LangConfiguration {
 
     public void setCategory(String category) {
         this.category = category;
+    }
+
+    public String getRedirect() {
+        return redirect;
+    }
+
+    public void setRedirect(String redirect) {
+        this.redirect = redirect;
     }
 
     public List<String> getName() {

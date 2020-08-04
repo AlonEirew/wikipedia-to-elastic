@@ -6,7 +6,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import wiki.WikiToElasticMain;
 import wiki.handlers.ArrayPageHandler;
-import wiki.parsers.IWikiParser;
 import wiki.parsers.STAXParser;
 
 import java.io.FileNotFoundException;
@@ -41,7 +40,7 @@ public class TestWikiToElasticUtils {
                 inputStream = WikiToElasticUtils.openCompressedFileInputStream(tinyWikifile);
 
                 ArrayPageHandler arrayPageHandler = new ArrayPageHandler();
-                IWikiParser parser = new STAXParser(arrayPageHandler, langConfig);
+                STAXParser parser = new STAXParser(arrayPageHandler, langConfig);
                 parser.parse(inputStream);
 
                 System.out.println("total time took to parse: " + (System.currentTimeMillis() - startTime));

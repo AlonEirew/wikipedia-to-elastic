@@ -1,6 +1,7 @@
 {
   "disambiguation": "Homonymie",
   "category": "Catégorie",
+  "redirect": "REDIRECTION",
   "name": [
     "nom",
     "prénom",
@@ -14,5 +15,5 @@
     "modèle:",
     "template:"
   ],
-  "coreNlpLang": "french"
+  "coreNlpLang": "StanfordCoreNLP-french.properties"
 }

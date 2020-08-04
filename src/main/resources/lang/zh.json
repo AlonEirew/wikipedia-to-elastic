@@ -1,6 +1,7 @@
 {
   "disambiguation": "消歧",
   "category": "类别",
+  "redirect": "重定向",
   "name": [
     "名称",
     "给定的名称",
@@ -14,5 +15,5 @@
     "草稿:",
     "template:"
   ],
-  "coreNlpLang": "chinese"
+  "coreNlpLang": "StanfordCoreNLP-chinese.properties"
 }

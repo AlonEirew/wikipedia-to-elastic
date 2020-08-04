@@ -26,10 +26,17 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.*;
 
-public class STAXParser implements IWikiParser {
+public class STAXParser {
 
     public enum DeleteUpdateMode {DELETE, UPDATE, NA}
 
+    private static final String PAGE_ELEMENT = "page";
+    private static final String TITLE_ELEMENT = "title";
+    private static final String ID_ELEMENT = "id";
+    private static final String TEXT_ELEMENT = "text";
+    private static final String REDIRECT_ELEMENT = "redirect";
+
+    private final String redirectTextPrefix;
     private final String[] filterTitles;
 
     private final static Logger LOGGER = LogManager.getLogger(STAXParser.class);
@@ -51,6 +58,7 @@ public class STAXParser implements IWikiParser {
         this.extractFields = true;
         this.deleteUpdateMode = DeleteUpdateMode.NA;
         this.filterTitles = langConfig.getTitlesPref().toArray(new String[0]);
+        this.redirectTextPrefix = "#" + langConfig.getRedirect();
     }
 
     public STAXParser(IPageHandler handler, WikiToElasticConfiguration config, LangConfiguration langConfig, DeleteUpdateMode mode) {
@@ -71,7 +79,6 @@ public class STAXParser implements IWikiParser {
      * Starting point of the parsing process of the wikipedia xml dump
      * @param inputStream to the wikipedia dump file
      */
-    @Override
     public void parse(InputStream inputStream) {
         try {
             XMLInputFactory factory = XMLInputFactory.newInstance();
@@ -143,8 +150,8 @@ public class STAXParser implements IWikiParser {
                         break;
                     case TEXT_ELEMENT:
                         text = reader.getElementText();
-                        if(text.startsWith(REDIRECT_TEXT_PREFIX)) {
-                            text = REDIRECT_TEXT_PREFIX;
+                        if(text.startsWith(redirectTextPrefix)) {
+                            text = redirectTextPrefix;
                         }
                         break;
                 }
