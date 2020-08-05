@@ -5,8 +5,13 @@
 package wiki.utils;
 
 import com.google.gson.reflect.TypeToken;
+import org.apache.commons.io.FileUtils;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 public class WikiToElasticConfiguration {
 
@@ -134,16 +139,22 @@ public class WikiToElasticConfiguration {
         this.extractRelationFields = extractRelationFields;
     }
 
-    public String getMappingFileContent() {
+    public String getMappingFileContent() throws IOException {
         if(this.mappingFileContent == null && this.mapping != null) {
-            this.mappingFileContent = WikiToElasticUtils.getFileContent(this.mapping);
+            this.mappingFileContent = FileUtils.readFileToString(
+                    new File(Objects.requireNonNull(
+                            WikiToElasticUtils.class.getClassLoader().getResource(
+                                    this.mapping)).getFile()), StandardCharsets.UTF_8);
         }
         return this.mappingFileContent;
     }
 
-    public String getSettingFileContent() {
+    public String getSettingFileContent() throws IOException {
         if(this.settingFileContent == null && this.setting != null) {
-            this.settingFileContent = WikiToElasticUtils.getFileContent(this.setting);
+            this.settingFileContent = FileUtils.readFileToString(
+                    new File(Objects.requireNonNull(
+                            WikiToElasticUtils.class.getClassLoader().getResource(this.setting)).getFile()),
+                    StandardCharsets.UTF_8);
         }
         return this.settingFileContent;
     }

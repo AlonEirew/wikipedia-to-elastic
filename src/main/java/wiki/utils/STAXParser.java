@@ -2,7 +2,7 @@
  * @author  Alon Eirew
  */
 
-package wiki.parsers;
+package wiki.utils;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -11,8 +11,6 @@ import wiki.data.WikiParsedPageBuilder;
 import wiki.data.WikiParsedPageRelations;
 import wiki.data.WikiParsedPageRelationsBuilder;
 import wiki.handlers.IPageHandler;
-import wiki.utils.LangConfiguration;
-import wiki.utils.WikiToElasticConfiguration;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;

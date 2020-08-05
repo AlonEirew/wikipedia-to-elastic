@@ -2,60 +2,159 @@
   "analysis": {
     "analyzer": {
       "prefix_asciifolding": {
+        "filter": [
+          "icu_normalizer",
+          "icu_folding",
+          "remove_empty"
+        ],
         "char_filter": [
           "near_space_flattener"
         ],
         "type": "custom",
         "tokenizer": "prefix"
       },
+      "source_text_plain": {
+        "filter": [
+          "icu_normalizer"
+        ],
+        "char_filter": [
+          "word_break_helper_source_text"
+        ],
+        "type": "custom",
+        "tokenizer": "standard"
+      },
+      "lowercase_keyword": {
+        "filter": [
+          "truncate_keyword",
+          "icu_normalizer",
+          "icu_folding",
+          "remove_empty"
+        ],
+        "type": "custom",
+        "tokenizer": "no_splitting"
+      },
       "prefix": {
+        "filter": [
+          "icu_normalizer"
+        ],
         "char_filter": [
           "near_space_flattener"
         ],
         "type": "custom",
         "tokenizer": "prefix"
+      },
+      "short_text": {
+        "filter": [
+          "icu_normalizer",
+          "icu_folding",
+          "remove_empty"
+        ],
+        "type": "custom",
+        "tokenizer": "whitespace"
+      },
+      "token_reverse": {
+        "filter": [
+          "reverse"
+        ],
+        "type": "custom",
+        "tokenizer": "no_splitting"
+      },
+      "suggest": {
+        "filter": [
+          "icu_normalizer",
+          "suggest_shingle"
+        ],
+        "type": "custom",
+        "tokenizer": "standard"
+      },
+      "source_text_plain_search": {
+        "filter": [
+          "icu_normalizer"
+        ],
+        "char_filter": [
+          "word_break_helper_source_text"
+        ],
+        "type": "custom",
+        "tokenizer": "standard"
+      },
+      "suggest_reverse": {
+        "filter": [
+          "icu_normalizer",
+          "suggest_shingle",
+          "reverse"
+        ],
+        "type": "custom",
+        "tokenizer": "standard"
+      },
+      "trigram": {
+        "filter": [
+          "icu_normalizer"
+        ],
+        "type": "custom",
+        "tokenizer": "trigram"
+      },
+      "short_text_search": {
+        "filter": [
+          "icu_normalizer"
+        ],
+        "type": "custom",
+        "tokenizer": "whitespace"
       },
       "plain": {
         "filter": [
-          "smartcn_stop",
-          "icu_normalizer"
+          "icu_normalizer",
+          "icu_folding",
+          "remove_empty"
         ],
         "char_filter": [
           "word_break_helper"
         ],
         "type": "custom",
-        "tokenizer": "icu_tokenizer"
+        "tokenizer": "standard"
       },
       "plain_search": {
         "filter": [
-          "smartcn_stop",
           "icu_normalizer"
         ],
         "char_filter": [
           "word_break_helper"
         ],
         "type": "custom",
-        "tokenizer": "icu_tokenizer"
+        "tokenizer": "standard"
       },
       "text": {
         "filter": [
-          "smartcn_stop"
+          "possessive_english",
+          "icu_normalizer",
+          "stop",
+          "icu_folding",
+          "remove_empty",
+          "kstem",
+          "custom_stem"
         ],
         "char_filter": [
-          "stconvertfix"
+          "word_break_helper",
+          "kana_map"
         ],
         "type": "custom",
-        "tokenizer": "smartcn_tokenizer"
+        "tokenizer": "standard"
       },
       "text_search": {
         "filter": [
-          "smartcn_stop"
+          "possessive_english",
+          "icu_normalizer",
+          "stop",
+          "icu_folding",
+          "remove_empty",
+          "kstem",
+          "custom_stem"
         ],
         "char_filter": [
-          "stconvertfix"
+          "word_break_helper",
+          "kana_map"
         ],
         "type": "custom",
-        "tokenizer": "smartcn_tokenizer"
+        "tokenizer": "standard"
       },
       "keyword": {
         "filter": [
@@ -65,11 +164,18 @@
         "tokenizer": "no_splitting"
       },
       "word_prefix": {
+        "filter": [
+          "icu_normalizer",
+          "prefix_ngram_filter"
+        ],
         "type": "custom",
         "tokenizer": "standard"
       },
       "near_match_asciifolding": {
         "filter": [
+          "truncate_keyword",
+          "icu_normalizer",
+          "icu_folding",
           "remove_empty"
         ],
         "char_filter": [
@@ -79,6 +185,9 @@
         "tokenizer": "no_splitting"
       },
       "near_match": {
+        "filter": [
+          "icu_normalizer"
+        ],
         "char_filter": [
           "near_space_flattener"
         ],
@@ -100,6 +209,48 @@
         "max_gram": "255"
       }
     },
+    "filter": {
+      "suggest_shingle": {
+        "max_shingle_size": "3",
+        "min_shingle_size": "2",
+        "output_unigrams": "true",
+        "type": "shingle"
+      },
+      "lowercase": {
+        "type": "lowercase"
+      },
+      "icu_nfkc_normalization": {
+        "name": "nfkc",
+        "type": "icu_normalizer"
+      },
+      "icu_normalizer": {
+        "name": "nfkc_cf",
+        "type": "icu_normalizer"
+      },
+      "icu_folding": {
+        "type": "icu_folding"
+      },
+      "truncate_keyword": {
+        "length": "5000",
+        "type": "truncate"
+      },
+      "prefix_ngram_filter": {
+        "type": "edgeNGram",
+        "max_gram": "255"
+      },
+      "remove_empty": {
+        "type": "length",
+        "min": "1"
+      },
+      "possessive_english": {
+        "type": "stemmer",
+        "language": "possessive_english"
+      },
+      "custom_stem": {
+        "type": "stemmer_override",
+        "rules": "guidelines => guideline"
+      }
+    },
     "char_filter": {
       "near_space_flattener": {
         "type": "mapping",
@@ -109,6 +260,97 @@
           "\\u02BC=>\\u0020",
           "_=>\\u0020",
           "-=>\\u0020"
+        ]
+      },
+      "kana_map": {
+        "type": "mapping",
+        "mappings": [
+          "\\u3041=>\\u30a1",
+          "\\u3042=>\\u30a2",
+          "\\u3043=>\\u30a3",
+          "\\u3044=>\\u30a4",
+          "\\u3045=>\\u30a5",
+          "\\u3046=>\\u30a6",
+          "\\u3094=>\\u30f4",
+          "\\u3047=>\\u30a7",
+          "\\u3048=>\\u30a8",
+          "\\u3049=>\\u30a9",
+          "\\u304a=>\\u30aa",
+          "\\u3095=>\\u30f5",
+          "\\u304b=>\\u30ab",
+          "\\u304c=>\\u30ac",
+          "\\u304d=>\\u30ad",
+          "\\u304e=>\\u30ae",
+          "\\u304f=>\\u30af",
+          "\\u3050=>\\u30b0",
+          "\\u3096=>\\u30f6",
+          "\\u3051=>\\u30b1",
+          "\\u3052=>\\u30b2",
+          "\\u3053=>\\u30b3",
+          "\\u3054=>\\u30b4",
+          "\\u3055=>\\u30b5",
+          "\\u3056=>\\u30b6",
+          "\\u3057=>\\u30b7",
+          "\\u3058=>\\u30b8",
+          "\\u3059=>\\u30b9",
+          "\\u305a=>\\u30ba",
+          "\\u305b=>\\u30bb",
+          "\\u305c=>\\u30bc",
+          "\\u305d=>\\u30bd",
+          "\\u305e=>\\u30be",
+          "\\u305f=>\\u30bf",
+          "\\u3060=>\\u30c0",
+          "\\u3061=>\\u30c1",
+          "\\u3062=>\\u30c2",
+          "\\u3063=>\\u30c3",
+          "\\u3064=>\\u30c4",
+          "\\u3065=>\\u30c5",
+          "\\u3066=>\\u30c6",
+          "\\u3067=>\\u30c7",
+          "\\u3068=>\\u30c8",
+          "\\u3069=>\\u30c9",
+          "\\u306a=>\\u30ca",
+          "\\u306b=>\\u30cb",
+          "\\u306c=>\\u30cc",
+          "\\u306d=>\\u30cd",
+          "\\u306e=>\\u30ce",
+          "\\u306f=>\\u30cf",
+          "\\u3070=>\\u30d0",
+          "\\u3071=>\\u30d1",
+          "\\u3072=>\\u30d2",
+          "\\u3073=>\\u30d3",
+          "\\u3074=>\\u30d4",
+          "\\u3075=>\\u30d5",
+          "\\u3076=>\\u30d6",
+          "\\u3077=>\\u30d7",
+          "\\u3078=>\\u30d8",
+          "\\u3079=>\\u30d9",
+          "\\u307a=>\\u30da",
+          "\\u307b=>\\u30db",
+          "\\u307c=>\\u30dc",
+          "\\u307d=>\\u30dd",
+          "\\u307e=>\\u30de",
+          "\\u307f=>\\u30df",
+          "\\u3080=>\\u30e0",
+          "\\u3081=>\\u30e1",
+          "\\u3082=>\\u30e2",
+          "\\u3083=>\\u30e3",
+          "\\u3084=>\\u30e4",
+          "\\u3085=>\\u30e5",
+          "\\u3086=>\\u30e6",
+          "\\u3087=>\\u30e7",
+          "\\u3088=>\\u30e8",
+          "\\u3089=>\\u30e9",
+          "\\u308a=>\\u30ea",
+          "\\u308b=>\\u30eb",
+          "\\u308c=>\\u30ec",
+          "\\u308d=>\\u30ed",
+          "\\u308e=>\\u30ee",
+          "\\u308f=>\\u30ef",
+          "\\u3090=>\\u30f0",
+          "\\u3091=>\\u30f1",
+          "\\u3092=>\\u30f2",
+          "\\u3093=>\\u30f3"
         ]
       },
       "word_break_helper_source_text": {
@@ -125,75 +367,9 @@
         "type": "mapping",
         "mappings": [
           "_=>\\u0020",
-          ",=>\\u0020",
-          "\"=>\\u0020",
-          "-=>\\u0020",
-          "'=>\\u0020",
-          "\\u2019=>\\u0020",
-          "\\u02BC=>\\u0020",
-          ";=>\\u0020",
-          "\\[=>\\u0020",
-          "\\]=>\\u0020",
-          "{=>\\u0020",
-          "}=>\\u0020",
-          "\\\\=>\\u0020",
-          "\\u00a0=>\\u0020",
-          "\\u1680=>\\u0020",
-          "\\u180e=>\\u0020",
-          "\\u2000=>\\u0020",
-          "\\u2001=>\\u0020",
-          "\\u2002=>\\u0020",
-          "\\u2003=>\\u0020",
-          "\\u2004=>\\u0020",
-          "\\u2005=>\\u0020",
-          "\\u2006=>\\u0020",
-          "\\u2007=>\\u0020",
-          "\\u2008=>\\u0020",
-          "\\u2009=>\\u0020",
-          "\\u200a=>\\u0020",
-          "\\u200b=>\\u0020",
-          "\\u200c=>\\u0020",
-          "\\u200d=>\\u0020",
-          "\\u202f=>\\u0020",
-          "\\u205f=>\\u0020",
-          "\\u3000=>\\u0020",
-          "\\ufeff=>\\u0020"
-        ]
-      },
-      "stconvertfix": {
-        "type": "mapping",
-        "mappings": [
-          "\\u606d\\u5f18=>\\u606d \\u5f18",
-          "\\u5138=>\\u3469"
-        ]
-      }
-    },
-    "filter": {
-      "suggest_shingle": {
-        "max_shingle_size": "3",
-        "min_shingle_size": "2",
-        "output_unigrams": "true",
-        "type": "shingle"
-      },
-      "lowercase": {
-        "type": "lowercase"
-      },
-      "asciifolding": {
-        "type": "asciifolding",
-        "preserve_original": "false"
-      },
-      "truncate_keyword": {
-        "length": "5000",
-        "type": "truncate"
-      },
-      "remove_empty": {
-        "type": "length",
-        "min": "1"
-      },
-      "smartcn_stop": {
-        "type": "stop",
-        "stopwords": [
-          ","
+          ".=>\\u0020",
+          "(=>\\u0020",
+          ")=>\\u0020"
         ]
       }
     }

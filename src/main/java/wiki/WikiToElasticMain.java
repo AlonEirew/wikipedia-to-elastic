@@ -15,7 +15,7 @@ import wiki.data.relations.CategoryRelationExtractor;
 import wiki.elastic.ElasticAPI;
 import wiki.handlers.ElasticPageHandler;
 import wiki.handlers.IPageHandler;
-import wiki.parsers.STAXParser;
+import wiki.utils.STAXParser;
 import wiki.utils.LangConfiguration;
 import wiki.utils.WikiPageParser;
 import wiki.utils.WikiToElasticConfiguration;

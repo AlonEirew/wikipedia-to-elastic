@@ -33,7 +33,7 @@ public class WikiPageParser {
         disambiguationCategories = langConfig.getDisambiguation();
 
         if(STOP_WORDS == null) {
-            String stopWordsFile = Objects.requireNonNull(WikiPageParser.class.getClassLoader().getResource("stop_words/" + lang + ".text")).getFile();
+            String stopWordsFile = Objects.requireNonNull(WikiPageParser.class.getClassLoader().getResource("stop_words/" + lang + ".txt")).getFile();
             try {
                 if(stopWordsFile != null) {
                     STOP_WORDS = FileUtils.readLines(new File(stopWordsFile), "UTF-8");

@@ -6,7 +6,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import wiki.WikiToElasticMain;
 import wiki.handlers.ArrayPageHandler;
-import wiki.parsers.STAXParser;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
