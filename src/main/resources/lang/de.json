@@ -1,11 +1,20 @@
 {
   "disambiguation": "Begriffsklärung",
-  "category": "Kategorie",
+  "category": [
+    "Kategorie",
+    "Category"
+  ],
   "redirect": "WEITERLEITUNG",
-  "name": [
+  "partNames": [
     "name",
     "vorname",
-    "nachname"
+    "nachname",
+    "als nachname",
+    "als vorname",
+    "vornamen",
+    "als familienname",
+    "menschen mit dem nachnamen",
+    "familien und nachname"
   ],
   "titlesPref": [
     "portal:",
@@ -14,6 +23,18 @@
     "wikipedia:",
     "draft:",
     "vorlage:"
+  ],
+  "beComp" : [
+    "ist ein",
+    "sind ein",
+    "war ein",
+    "waren a",
+    "sei ein",
+    "ist der",
+    "sind die",
+    "war das",
+    "waren die",
+    "sei der"
   ],
   "coreNlpLang": "StanfordCoreNLP-german.properties"
 }

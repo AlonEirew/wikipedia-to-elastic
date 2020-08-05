@@ -33,7 +33,7 @@ public class BeCompRelationExtractor implements IRelationsExtractor<BeCompRelati
     }
 
     @Override
-    public BeCompRelationResult extract(String firstSentence) {
+    public BeCompRelationResult extract(String firstSentence) throws Exception {
         if(firstSentence.contains(".")) {
             firstSentence = firstSentence.substring(0, firstSentence.indexOf("."));
         }

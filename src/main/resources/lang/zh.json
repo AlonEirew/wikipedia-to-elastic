@@ -1,11 +1,19 @@
 {
   "disambiguation": "消歧",
-  "category": "类别",
+  "category": [
+    "类别",
+    "Category"
+  ],
   "redirect": "重定向",
-  "name": [
+  "partNames": [
     "名称",
     "给定的名称",
-    "姓"
+    "姓",
+    "作为姓",
+    "如给定名称",
+    "姓",
+    "有姓的人",
+    "姓氏和姓氏"
   ],
   "titlesPref": [
     "主题:",
@@ -14,6 +22,14 @@
     "维基百科:",
     "草稿:",
     "template:"
+  ],
+  "beComp" : [
+    "是一个",
+    "曾经是一个",
+    "成为",
+    "是个",
+    "是",
+    "成为"
   ],
   "coreNlpLang": "StanfordCoreNLP-chinese.properties"
 }

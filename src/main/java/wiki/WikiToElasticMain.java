@@ -12,6 +12,8 @@ import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import wiki.data.relations.BeCompRelationExtractor;
 import wiki.data.relations.CategoryRelationExtractor;
+import wiki.data.relations.LinkAndParenthesisRelationExtractor;
+import wiki.data.relations.PartNameRelationExtractor;
 import wiki.elastic.ElasticAPI;
 import wiki.handlers.ElasticPageHandler;
 import wiki.handlers.IPageHandler;
@@ -36,9 +38,11 @@ public class WikiToElasticMain {
             String langConfigFile = Objects.requireNonNull(WikiToElasticMain.class.getClassLoader().getResource("lang/" + config.getLang() + ".json")).getFile();
             LangConfiguration langConfiguration = GSON.fromJson(new FileReader(langConfigFile), LangConfiguration.class);
 
+            LinkAndParenthesisRelationExtractor.initResources(langConfiguration);
             WikiPageParser.initResources(langConfiguration, config.getLang());
-            BeCompRelationExtractor.initResources(langConfiguration);
             CategoryRelationExtractor.initResources(langConfiguration);
+            BeCompRelationExtractor.initResources(langConfiguration);
+            PartNameRelationExtractor.initResources(langConfiguration);
             LOGGER.info("Process configuration loaded");
 
             long startTime = System.currentTimeMillis();

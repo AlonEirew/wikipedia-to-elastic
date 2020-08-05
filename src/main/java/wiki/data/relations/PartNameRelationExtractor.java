@@ -1,28 +1,34 @@
 package wiki.data.relations;
 
-import org.apache.xpath.operations.Bool;
+import wiki.utils.LangConfiguration;
 
-import java.util.Set;
+import java.util.List;
 
 public class PartNameRelationExtractor implements IRelationsExtractor<Boolean> {
+
+    private static List<String> partNames;
+    private static List<String> category;
+
+    public static void initResources(LangConfiguration langConfig) {
+        partNames = langConfig.getPartNames();
+        category = langConfig.getCategory();
+    }
+
     @Override
-    public Boolean extract(String line) {
+    public Boolean extract(String line) throws Exception {
         if (line != null && !line.isEmpty()) {
             line = line.toLowerCase();
-            if (line.contains("===as surname==="))
-                return true;
-            else if (line.contains("===as given name==="))
-                return true;
-            else if (line.contains("===given names==="))
-                return true;
-            else if (line.contains("==as a surname=="))
-                return true;
-            else if (line.contains("==people with the surname=="))
-                return true;
-            else if (line.contains("==family name and surname=="))
-                return true;
-            else if (line.contains("category:given names"))
-                return true;
+            for(String name : partNames) {
+                if (line.contains("===" + name + "===")) {
+                    return true;
+                }
+
+                for(String cat : category) {
+                    if (line.contains(cat + ":" + name)) {
+                        return true;
+                    }
+                }
+            }
         }
         return false;
     }

@@ -1,7 +1,5 @@
 package wiki.utils;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import edu.stanford.nlp.simple.Sentence;
 import joptsimple.internal.Strings;
 import org.apache.commons.io.FileUtils;
@@ -10,10 +8,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.lang.reflect.Type;
-import java.net.URL;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -21,16 +15,18 @@ import java.util.regex.Pattern;
 public class WikiPageParser {
     private final static Logger LOGGER = LogManager.getLogger(WikiPageParser.class);
 
-    private static String[] partNameCategories;
+    private static List<String> partNameCategories;
     private static String disambiguationCategories;
+    private static List<String> beComps;
 
     private static final String URL_PATTERN = "(https?://[\\w\\d:#@%/;$()~_?\\+-=\\\\\\.&]*)";
 
     public static List<String> STOP_WORDS;
 
     public static void initResources(LangConfiguration langConfig, String lang) {
-        partNameCategories = langConfig.getName().toArray(new String[0]);
+        partNameCategories = langConfig.getPartNames();
         disambiguationCategories = langConfig.getDisambiguation();
+        beComps = langConfig.getBeComp();
 
         if(STOP_WORDS == null) {
             String stopWordsFile = Objects.requireNonNull(WikiPageParser.class.getClassLoader().getResource("stop_words/" + lang + ".txt")).getFile();
@@ -128,26 +124,10 @@ public class WikiPageParser {
     private static int extractBeAIndex(String sentence) {
         int result = -1;
 
-        if(sentence.contains("is a")) {
-            result = sentence.indexOf("is a");
-        } else if(sentence.contains("are a")) {
-            result = sentence.indexOf("are a");
-        } else if(sentence.contains("was a")) {
-            result = sentence.indexOf("was a");
-        } else if(sentence.contains("were a")) {
-            result = sentence.indexOf("were a");
-        } else if(sentence.contains("be a")) {
-            result = sentence.indexOf("be a");
-        } else if(sentence.contains("is the")) {
-            result = sentence.indexOf("is the");
-        } else if(sentence.contains("are the")) {
-            result = sentence.indexOf("are the");
-        } else if(sentence.contains("was the")) {
-            result = sentence.indexOf("was the");
-        } else if(sentence.contains("were the")) {
-            result = sentence.indexOf("were the");
-        } else if(sentence.contains("be the")) {
-            result = sentence.indexOf("be the");
+        for(String be : beComps) {
+            if (sentence.contains(be)) {
+                return sentence.indexOf(be);
+            }
         }
 
         return result;
@@ -238,6 +218,6 @@ public class WikiPageParser {
     }
 
     public static String getTrimTextOnly(String text) {
-        return text.replaceAll("[^a-zA-Z0-9]", " ").trim();
+        return text; //text.replaceAll("[^a-zA-Z0-9]", " ").trim();
     }
 }

@@ -45,6 +45,8 @@ public class TestElasticAPI {
             this.configuration = GSON.fromJson(reader, WikiToElasticConfiguration.CONFIGURATION_TYPE);
         }
 
+        assert this.configuration != null;
+
         // init elastic client
         if(this.elasicApi == null) {
             this.client = new RestHighLevelClient(

@@ -24,11 +24,11 @@ public class WikiParsedPageRelationsBuilder {
     private Set<String> titleParenthesisNorm;
     private Set<String> beCompRelationsNorm;
 
-    public WikiParsedPageRelations buildFromWikipediaPageText(String pageText) {
+    public WikiParsedPageRelations buildFromWikipediaPageText(String pageText) throws Exception {
         return buildFromText(pageText, true);
     }
 
-    public WikiParsedPageRelations buildFromWikipediaPageTextNoNormalization(String pageText) {
+    public WikiParsedPageRelations buildFromWikipediaPageTextNoNormalization(String pageText) throws Exception {
         return buildFromText(pageText, false);
     }
 
@@ -48,7 +48,7 @@ public class WikiParsedPageRelationsBuilder {
                 this.beCompRelationsNorm);
     }
 
-    private WikiParsedPageRelations buildFromText(String pageText, boolean normalize) {
+    private WikiParsedPageRelations buildFromText(String pageText, boolean normalize) throws Exception {
         this.categories = new HashSet<>();
         this.categoriesNorm = new HashSet<>();
         this.titleParenthesis = new HashSet<>();

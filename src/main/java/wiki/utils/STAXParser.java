@@ -179,32 +179,36 @@ public class STAXParser {
             LOGGER.info("Skipping page processing of- " + title);
         } else {
             this.executorService.submit(() -> {
-                LOGGER.info("prepare to commit page with id-" + id + ", title-" + title);
-                WikiParsedPageRelations relations;
-                // Redirect pages text are not processed (can be found in the underline redirected page)
-                if (this.extractFields && (redirect == null || redirect.isEmpty())) {
-                    if (this.normalize) {
-                        // Building the relations and norm relations object
-                        relations = new WikiParsedPageRelationsBuilder().buildFromWikipediaPageText(text);
+                try {
+                    LOGGER.info("prepare to commit page with id-" + id + ", title-" + title);
+                    WikiParsedPageRelations relations;
+                    // Redirect pages text are not processed (can be found in the underline redirected page)
+                    if (this.extractFields && (redirect == null || redirect.isEmpty())) {
+                        if (this.normalize) {
+                            // Building the relations and norm relations object
+                            relations = new WikiParsedPageRelationsBuilder().buildFromWikipediaPageText(text);
+                        } else {
+                            // Building only the relations object
+                            relations = new WikiParsedPageRelationsBuilder().buildFromWikipediaPageTextNoNormalization(text);
+                        }
                     } else {
-                        // Building only the relations object
-                        relations = new WikiParsedPageRelationsBuilder().buildFromWikipediaPageTextNoNormalization(text);
+                        // Empty relations for redirect pages (Relations can be found in the underline redirected page)
+                        relations = new WikiParsedPageRelationsBuilder().build();
                     }
-                } else {
-                    // Empty relations for redirect pages (Relations can be found in the underline redirected page)
-                    relations = new WikiParsedPageRelationsBuilder().build();
+
+                    final WikiParsedPage page = new WikiParsedPageBuilder()
+                            .setId(id)
+                            .setTitle(title)
+                            .setRedirectTitle(redirect)
+                            .setText(text)
+                            .setRelations(relations)
+                            .build();
+
+                    // Adding the page to the elastic search queue handler
+                    handler.addPage(page);
+                } catch (Exception ex) {
+                    LOGGER.error("Got Exception in thread", ex);
                 }
-
-                final WikiParsedPage page = new WikiParsedPageBuilder()
-                        .setId(id)
-                        .setTitle(title)
-                        .setRedirectTitle(redirect)
-                        .setText(text)
-                        .setRelations(relations)
-                        .build();
-
-                // Adding the page to the elastic search queue handler
-                handler.addPage(page);
             });
         }
     }

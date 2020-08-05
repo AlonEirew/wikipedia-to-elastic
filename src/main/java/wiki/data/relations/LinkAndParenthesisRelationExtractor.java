@@ -1,6 +1,7 @@
 package wiki.data.relations;
 
 import wiki.data.obj.LinkParenthesisPair;
+import wiki.utils.LangConfiguration;
 import wiki.utils.WikiPageParser;
 
 import java.util.HashSet;
@@ -10,14 +11,20 @@ import java.util.regex.Pattern;
 
 public class LinkAndParenthesisRelationExtractor implements IRelationsExtractor<LinkParenthesisPair> {
 
-    private static final String PARENTHESIS_REGEX_1 = "\\[\\[(.*)\\]\\]";
+    private static final String PARENTHESIS_REGEX_1 = "\\[\\[((?>\\P{M}\\p{M}*)+)\\]\\]";
     private static final Pattern PARENTHESIS_PATTERN_1 = Pattern.compile(PARENTHESIS_REGEX_1);
 
-    private static final String PARENTHESIS_REGEX_2 = "(.*)\\s?\\((.*)\\)";
+    private static final String PARENTHESIS_REGEX_2 = "((?>\\P{M}\\p{M}*)+)\\s?\\(((?>\\P{M}\\p{M}*)+)\\)";
     private static final Pattern PARENTHESIS_PATTERN_2 = Pattern.compile(PARENTHESIS_REGEX_2);
 
+    private static String disambiguationTitle;
+
+    public static void initResources(LangConfiguration lang) {
+        disambiguationTitle = "(" + lang.getDisambiguation() + ")";
+    }
+
     @Override
-    public LinkParenthesisPair extract(String line) {
+    public LinkParenthesisPair extract(String line) throws Exception {
         Set<String> parenthesis = new HashSet<>();
         Set<String> links = new HashSet<>();
 

@@ -4,10 +4,11 @@ import java.util.List;
 
 public class LangConfiguration {
     private String disambiguation;
-    private String category;
+    private List<String> category;
     private String redirect;
-    private List<String> name;
+    private List<String> partNames;
     private List<String> titlesPref;
+    private List<String> beComp;
     private String coreNlpLang;
 
     public String getDisambiguation() {
@@ -18,11 +19,11 @@ public class LangConfiguration {
         this.disambiguation = disambiguation;
     }
 
-    public String getCategory() {
+    public List<String> getCategory() {
         return category;
     }
 
-    public void setCategory(String category) {
+    public void setCategory(List<String> category) {
         this.category = category;
     }
 
@@ -34,12 +35,12 @@ public class LangConfiguration {
         this.redirect = redirect;
     }
 
-    public List<String> getName() {
-        return name;
+    public List<String> getPartNames() {
+        return partNames;
     }
 
-    public void setName(List<String> name) {
-        this.name = name;
+    public void setPartNames(List<String> partNames) {
+        this.partNames = partNames;
     }
 
     public List<String> getTitlesPref() {
@@ -48,6 +49,14 @@ public class LangConfiguration {
 
     public void setTitlesPref(List<String> titlesPref) {
         this.titlesPref = titlesPref;
+    }
+
+    public List<String> getBeComp() {
+        return beComp;
+    }
+
+    public void setBeComp(List<String> beComp) {
+        this.beComp = beComp;
     }
 
     public String getCoreNlpLang() {

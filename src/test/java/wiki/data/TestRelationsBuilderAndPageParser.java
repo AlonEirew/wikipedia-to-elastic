@@ -38,7 +38,7 @@ public class TestRelationsBuilderAndPageParser {
     }
 
     @Test
-    public void testPageAndRelationExtractPageLinks() {
+    public void testPageAndRelationExtractPageLinks() throws Exception {
         String text = getFileJsonContant("nlp_wiki_test_text.json");
         WikiParsedPageRelations jsonResult = getFileRelationContant("nlp_relation_result.json");
         WikiParsedPageRelationsBuilder builder = new WikiParsedPageRelationsBuilder();
@@ -49,7 +49,7 @@ public class TestRelationsBuilderAndPageParser {
     }
 
     @Test
-    public void testPageAndRelationExtractDisambiguation() {
+    public void testPageAndRelationExtractDisambiguation() throws Exception {
         String text = getFileJsonContant("nlp_disambig_wiki_test_text.json");
         WikiParsedPageRelations jsonResult = getFileRelationContant("nlp_disambig_relation_result.json");
         WikiParsedPageRelationsBuilder builder = new WikiParsedPageRelationsBuilder();
@@ -60,21 +60,21 @@ public class TestRelationsBuilderAndPageParser {
     }
 
     @Test
-    public void textExtractCategories() {
+    public void textExtractCategories() throws Exception {
         IRelationsExtractor<Set<String>> categoryExtract = new CategoryRelationExtractor();
         Set<String> categories = categoryExtract.extract("[[Category:Artificial intelligence]]");
         Assert.assertTrue(categories.contains("Artificial intelligence"));
     }
 
     @Test
-    public void textExtractDisCategory() {
+    public void textExtractDisCategory() throws Exception {
         IRelationsExtractor<Set<String>> categoryExtract = new CategoryRelationExtractor();
         Set<String> categories = categoryExtract.extract("{{disambiguation}}");
         Assert.assertTrue(categories.contains("disambiguation"));
     }
 
     @Test
-    public void textExtractLinksAndParenthesis() {
+    public void textExtractLinksAndParenthesis() throws Exception {
         IRelationsExtractor<LinkParenthesisPair> linkParenthExtractor = new LinkAndParenthesisRelationExtractor();
 
         LinkParenthesisPair linkParenthesisPair1 = linkParenthExtractor.extract("[[Artificial intelligence|Machine Learning]]");
@@ -99,7 +99,7 @@ public class TestRelationsBuilderAndPageParser {
     }
 
     @Test
-    public void testExtractBeComp() {
+    public void testExtractBeComp() throws Exception {
         IRelationsExtractor<BeCompRelationResult> beCompExtractor = new BeCompRelationExtractor();
 
         final List<String> textsLists = getFileJsonListContant("is_a_wiki_pages_test.json");
@@ -150,7 +150,7 @@ public class TestRelationsBuilderAndPageParser {
     }
 
     @Test
-    public void testBeSingleSent() {
+    public void testBeSingleSent() throws Exception {
         IRelationsExtractor<BeCompRelationResult> beCompExtractor = new BeCompRelationExtractor();
 
         String text = "'''Alabama''' is a [[U.S. state|state]] in the [[Southern United States|southeastern region]] of the [[United States]]. It is bordered by [[Tennessee]] to the north, [[Georgia (U.S. state)|Georgia]] to the east, [[Florida]] and the [[Gulf of Mexico]] to the south, and [[Mississippi]] to the west. Alabama is the [[List of U.S. states and territories by area|30th largest by area]] and the [[List of U.S. states and territories by population|24th-most populous]] of the [[List of U.S. states|U.S. states]]. With a total of {{convert|1500|mi|km}} of [[inland waterway]]s, Alabama has among the most of any state.<ref>{{cite web|title=Alabama Transportation Overview|url=https://www.edpa.org/wp-content/uploads/Alabama-Transportation-Overview-1.pdf|publisher=Economic Development Partnership of Alabama|accessdate=21 January 2017}}</ref>\n";
