@@ -13,10 +13,11 @@ Integrated with Intel NLP Framework <a href="https://github.com/NervanaSystems/n
 
 For more information and examples check this related <a href="https://www.intel.ai/extracting-semantic-relations-using-external-knowledge-resources-with-nlp-architect/#gs.12xroe">blog post</a>.
 
-Current supported languages: *{English, French, Spanish, German, Chinese}*
+Current supported languages: *{English, French, Spanish, German, Chinese}* <br/>
 
-#### Extracted Relations Types and Features (only English version)
-Use 3 different types of Wikipedia pages (Redirect/Disambiguation/Title) in order to extract 6 different 
+#### Extracted Relations Types and Features
+Note Relations integrity tested only for English. Other languages will probably require some tuning.<br/>
+3 different types of Wikipedia pages are used: {Redirect/Disambiguation/Title} in order to extract 6 different 
 semantic features for tasks such as Identifying Semantic Relations, Entity Linking, Cross Document Co-Reference, Knowledge Graphs, Summarization and other.
 
 * Redirect Links - See details at <a href="https://en.wikipedia.org/wiki/Wikipedia:Redirect">Wikipedia Redirect</a>
@@ -28,10 +29,9 @@ semantic features for tasks such as Identifying Semantic Relations, Entity Linki
 
 ***
 
-
 ### Getting the index with Docker
 This is the preferred and fastest way to get the elastic index locally.<br/>
-The index on Docker Hub is updated with wikipedia pages till August 2019.<br/>
+Docker images for English contains all extracted fields. For other languages, docker images won't contain the `relations` field.
 
 #### Docker Prerequisites
 1) Before starting this one-time process, make sure docker disk image size (*in your Docker Engine Preferences*) is not limited under 150GB.
@@ -50,10 +50,10 @@ in order to verify you have the right value (i.e 262144), run:
 
 * Pull the latest image, use *one* of those commands (processed dump year):
 
-    `#>docker pull aeirew/elastic-wiki` // English (2019) <br/>
-    `#>docker pull aeirew/elastic-wiki-fr` // French (2020) <br/>
-    `#>docker pull aeirew/elastic-wiki-es` // Spanish (2020) <br/>
-    `#>docker pull aeirew/elastic-wiki-de` // German (2020) <br/>
+    `#>docker pull aeirew/elastic-wiki` // English (August 2019) <br/>
+    `#>docker pull aeirew/elastic-wiki-fr` // French (July 2020) <br/>
+    `#>docker pull aeirew/elastic-wiki-es` // Spanish (July 2020) <br/>
+    `#>docker pull aeirew/elastic-wiki-de` // German (July 2020) <br/>
 
 * Once pulled, run it (all commands below use the English docker image, replace with the actual pulled image): 
    
@@ -92,13 +92,11 @@ In case of using this data in order to identify semantic relations between phras
 
 In case relation fields norm not needed or relations not needed all together, set normalizeFields/extractRelationFields to false in `conf.json` (as shown in "Project Configuration Files"), for a much faster data export into elastic **(< 2 hours)**.<br />
 
-If require parsing other Wiki dumps such as Wikinews, Wikidata, or extraction of Wikipedia dumps in other languages (fr, es, de, etc.),
-Use this process as well (set extractRelationFields to false as it is not supported) or download the existing multi-lingual docker images.
-
 ### Requisites
 * Java 1.8
 * ElasticSearch 6.2 (<a href=https://www.elastic.co/downloads/elasticsearch>Installation Guide</a>)
 * Wikipedia xml.bz2 dump file in required language (English for example<a href=https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles.xml.bz2>download enwiki latest dump xml</a>)
+* project `build.gradle` - In case of building **none** English index (and `conf.json` - `extractRelationFields=true`), remove the comment for the `stanford-model` of the required language
 
 ### Project Configuration Files
 * `src/main/resources/conf.json` - basic process configuration
@@ -116,9 +114,12 @@ Use this process as well (set extractRelationFields to false as it is not suppor
     "scheme" : "http" (Elastic host schema, should probebly stay unchanged)
     "shards" : 1 (Number of Elastic shards to use)
     "replicas" : 0 (Number of Elastic replicas to use)
+    "lang": "en" (current support {en, fr, es, de, zh})
 ```
 * `src/main/resources/mapping.json` - Elastic wiki index mapping (Should probably stay unchanged)
 * `src/main/resources/{en,es,fr,de,zh}_map_settings.json` - Elastic index settings (Should probably stay unchanged)
+* `src/main/resources/lang/{en,es,fr,de,zh}.json` - language specific configuration files
+* `src/main/resources/stop_words/{en,es,fr,de,zh}.txt` - language specific stop-words list
 
 * Make sure Elastic process is running and active on your host (if running Elastic locally your IP is <a href="http://localhost:9200/">http://localhost:9200/</a>)
 * Checkout/Clone the repository

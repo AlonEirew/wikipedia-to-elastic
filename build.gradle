@@ -9,6 +9,7 @@ sourceCompatibility = 1.8
 repositories {
     mavenCentral()
 }
+
 dependencies {
     compile group: 'org.apache.commons', name: 'commons-compress', version: '1.16.1'
     compile group: 'com.google.code.gson', name: 'gson', version: '2.8.2'
@@ -18,9 +19,12 @@ dependencies {
     compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.11.0'
     compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.0'
     compile group: 'commons-io', name: 'commons-io', version: '2.6'
-    compile group: 'edu.stanford.nlp', name: 'stanford-corenlp', version: '3.9.2'
-    compile group: 'edu.stanford.nlp', name: 'stanford-corenlp', classifier: 'models', version: '3.9.2'
-//    compile group: 'edu.stanford.nlp', name: 'stanford-corenlp', classifier: 'models-spanish', version: '3.9.2'
+    compile group: 'edu.stanford.nlp', name: 'stanford-corenlp', version: '4.0.0'
+    compile group: 'edu.stanford.nlp', name: 'stanford-corenlp', classifier: 'models', version: '4.0.0'
+//    compile group: 'edu.stanford.nlp', name: 'stanford-corenlp', classifier: 'models-spanish', version: '4.0.0'
+//    compile group: 'edu.stanford.nlp', name: 'stanford-corenlp', classifier: 'models-german', version: '4.0.0'
+//    compile group: 'edu.stanford.nlp', name: 'stanford-corenlp', classifier: 'models-french', version: '4.0.0'
+//    compile group: 'edu.stanford.nlp', name: 'stanford-corenlp', classifier: 'models-chinese', version: '4.0.0'
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
 
