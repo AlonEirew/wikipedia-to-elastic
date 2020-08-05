@@ -5,11 +5,8 @@
 package wiki;
 
 import com.google.gson.Gson;
-import org.apache.http.HttpHost;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.elasticsearch.client.RestClient;
-import org.elasticsearch.client.RestHighLevelClient;
 import wiki.data.relations.BeCompRelationExtractor;
 import wiki.data.relations.CategoryRelationExtractor;
 import wiki.data.relations.LinkAndParenthesisRelationExtractor;
@@ -17,15 +14,12 @@ import wiki.data.relations.PartNameRelationExtractor;
 import wiki.elastic.ElasticAPI;
 import wiki.handlers.ElasticPageHandler;
 import wiki.handlers.IPageHandler;
-import wiki.utils.STAXParser;
-import wiki.utils.LangConfiguration;
-import wiki.utils.WikiPageParser;
-import wiki.utils.WikiToElasticConfiguration;
-import wiki.utils.WikiToElasticUtils;
+import wiki.utils.*;
 
 import java.io.*;
 import java.util.Objects;
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
 
 public class WikiToElasticMain {
 
@@ -49,7 +43,9 @@ public class WikiToElasticMain {
             startProcess(config, langConfiguration);
             long endTime = System.currentTimeMillis();
 
-            LOGGER.info("Process Done, took:" + (endTime - startTime) + "ms");
+            long durationInMillis = endTime - startTime;
+            long took = TimeUnit.MILLISECONDS.toMinutes(durationInMillis);
+            LOGGER.info("Process Done, took~" + took + "min (" + durationInMillis + "ms)" );
         } catch (FileNotFoundException e) {
             LOGGER.error("Failed to start process", e);
         } catch (IOException e) {
@@ -65,31 +61,25 @@ public class WikiToElasticMain {
      * @throws IOException
      */
     static void startProcess(WikiToElasticConfiguration configuration, LangConfiguration langConfiguration) throws IOException {
-        RestHighLevelClient client = null;
         InputStream inputStream = null;
         STAXParser parser = null;
         IPageHandler pageHandler = null;
+        ElasticAPI elasicApi = null;
         STAXParser.DeleteUpdateMode mode;
         try(Scanner reader = new Scanner(System.in)) {
             LOGGER.info("Reading wikidump: " + configuration.getWikiDump());
             File wikifile = new File(configuration.getWikiDump());
-
             if(wikifile.exists()) {
                 inputStream = WikiToElasticUtils.openCompressedFileInputStream(wikifile.getPath());
-                // init elastic client
-                client = new RestHighLevelClient(
-                        RestClient.builder(
-                                new HttpHost(configuration.getHost(),
-                                        configuration.getPort(),
-                                        configuration.getScheme())));
-
-                ElasticAPI elasicApi = new ElasticAPI(client);
+                elasicApi = new ElasticAPI(configuration);
 
                 // Delete if index already exists
                 System.out.println("Would you like to clean & delete index (if exists) \"" + configuration.getIndexName() +
                         "\" or update (new pages) in it [D(Delete)/U(Update)]");
 
-                String ans = reader.nextLine(); // Scans the next token of the input as an int.
+                // Scans the next token of the input as an int.
+                String ans = reader.nextLine();
+
                 if(ans.equalsIgnoreCase("d") || ans.equalsIgnoreCase("delete")) {
                     elasicApi.deleteIndex(configuration.getIndexName());
 
@@ -124,15 +114,14 @@ public class WikiToElasticMain {
                 inputStream.close();
             }
             if(parser != null) {
-                LOGGER.info("*** Total id's extracted=" + parser.getTotalIds().size());
                 parser.shutDownPool();
                 pageHandler.close();
-                LOGGER.info("*** Total id's committed=" + ((ElasticPageHandler) pageHandler).getTotalIdsCommitted());
+                LOGGER.info("*** Total id's extracted=" + parser.getTotalIds().size());
                 LOGGER.info("*** In commit queue=" + ((ElasticPageHandler) pageHandler).getPagesQueueSize() + " (should be 0)");
             }
-            if(client != null) {
-                LOGGER.info("Closing RestHighLevelClient..");
-                client.close();
+            if(elasicApi != null) {
+                elasicApi.close();
+                LOGGER.info("*** Total id's committed=" + elasicApi.getTotalIdsSuccessfullyCommitted());
             }
         }
     }

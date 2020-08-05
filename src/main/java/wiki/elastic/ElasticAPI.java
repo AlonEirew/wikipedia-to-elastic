@@ -5,6 +5,7 @@
 package wiki.elastic;
 
 import com.google.gson.Gson;
+import org.apache.http.HttpHost;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.ElasticsearchException;
@@ -19,6 +20,7 @@ import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentType;
@@ -26,22 +28,43 @@ import org.elasticsearch.rest.RestStatus;
 import wiki.data.WikiParsedPage;
 import wiki.utils.WikiToElasticConfiguration;
 
+import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public class ElasticAPI {
+public class ElasticAPI implements Closeable {
 
     private final static Logger LOGGER = LogManager.getLogger(ElasticAPI.class);
     private static final Gson GSON = new Gson();
     private final static int MAX_AVAILABLE = 10;
 
+    private final AtomicInteger totalIdsProcessed = new AtomicInteger(0);
+    private final AtomicInteger totalIdsSuccessfullyCommitted = new AtomicInteger(0);
+
     // Limit the number of threads accessing elastic in parallel
     private final Semaphore available = new Semaphore(MAX_AVAILABLE, true);
     private final RestHighLevelClient client;
+    private final Object closeLock = new Object();
 
     public ElasticAPI(RestHighLevelClient client) {
         this.client = client;
+    }
+
+    public ElasticAPI(WikiToElasticConfiguration configuration) {
+        File wikifile = new File(configuration.getWikiDump());
+        if (wikifile.exists()) {
+            // init elastic client
+            this.client = new RestHighLevelClient(
+                    RestClient.builder(
+                            new HttpHost(configuration.getHost(),
+                                    configuration.getPort(),
+                                    configuration.getScheme())));
+        } else {
+            this.client = null;
+        }
     }
 
     public DeleteIndexResponse deleteIndex(String indexName) {
@@ -101,8 +124,21 @@ public class ElasticAPI {
         return createIndexResponse;
     }
 
-    public synchronized void releaseSemaphore() {
+    public synchronized void onSuccess(int successCount) {
         this.available.release();
+        this.totalIdsSuccessfullyCommitted.addAndGet(successCount);
+        this.totalIdsProcessed.addAndGet(-successCount);
+        synchronized (closeLock) {
+            closeLock.notify();
+        }
+    }
+
+    public synchronized void onFail(int failedCount) {
+        this.available.release();
+        this.totalIdsProcessed.addAndGet(-failedCount);
+        synchronized (closeLock) {
+            closeLock.notify();
+        }
     }
 
     public void addDocAsnc(String indexName, String indexType, WikiParsedPage page) {
@@ -113,10 +149,10 @@ public class ElasticAPI {
                     page);
 
             try {
-                // release will happen from listener (async)
                 this.available.acquire();
                 ElasticDocCreateListener listener = new ElasticDocCreateListener(indexRequest, this);
                 this.client.indexAsync(indexRequest, listener);
+                this.totalIdsProcessed.incrementAndGet();
                 LOGGER.trace("Doc with Id " + page.getId() + " will be created asynchronously");
             } catch (InterruptedException e) {
                 LOGGER.debug(e);
@@ -126,7 +162,8 @@ public class ElasticAPI {
 
     public void retryAddDoc(IndexRequest indexRequest, ElasticDocCreateListener listener) {
         try {
-            // release will happen from listener (async)
+            // Release to give chance for other threads that waiting to execute
+            this.available.release();
             this.available.acquire();
             this.client.indexAsync(indexRequest, listener);
             LOGGER.trace("Doc with Id " + indexRequest.id() + " will retry asynchronously");
@@ -148,6 +185,7 @@ public class ElasticAPI {
                 this.available.acquire();
                 res = this.client.index(indexRequest);
                 this.available.release();
+                this.totalIdsSuccessfullyCommitted.incrementAndGet();
             }
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
@@ -160,28 +198,31 @@ public class ElasticAPI {
         BulkRequest bulkRequest = new BulkRequest();
 
         if(pages != null) {
-            for(WikiParsedPage page : pages) {
-                if(isValidRequest(indexName, indexType, page)) {
+            for (WikiParsedPage page : pages) {
+                if (isValidRequest(indexName, indexType, page)) {
                     IndexRequest request = createIndexRequest(indexName, indexType, page);
                     bulkRequest.add(request);
                 }
             }
-        }
 
-        try {
-            // release will happen from listener (async)
-            this.available.acquire();
-            ElasticBulkDocCreateListener listener = new ElasticBulkDocCreateListener(bulkRequest, this);
-            this.client.bulkAsync(bulkRequest, listener);
-            LOGGER.debug("Bulk insert will be created asynchronously");
-        } catch (InterruptedException e) {
-            LOGGER.error("Failed to acquire semaphore, lost bulk insert!", e);
+
+            try {
+                // release will happen from listener (async)
+                this.available.acquire();
+                ElasticBulkDocCreateListener listener = new ElasticBulkDocCreateListener(bulkRequest, this);
+                this.client.bulkAsync(bulkRequest, listener);
+                this.totalIdsProcessed.addAndGet(pages.size());
+                LOGGER.debug("Bulk insert will be created asynchronously");
+            } catch (InterruptedException e) {
+                LOGGER.error("Failed to acquire semaphore, lost bulk insert!", e);
+            }
         }
     }
 
     public void retryAddBulk(BulkRequest bulkRequest, ElasticBulkDocCreateListener listener) {
         try {
-            // release will happen from listener (async)
+            // Release to give chance for other threads that waiting to execute
+            this.available.release();
             this.available.acquire();
             this.client.bulkAsync(bulkRequest, listener);
             LOGGER.debug("Bulk insert retry");
@@ -221,6 +262,14 @@ public class ElasticAPI {
         return ret;
     }
 
+    public int getTotalIdsProcessed() {
+        return totalIdsProcessed.get();
+    }
+
+    public int getTotalIdsSuccessfullyCommitted() {
+        return totalIdsSuccessfullyCommitted.get();
+    }
+
     private IndexRequest createIndexRequest(String indexName, String indexType, WikiParsedPage page) {
         IndexRequest indexRequest = new IndexRequest(
                 indexName,
@@ -235,5 +284,23 @@ public class ElasticAPI {
     private boolean isValidRequest(String indexName, String indexType, WikiParsedPage page) {
         return page != null && page.getId() > 0 && page.getTitle() != null && !page.getTitle().isEmpty() &&
                 indexName != null && !indexName.isEmpty() && indexType != null && !indexType.isEmpty();
+    }
+
+    @Override
+    public void close() throws IOException {
+        if(client != null) {
+            LOGGER.info("Closing RestHighLevelClient..");
+            try {
+                synchronized(closeLock) {
+                    while(this.totalIdsProcessed.get() != 0) {
+                        LOGGER.info("Waiting for " + this.totalIdsProcessed.get() + " async requests to complete...");
+                        closeLock.wait();
+                    }
+                    client.close();
+                }
+            } catch (InterruptedException e) {
+                client.close();
+            }
+        }
     }
 }

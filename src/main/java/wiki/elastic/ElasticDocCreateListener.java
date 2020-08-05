@@ -29,7 +29,7 @@ public class ElasticDocCreateListener implements ActionListener<IndexResponse> {
 
     @Override
     public void onResponse(IndexResponse indexResponse) {
-        this.elasicApi.releaseSemaphore();
+        this.elasicApi.onSuccess(1);
         String index = indexResponse.getIndex();
         String id = indexResponse.getId();
         if (indexResponse.getResult() == DocWriteResponse.Result.CREATED) {
@@ -41,11 +41,11 @@ public class ElasticDocCreateListener implements ActionListener<IndexResponse> {
 
     @Override
     public void onFailure(Exception e) {
-        this.elasicApi.releaseSemaphore();
         LOGGER.error("failed inserting document with exception=" + e.getMessage());
         if (count.incrementAndGet() < MAX_RETRY) {
             this.elasicApi.retryAddDoc(indexRequest, this);
         } else {
+            this.elasicApi.onFail(1);
             LOGGER.error("Failed, max retry exceeded, throwing request!");
         }
     }

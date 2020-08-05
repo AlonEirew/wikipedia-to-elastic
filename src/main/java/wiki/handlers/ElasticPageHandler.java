@@ -4,16 +4,14 @@
 
 package wiki.handlers;
 
-import org.elasticsearch.action.ActionListener;
-import org.elasticsearch.action.bulk.BulkResponse;
 import wiki.data.WikiParsedPage;
 import wiki.elastic.ElasticAPI;
-import wiki.elastic.ElasticBulkDocCreateListener;
 import wiki.utils.WikiToElasticConfiguration;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ElasticPageHandler implements IPageHandler {
 
@@ -22,7 +20,6 @@ public class ElasticPageHandler implements IPageHandler {
     private final String docType;
     private final int bulkSize;
 
-    private int totalIdsCommitted = 0;
     private final Object lock = new Object();
 
     private final List<WikiParsedPage> pages = new ArrayList<>();
@@ -65,15 +62,10 @@ public class ElasticPageHandler implements IPageHandler {
         synchronized (this.lock) {
             if (this.pages.size() > 0) {
                 List<WikiParsedPage> copyPages = new ArrayList<>(this.pages);
-                totalIdsCommitted += this.pages.size();
                 this.pages.clear();
                 elasticApi.addBulkAsnc(this.indexName, this.docType, copyPages);
             }
         }
-    }
-
-    public int getTotalIdsCommitted() {
-        return totalIdsCommitted;
     }
 
     public int getPagesQueueSize() {
@@ -83,7 +75,6 @@ public class ElasticPageHandler implements IPageHandler {
     @Override
     public void close() throws IOException {
         List<WikiParsedPage> copyPages = new ArrayList<>(this.pages);
-        totalIdsCommitted += this.pages.size();
         this.pages.clear();
         for(WikiParsedPage page : copyPages) {
             elasticApi.addDoc(this.indexName, this.docType, page);

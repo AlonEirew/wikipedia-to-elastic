@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class ElasticBulkDocCreateListener implements ActionListener<BulkResponse> {
 
-    private final static Logger LOGGER = LogManager.getLogger(ElasticDocCreateListener.class);
+    private final static Logger LOGGER = LogManager.getLogger(ElasticBulkDocCreateListener.class);
     private final static int MAX_RETRY = 3;
 
     private final AtomicInteger count =  new AtomicInteger();
@@ -32,7 +32,7 @@ public class ElasticBulkDocCreateListener implements ActionListener<BulkResponse
 
     @Override
     public void onResponse(BulkResponse bulkResponse) {
-        this.elasicApi.releaseSemaphore();
+        this.elasicApi.onSuccess(bulkResponse.getItems().length);
         StringBuilder sb = new StringBuilder();
         sb.append("Bulk Created/Updated done successfully, ids: [");
         for (BulkItemResponse bulkItemResponse : bulkResponse) {
@@ -55,11 +55,11 @@ public class ElasticBulkDocCreateListener implements ActionListener<BulkResponse
 
     @Override
     public void onFailure(Exception e) {
-        this.elasicApi.releaseSemaphore();
         LOGGER.error("Failed to commit some pages with exception=" + e.getMessage());
         if (count.incrementAndGet() < MAX_RETRY) {
             this.elasicApi.retryAddBulk(this.bulkRequest, this);
         } else {
+            this.elasicApi.onFail(bulkRequest.requests().size());
             LOGGER.error("Failed, max retry exceeded, throwing request!");
         }
     }

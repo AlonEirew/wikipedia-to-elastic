@@ -16,7 +16,7 @@ For more information and examples check this related <a href="https://www.intel.
 Current supported languages: *{English, French, Spanish, German, Chinese}* <br/>
 
 #### Extracted Relations Types and Features
-Note Relations integrity tested only for English. Other languages will probably require some tuning.<br/>
+*Note Relations integrity tested only for English. Other languages will probably require some tuning.*f<br/><br/>
 3 different types of Wikipedia pages are used: {Redirect/Disambiguation/Title} in order to extract 6 different 
 semantic features for tasks such as Identifying Semantic Relations, Entity Linking, Cross Document Co-Reference, Knowledge Graphs, Summarization and other.
 
