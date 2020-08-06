@@ -44,15 +44,13 @@ public class STAXParser {
     private final IPageHandler handler;
     private final ExecutorService executorService;
     private final Set<Long> totalIds = new HashSet<>();
-    private boolean normalize;
     private boolean extractFields;
     private DeleteUpdateMode deleteUpdateMode;
 
 
     public STAXParser(IPageHandler handler, LangConfiguration langConfig) {
-        this.executorService = initExecuterService();
+        this.executorService = initExecutorService();
         this.handler = handler;
-        this.normalize = true;
         this.extractFields = true;
         this.deleteUpdateMode = DeleteUpdateMode.NA;
         this.filterTitles = langConfig.getTitlesPref().toArray(new String[0]);
@@ -61,12 +59,11 @@ public class STAXParser {
 
     public STAXParser(IPageHandler handler, WikiToElasticConfiguration config, LangConfiguration langConfig, DeleteUpdateMode mode) {
         this(handler, langConfig);
-        this.normalize = config.isNormalizeFields();
         this.deleteUpdateMode = mode;
         this.extractFields = config.isExtractRelationFields();
     }
 
-    private ExecutorService initExecuterService() {
+    private ExecutorService initExecutorService() {
         int cores = Runtime.getRuntime().availableProcessors();
         return new ThreadPoolExecutor(cores, cores,
                 0L, TimeUnit.MILLISECONDS, this.blockingQueue, this.rejectedExecutionHandler);
@@ -184,13 +181,7 @@ public class STAXParser {
                     WikiParsedPageRelations relations;
                     // Redirect pages text are not processed (can be found in the underline redirected page)
                     if (this.extractFields && (redirect == null || redirect.isEmpty())) {
-                        if (this.normalize) {
-                            // Building the relations and norm relations object
-                            relations = new WikiParsedPageRelationsBuilder().buildFromWikipediaPageText(text);
-                        } else {
-                            // Building only the relations object
-                            relations = new WikiParsedPageRelationsBuilder().buildFromWikipediaPageTextNoNormalization(text);
-                        }
+                        relations = new WikiParsedPageRelationsBuilder().buildFromText(text);
                     } else {
                         // Empty relations for redirect pages (Relations can be found in the underline redirected page)
                         relations = new WikiParsedPageRelationsBuilder().build();

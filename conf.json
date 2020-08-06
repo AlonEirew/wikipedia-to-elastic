@@ -1,7 +1,6 @@
 {
   "indexName": "enwiki_test",
   "docType": "wikipage",
-  "normalizeFields": true,
   "extractRelationFields": true,
   "insertBulkSize": 100,
   "mapping": "mapping.json",

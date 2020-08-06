@@ -46,11 +46,7 @@ public class TestElasticAPI {
 
         // init elastic client
         if(this.elasicApi == null) {
-            this.client = new RestHighLevelClient(
-                    RestClient.builder(
-                            new HttpHost(configuration.getHost(), configuration.getPort(), configuration.getScheme())));
-
-            this.elasicApi = new ElasticAPI(client);
+            this.elasicApi = new ElasticAPI(configuration);
         }
 
 

@@ -28,7 +28,6 @@ public class WikiToElasticConfiguration {
     private int shards;
     private int replicas;
     private int insertBulkSize;
-    private boolean normalizeFields;
     private boolean extractRelationFields;
     private String lang;
 
@@ -121,14 +120,6 @@ public class WikiToElasticConfiguration {
 
     public void setInsertBulkSize(int insertBulkSize) {
         this.insertBulkSize = insertBulkSize;
-    }
-
-    public boolean isNormalizeFields() {
-        return normalizeFields;
-    }
-
-    public void setNormalizeFields(boolean normalizeFields) {
-        this.normalizeFields = normalizeFields;
     }
 
     public boolean isExtractRelationFields() {

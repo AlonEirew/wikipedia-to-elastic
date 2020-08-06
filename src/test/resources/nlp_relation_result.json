@@ -1,1 +1,13 @@
-{"isPartName":false,"isDisambiguation":false,"categories":["Speech recognition", "Natural language processing", "Computational linguistics","Artificial intelligence","Computational fields of study"],"titleParenthesis":[],"categoriesNorm":["speech recognition", "natural language processing", "computational linguistics","computational field study","artificial intelligence"],"titleParenthesisNorm":[]}
+{
+  "isPartName": false,
+  "isDisambiguation": false,
+  "categories": [
+    "Speech recognition",
+    "Natural language processing",
+    "Computational linguistics",
+    "Artificial intelligence",
+    "Computational fields of study"
+  ],
+  "titleParenthesis": [
+  ]
+}

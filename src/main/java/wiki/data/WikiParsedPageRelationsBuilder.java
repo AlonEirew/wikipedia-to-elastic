@@ -17,20 +17,6 @@ public class WikiParsedPageRelationsBuilder {
     private Set<String> titleParenthesis;
     private Set<String> beCompRelations;
 
-    private Set<String> disambiguationLinksNorm;
-    private Set<String> categoriesNorm;
-    private Set<String> aliasesNorm;
-    private Set<String> titleParenthesisNorm;
-    private Set<String> beCompRelationsNorm;
-
-    public WikiParsedPageRelations buildFromWikipediaPageText(String pageText) throws Exception {
-        return buildFromText(pageText, true);
-    }
-
-    public WikiParsedPageRelations buildFromWikipediaPageTextNoNormalization(String pageText) throws Exception {
-        return buildFromText(pageText, false);
-    }
-
     public WikiParsedPageRelations build() {
         return new WikiParsedPageRelations(
                 this.isPartName,
@@ -39,19 +25,12 @@ public class WikiParsedPageRelationsBuilder {
                 this.categories,
                 this.aliases,
                 this.titleParenthesis,
-                this.beCompRelations,
-                this.disambiguationLinksNorm,
-                this.categoriesNorm,
-                this.aliasesNorm,
-                this.titleParenthesisNorm,
-                this.beCompRelationsNorm);
+                this.beCompRelations);
     }
 
-    private WikiParsedPageRelations buildFromText(String pageText, boolean normalize) throws Exception {
+    public WikiParsedPageRelations buildFromText(String pageText) throws Exception {
         this.categories = new HashSet<>();
-        this.categoriesNorm = new HashSet<>();
         this.titleParenthesis = new HashSet<>();
-        this.titleParenthesisNorm = new HashSet<>();
 
         IRelationsExtractor<Set<String>> categoryExtractor = new CategoryRelationExtractor();
         IRelationsExtractor<Boolean> partNameExtractor = new PartNameRelationExtractor();
@@ -73,9 +52,6 @@ public class WikiParsedPageRelationsBuilder {
             LinkParenthesisPair linkParenthesisPair = pairExtractor.extract(line);
 
             this.categories.addAll(lineCategories);
-            if(normalize) {
-                this.categoriesNorm.addAll(WikiPageParser.normalizeStringSet(lineCategories));
-            }
             extLinks.addAll(linkParenthesisPair.getLinks());
             extParenthesis.addAll(linkParenthesisPair.getParenthesis());
         }
@@ -84,17 +60,10 @@ public class WikiParsedPageRelationsBuilder {
             this.isDisambiguation = true;
             this.disambiguationLinks = extLinks;
             this.titleParenthesis = extParenthesis;
-            if(normalize) {
-                this.disambiguationLinksNorm = WikiPageParser.normalizeStringSet(extLinks);
-                this.titleParenthesisNorm = WikiPageParser.normalizeStringSet(extParenthesis);
-            }
         } else {
             String firstParagraph = WikiPageParser.extractFirstPageParagraph(pageText);
             final BeCompRelationResult beCompRelations = beCompExtractor.extract(firstParagraph);
             this.beCompRelations = beCompRelations.getBeCompRelations();
-            if(normalize) {
-                this.beCompRelationsNorm = beCompRelations.getBeCompRelationsNorm();
-            }
         }
         return this.build();
     }
