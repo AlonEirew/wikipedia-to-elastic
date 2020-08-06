@@ -16,7 +16,13 @@ public class ArrayPageHandler implements IPageHandler {
 
     @Override
     public boolean isPageExists(String pageId) {
-        return pages.contains(pageId);
+        for(WikiParsedPage page : this.pages) {
+            if(String.valueOf(page.getId()).equals(pageId)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Override

@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class WordFrequency {
     private String originalWord;
     private String lemma;
-    private AtomicInteger wordDocCount;
+    private final AtomicInteger wordDocCount;
     private double frequencyInDoc;
 
     public WordFrequency(String originalWord, String lemma) {

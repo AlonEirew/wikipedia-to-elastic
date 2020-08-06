@@ -1,6 +1,5 @@
 package wiki.data;
 
-import org.apache.xpath.operations.Bool;
 import wiki.data.obj.BeCompRelationResult;
 import wiki.data.obj.LinkParenthesisPair;
 import wiki.data.relations.*;

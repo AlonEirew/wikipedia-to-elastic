@@ -163,8 +163,7 @@ public class TestRelationsBuilderAndPageParser {
         InputStream inputStreamNlp = TestRelationsBuilderAndPageParser.class.getClassLoader().getResourceAsStream(fileName);
         assert inputStreamNlp != null;
         JsonObject inputJsonNlp = GSON.fromJson(new InputStreamReader(inputStreamNlp), JsonObject.class);
-        String text = inputJsonNlp.get("text").getAsString();
-        return text;
+        return inputJsonNlp.get("text").getAsString();
     }
 
     public static List<String> getFileJsonListContant(String fileName) {

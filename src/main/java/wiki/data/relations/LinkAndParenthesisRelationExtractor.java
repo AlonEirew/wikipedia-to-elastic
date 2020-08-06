@@ -40,7 +40,7 @@ public class LinkAndParenthesisRelationExtractor implements IRelationsExtractor<
                     links.add(link);
                     if (parenthesisMatcher2.group(2) != null) {
                         String parenth = parenthesisMatcher2.group(2);
-                        if(!parenth.equalsIgnoreCase("disambiguation")) {
+                        if(!parenth.equalsIgnoreCase(disambiguationTitle)) {
                             parenth = WikiPageParser.getTrimTextOnly(parenth);
                             parenthesis.add(parenth);
                         }

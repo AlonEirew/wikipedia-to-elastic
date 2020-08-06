@@ -93,7 +93,7 @@ In case of using this data in order to identify semantic relations between phras
 In case relation fields norm not needed or relations not needed all together, set normalizeFields/extractRelationFields to false in `conf.json` (as shown in "Project Configuration Files"), for a much faster data export into elastic **(< 2 hours)**.<br />
 
 ### Requisites
-* Java 1.8
+* Java 11
 * ElasticSearch 6.2 (<a href=https://www.elastic.co/downloads/elasticsearch>Installation Guide</a>)
 * Wikipedia xml.bz2 dump file in required language (English for example<a href=https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles.xml.bz2>download enwiki latest dump xml</a>)
 * project `build.gradle` - In case of building **none** English index (and `conf.json` - `extractRelationFields=true`), remove the comment for the `stanford-model` of the required language

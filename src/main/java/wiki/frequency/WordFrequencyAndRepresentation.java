@@ -13,15 +13,15 @@ public class WordFrequencyAndRepresentation {
 
     private static final double FREQUANCY_THREASH = 0.005;
 
-    private Map<String, WordFrequency> docWordsFrequency = new HashMap<>();
-    private AtomicInteger docWordsCount = new AtomicInteger(0);
+    private final Map<String, WordFrequency> docWordsFrequency = new HashMap<>();
+    private final AtomicInteger docWordsCount = new AtomicInteger(0);
 
     public WordFrequencyAndRepresentation(LangConfiguration langConfig, String lang) {
         WikiPageParser.initResources(langConfig, lang);
     }
 
     public void countDocFrequency(String docString) {
-        String splittedText[] = docString.split("\n");
+        String[] splittedText = docString.split("\n");
         for(String line : splittedText) {
             this.countLineFrequency(line);
         }
