@@ -1,5 +1,9 @@
 {
-  "disambiguation": "Disambiguation",
+  "infoboxText" : "Infobox",
+  "disambiguation": [
+    "disambig",
+    "disambiguation"
+  ],
   "category": [
     "Category"
   ],

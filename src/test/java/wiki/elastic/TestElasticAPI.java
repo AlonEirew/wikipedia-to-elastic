@@ -2,17 +2,12 @@ package wiki.elastic;
 
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
-import org.apache.http.HttpHost;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
 import wiki.data.WikiParsedPage;
 import wiki.data.WikiParsedPageBuilder;
 import wiki.utils.WikiToElasticConfiguration;
@@ -25,6 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 public class TestElasticAPI {
     private static final Gson GSON = new Gson();
 
@@ -33,7 +30,6 @@ public class TestElasticAPI {
     private ElasticAPI elasicApi;
 
 
-    @Before
     public void prepareText() throws FileNotFoundException {
         URL url = TestElasticAPI.class.getClassLoader().getResource("test_config.json");
         if(this.configuration == null && url != null) {
@@ -57,7 +53,6 @@ public class TestElasticAPI {
         this.elasicApi.createIndex(configuration);
     }
 
-    @Test
     public void testPutDocOnElastic() throws IOException, InterruptedException {
         // Create/Add Page
         // Create page
@@ -71,7 +66,6 @@ public class TestElasticAPI {
         searchCreatedIndex(this.configuration, this.client, this.elasicApi);
     }
 
-    @Test
     public void testPutBulkOnElastic() throws IOException, InterruptedException {
         // Create/Add Page
         // Create page
@@ -84,7 +78,6 @@ public class TestElasticAPI {
         searchCreatedIndex(this.configuration, this.client, this.elasicApi);
     }
 
-    @Test
     public void testIsDocExist() throws InterruptedException {
         // Create page
         List<WikiParsedPage> testPages = createTestPages();
@@ -93,11 +86,11 @@ public class TestElasticAPI {
         Thread.sleep(2000);
 
         for(WikiParsedPage page : testPages) {
-            Assert.assertTrue(this.elasicApi.isDocExists(this.configuration.getIndexName(),
+            assertTrue(this.elasicApi.isDocExists(this.configuration.getIndexName(),
                     this.configuration.getDocType(), String.valueOf(page.getId())));
         }
 
-        Assert.assertFalse(this.elasicApi.isDocExists(this.configuration.getIndexName(),
+        assertFalse(this.elasicApi.isDocExists(this.configuration.getIndexName(),
                 this.configuration.getDocType(), "1234"));
     }
 
@@ -140,7 +133,7 @@ public class TestElasticAPI {
         searchRequest.source(sourceBuilder);
 
         SearchResponse searchResponse = client.search(searchRequest);
-        Assert.assertNotNull(searchResponse);
+        assertNotNull(searchResponse);
         System.out.println(searchResponse.toString());
 
         elasicApi.deleteIndex(configuration.getIndexName());

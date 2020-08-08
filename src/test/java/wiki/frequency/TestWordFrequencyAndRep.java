@@ -1,9 +1,9 @@
 package wiki.frequency;
 
 import com.google.gson.Gson;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import wiki.TestUtils;
 import wiki.WikiToElasticMain;
-import wiki.data.TestRelationsBuilderAndPageParser;
 import wiki.utils.LangConfiguration;
 import wiki.utils.WikiToElasticConfiguration;
 
@@ -22,7 +22,7 @@ public class TestWordFrequencyAndRep {
         LangConfiguration langConfiguration = GSON.fromJson(new FileReader(langConfigFile), LangConfiguration.class);
 
         WordFrequencyAndRepresentation wfar = new WordFrequencyAndRepresentation(langConfiguration, config.getLang());
-        String text = TestRelationsBuilderAndPageParser.getFileJsonContant("nlp_wiki_test_text.json");
+        String text = TestUtils.getFileJsonContent("nlp_wiki_test_text.json");
         wfar.countDocFrequency(text);
 
         System.out.println(GSON.toJson(wfar.getDocWordsFrequency()));

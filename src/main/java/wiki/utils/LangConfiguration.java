@@ -3,7 +3,8 @@ package wiki.utils;
 import java.util.List;
 
 public class LangConfiguration {
-    private String disambiguation;
+    private String infoboxText;
+    private List<String> disambiguation;
     private List<String> category;
     private String redirect;
     private List<String> partNames;
@@ -11,11 +12,19 @@ public class LangConfiguration {
     private List<String> beComp;
     private String coreNlpLang;
 
-    public String getDisambiguation() {
+    public String getInfoboxText() {
+        return infoboxText;
+    }
+
+    public void setInfoboxText(String infoboxText) {
+        this.infoboxText = infoboxText;
+    }
+
+    public List<String> getDisambiguation() {
         return disambiguation;
     }
 
-    public void setDisambiguation(String disambiguation) {
+    public void setDisambiguation(List<String> disambiguation) {
         this.disambiguation = disambiguation;
     }
 

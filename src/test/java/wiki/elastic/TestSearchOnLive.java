@@ -8,20 +8,19 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.junit.Assert;
-import org.junit.Before;
 import wiki.data.WikiParsedPage;
 import wiki.data.WikiParsedPageBuilder;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 public class TestSearchOnLive {
 
     private RestHighLevelClient client;
     private ElasticAPI elasicApi;
 
-    @Before
     public void prepareText() {
         // init elastic client
         if(this.elasicApi == null) {
@@ -33,7 +32,6 @@ public class TestSearchOnLive {
         }
     }
 
-//    @Test
     public void testPutAndSearchDocOnElastic() throws InterruptedException, IOException {
         // Create/Add Page
         // Create page
@@ -51,7 +49,7 @@ public class TestSearchOnLive {
         searchRequest.source(sourceBuilder);
 
         SearchResponse searchResponse = client.search(searchRequest);
-        Assert.assertNotNull(searchResponse);
+        assertNotNull(searchResponse);
         System.out.println(searchResponse.toString());
     }
 

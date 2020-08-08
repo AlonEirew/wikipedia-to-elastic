@@ -5,24 +5,25 @@ import wiki.utils.WikiPageParser;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class CategoryRelationExtractor implements IRelationsExtractor<Set<String>> {
 
-    private static String disambiguationTitle;
+    private static List<String> disambiguationTitles;
 
     private static Pattern catPattern;
     private static Pattern disPattern;
 
     public static void initResources(LangConfiguration lang) {
-        disambiguationTitle = "(" + lang.getDisambiguation() + ")";
+        disambiguationTitles = lang.getDisambiguation();
 
         String catRegex = "\\[\\[(" + String.join("|", lang.getCategory()) + "):((?>\\P{M}\\p{M}*)+)\\]\\]";
         catPattern = Pattern.compile(catRegex);
 
-        String disRegex = "^\\{\\{(" + lang.getDisambiguation().toLowerCase() + "|" + lang.getDisambiguation() + ")(?>\\P{M}\\p{M}*)+\\}\\}$";
+        String disRegex = "^\\{\\{((" + String.join("|", lang.getDisambiguation()) + ")(?>\\P{M}\\p{M}*)*)\\}\\}$";
         disPattern = Pattern.compile(disRegex);
     }
 
@@ -37,25 +38,18 @@ public class CategoryRelationExtractor implements IRelationsExtractor<Set<String
                     cat = cat.split("\\|")[0];
                 }
 
-                cat = trimDisambig(cat);
                 cat = WikiPageParser.getTrimTextOnly(cat);
                 categories.add(cat);
             }
 
-            Matcher disMatch = disPattern.matcher(line);
+            Matcher disMatch = disPattern.matcher(line.toLowerCase());
             while (disMatch.find()) {
-                String cat = disMatch.group(1);
+                String cat = disMatch.group(2);
                 String[] cats = cat.split("\\|");
                 categories.addAll(Arrays.asList(cats));
+                categories.addAll(disambiguationTitles);
             }
         }
         return categories;
-    }
-
-    private String trimDisambig(String cat) {
-        if (cat.contains(disambiguationTitle.toLowerCase())) {
-            cat = cat.replace(disambiguationTitle, "");
-        }
-        return cat;
     }
 }

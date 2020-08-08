@@ -9,21 +9,21 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class WikiParsedPageRelationsBuilder {
+    private String infobox;
     private boolean isPartName = false;
     private boolean isDisambiguation = false;
     private Set<String> disambiguationLinks;
     private Set<String> categories;
-    private Set<String> aliases;
     private Set<String> titleParenthesis;
     private Set<String> beCompRelations;
 
     public WikiParsedPageRelations build() {
         return new WikiParsedPageRelations(
+                this.infobox,
                 this.isPartName,
                 this.isDisambiguation,
                 this.disambiguationLinks,
                 this.categories,
-                this.aliases,
                 this.titleParenthesis,
                 this.beCompRelations);
     }
@@ -36,7 +36,9 @@ public class WikiParsedPageRelationsBuilder {
         IRelationsExtractor<Boolean> partNameExtractor = new PartNameRelationExtractor();
         IRelationsExtractor<LinkParenthesisPair> pairExtractor = new LinkAndParenthesisRelationExtractor();
         IRelationsExtractor<BeCompRelationResult> beCompExtractor = new BeCompRelationExtractor();
+        IRelationsExtractor<String> infoboxExtrator = new InfoboxRelationExtractor();
 
+        this.infobox = infoboxExtrator.extract(pageText);
         String[] textLines = pageText.split("\n");
         Set<String> extLinks = new HashSet<>();
         Set<String> extParenthesis = new HashSet<>();

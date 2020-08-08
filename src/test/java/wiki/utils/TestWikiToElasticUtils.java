@@ -1,9 +1,8 @@
 package wiki.utils;
 
 import com.google.gson.Gson;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import wiki.WikiToElasticMain;
 import wiki.handlers.ArrayPageHandler;
 
@@ -14,12 +13,15 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Objects;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 public class TestWikiToElasticUtils {
 
     private static final Gson GSON = new Gson();
     private static LangConfiguration langConfig;
 
-    @BeforeClass
+    @BeforeAll
     public static void initTest() throws FileNotFoundException {
         String testConfig = Objects.requireNonNull(WikiToElasticMain.class.getClassLoader().getResource("test_config.json")).getFile();
         WikiToElasticConfiguration config = GSON.fromJson(new FileReader(testConfig), WikiToElasticConfiguration.class);
@@ -44,8 +46,8 @@ public class TestWikiToElasticUtils {
 
                 System.out.println("total time took to parse: " + (System.currentTimeMillis() - startTime));
                 String output = String.valueOf(arrayPageHandler.getPages().size());
-                Assert.assertNotNull(output);
-                Assert.assertFalse(output.isEmpty());
+                assertNotNull(output);
+                assertFalse(output.isEmpty());
             }
         } finally {
             WikiToElasticUtils.closeCompressedFileInputStream(inputStream);

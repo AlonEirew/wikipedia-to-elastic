@@ -1,5 +1,8 @@
 {
-  "disambiguation": "消歧",
+  "infoboxText" : "Infobox",
+  "disambiguation": [
+    "消歧"
+  ],
   "category": [
     "类别",
     "Category"

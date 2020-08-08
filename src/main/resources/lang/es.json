@@ -1,5 +1,8 @@
 {
-  "disambiguation": "Desambiguación",
+  "infoboxText" : "Infobox",
+  "disambiguation": [
+    "Desambiguación"
+  ],
   "category": [
     "Categoría",
     "Category"

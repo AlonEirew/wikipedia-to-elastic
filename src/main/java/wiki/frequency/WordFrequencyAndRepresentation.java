@@ -17,7 +17,7 @@ public class WordFrequencyAndRepresentation {
     private final AtomicInteger docWordsCount = new AtomicInteger(0);
 
     public WordFrequencyAndRepresentation(LangConfiguration langConfig, String lang) {
-        WikiPageParser.initResources(langConfig, lang);
+        WikiPageParser.initResources(lang, langConfig);
     }
 
     public void countDocFrequency(String docString) {

@@ -7,10 +7,7 @@ package wiki;
 import com.google.gson.Gson;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import wiki.data.relations.BeCompRelationExtractor;
-import wiki.data.relations.CategoryRelationExtractor;
-import wiki.data.relations.LinkAndParenthesisRelationExtractor;
-import wiki.data.relations.PartNameRelationExtractor;
+import wiki.data.relations.*;
 import wiki.elastic.ElasticAPI;
 import wiki.handlers.ElasticPageHandler;
 import wiki.handlers.IPageHandler;
@@ -32,11 +29,7 @@ public class WikiToElasticMain {
             String langConfigFile = Objects.requireNonNull(WikiToElasticMain.class.getClassLoader().getResource("lang/" + config.getLang() + ".json")).getFile();
             LangConfiguration langConfiguration = GSON.fromJson(new FileReader(langConfigFile), LangConfiguration.class);
 
-            LinkAndParenthesisRelationExtractor.initResources(langConfiguration);
-            WikiPageParser.initResources(langConfiguration, config.getLang());
-            CategoryRelationExtractor.initResources(langConfiguration);
-            BeCompRelationExtractor.initResources(langConfiguration);
-            PartNameRelationExtractor.initResources(langConfiguration);
+            initExtractors(config, langConfiguration);
             LOGGER.info("Process configuration loaded");
 
             long startTime = System.currentTimeMillis();
@@ -53,6 +46,16 @@ public class WikiToElasticMain {
         } catch (Exception e) {
             LOGGER.error("Something went wrong..", e);
         }
+    }
+
+    public static void initExtractors(WikiToElasticConfiguration config, LangConfiguration langConfiguration) {
+        WikiPageParser.initResources(config.getLang(), langConfiguration);
+
+        InfoboxRelationExtractor.initResources(langConfiguration);
+        LinkAndParenthesisRelationExtractor.initResources(langConfiguration);
+        CategoryRelationExtractor.initResources(langConfiguration);
+        BeCompRelationExtractor.initResources(langConfiguration);
+        PartNameRelationExtractor.initResources(langConfiguration);
     }
 
     /**

@@ -1,10 +1,15 @@
 package wiki.utils;
 
 import edu.stanford.nlp.simple.Sentence;
+import info.bliki.wiki.model.WikiModel;
 import joptsimple.internal.Strings;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,17 +21,13 @@ public class WikiPageParser {
     private final static Logger LOGGER = LogManager.getLogger(WikiPageParser.class);
 
     private static List<String> partNameCategories;
-    private static String disambiguationCategories;
-    private static List<String> beComps;
-
-    private static final String URL_PATTERN = "(https?://[\\w\\d:#@%/;$()~_?\\+-=\\\\\\.&]*)";
+    private static List<String> disambiguationCategories;
 
     public static List<String> STOP_WORDS;
 
-    public static void initResources(LangConfiguration langConfig, String lang) {
+    public static void initResources(String lang, LangConfiguration langConfig) {
         partNameCategories = langConfig.getPartNames();
         disambiguationCategories = langConfig.getDisambiguation();
-        beComps = langConfig.getBeComp();
 
         if(STOP_WORDS == null) {
             String stopWordsFile = Objects.requireNonNull(WikiPageParser.class.getClassLoader().getResource("stop_words/" + lang + ".txt")).getFile();
@@ -80,132 +81,34 @@ public class WikiPageParser {
     }
 
     public static boolean isDisambiguation(Collection<String> categories) {
-        if (categories != null) {
-            for (String cat : categories) {
-                if (cat.equalsIgnoreCase(disambiguationCategories)) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return !Collections.disjoint(categories, disambiguationCategories);
     }
 
     public static String extractFirstPageParagraph(String text) {
-        String firstParagraph = "";
-        int firstSentenceStartIndex = text.indexOf("'''");
-        if(firstSentenceStartIndex >= 0) {
-            int lastTempIndex = text.indexOf("\n", firstSentenceStartIndex);
-            if (lastTempIndex == -1) {
-                lastTempIndex = text.length();
-            }
-
-            firstParagraph = text.substring(firstSentenceStartIndex, lastTempIndex);
-            if(extractBeAIndex(firstParagraph) == -1) {
-                firstParagraph = extractFirstPageParagraph(text.substring(lastTempIndex));
+        String htmlText = WikiModel.toHtml(text);
+        String cleanHtml = cleanTextField(htmlText);
+        Document doc = Jsoup.parse(cleanHtml);
+        Elements pis = doc.getElementsByTag("p");
+        for(Element elem : pis) {
+            String ptext = elem.text().trim();
+            if(!ptext.isEmpty()) {
+                return ptext;
             }
         }
 
-        String firstParagraphRemJson = removeJsonTags(firstParagraph);
-        String firstParagraphCleanLinks = normTextLinks(firstParagraphRemJson);
-        return cleanUrlPattern(firstParagraphCleanLinks);
+        return null;
     }
 
-    private static String cleanUrlPattern(String textToClean) {
-        Pattern p = Pattern.compile(URL_PATTERN,Pattern.CASE_INSENSITIVE);
-        Matcher m = p.matcher(textToClean);
-        while (m.find()) {
-            try {
-                textToClean = textToClean.replaceAll(m.group(0), "").trim();
-            } catch (Exception ignored) { }
-        }
-        return textToClean;
-    }
-
-    private static int extractBeAIndex(String sentence) {
-        int result = -1;
-
-        for(String be : beComps) {
-            if (sentence.contains(be)) {
-                return sentence.indexOf(be);
-            }
+    private static String cleanTextField(String html) {
+        String cleanHtml = html;
+        Pattern pat1 = Pattern.compile("(?s)\\{\\{[^{]*?\\}\\}");
+        Matcher match1 = pat1.matcher(cleanHtml);
+        while (match1.find()) {
+            cleanHtml = match1.replaceAll("");
+            match1 = pat1.matcher(cleanHtml);
         }
 
-        return result;
-    }
-
-    // Remove Json, html and parenthesis blocks {{.*}}/<.*>/(.*) mostly hyper links
-    private static String removeJsonTags(String text) {
-        text = removeParenthesis("{{", "}}", text);
-        text = removeParenthesis("<", ">", text);
-        text = removeParenthesis("(", ")", text);
-        text = text.replaceAll("'", "");
-        text = text.replaceAll("&nbsp;", " ");
-
-        return text;
-    }
-
-    private static String removeParenthesis(String parenthesisTypeBegin, String parenthesisTypeEnd, String text) {
-        while(text.contains(parenthesisTypeBegin) || text.contains(parenthesisTypeEnd)) {
-            StringBuffer buff = new StringBuffer(text);
-            int end = buff.indexOf(parenthesisTypeEnd);
-            int start;
-            if(end != -1) {
-                start = findInnerStartIndex(text.substring(0, end), -1, parenthesisTypeBegin);
-                if(start == -1) {
-                    return text;
-                }
-            } else {
-                start = buff.indexOf(parenthesisTypeBegin);
-                if(start != -1) {
-                    end = buff.length() - parenthesisTypeEnd.length();
-                }
-            }
-
-            if(start == -1 || end == -1) {
-                return text;
-            }
-
-            buff.delete(start, end + parenthesisTypeEnd.length());
-            text = buff.toString();
-        }
-
-        return text;
-    }
-
-    private static int findInnerStartIndex(String text, int startIndex, String parenthesisTypeBegin) {
-        int sIndex = text.indexOf(parenthesisTypeBegin);
-        if(sIndex == -1) {
-            return startIndex;
-        }
-
-        return findInnerStartIndex(text.substring(sIndex + parenthesisTypeBegin.length()), sIndex, parenthesisTypeBegin);
-    }
-
-    // Every thing in between [[.*]]
-    private static String normTextLinks(String text) {
-        StringBuilder result = new StringBuilder();
-        for (int i = 0; i < text.length(); i++) {
-            if(text.charAt(i) == '[') {
-                StringBuilder resultIn = new StringBuilder();
-                while (i + 1 < text.length() && text.charAt(++i) != ']') {
-                    if (text.charAt(i) == '[') {
-                        continue;
-                    }
-                    else if (text.charAt(i) == '|') {
-                        resultIn = new StringBuilder(); // clean (multi separated link)
-                        continue;
-                    }
-                    resultIn.append(text.charAt(i));
-                }
-                result.append(resultIn);
-            } else {
-                if (text.charAt(i) != ']') {
-                    result.append(text.charAt(i));
-                }
-            }
-        }
-
-        return result.toString();
+        return cleanHtml;
     }
 
     public static String cleanValue(String value) {
@@ -218,6 +121,6 @@ public class WikiPageParser {
     }
 
     public static String getTrimTextOnly(String text) {
-        return text; //text.replaceAll("[^a-zA-Z0-9]", " ").trim();
+        return text.trim(); //text.replaceAll("[^a-zA-Z0-9]", " ").trim();
     }
 }

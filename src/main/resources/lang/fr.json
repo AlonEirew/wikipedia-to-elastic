@@ -1,5 +1,8 @@
 {
-  "disambiguation": "Homonymie",
+  "infoboxText" : "Infobox",
+  "disambiguation": [
+    "Homonymie"
+  ],
   "category": [
     "Catégorie",
     "Category"

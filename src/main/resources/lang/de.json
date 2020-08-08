@@ -1,5 +1,8 @@
 {
-  "disambiguation": "Begriffsklärung",
+  "infoboxText" : "Infobox",
+  "disambiguation": [
+    "Begriffsklärung"
+  ],
   "category": [
     "Kategorie",
     "Category"

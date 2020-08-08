@@ -86,11 +86,11 @@ in order to create and export the wiki data into the Elastic index (which takes 
 
 ### Building the index From Source
 
-**Disclimer:** Processing English Wikipedia latest full dump (15GB .bz2 AND 66GB unpacked as .xml) including extraction of relations fields, normalization and lemmatization of text, 
-will take about **5 days** (tested on MacBook pro, using stanford parser to extract relations, normalize and lemmatize the data).<br/>
-In case of using this data in order to identify semantic relations between phrases at run time, It is recommended to normalize the fields for better results, thus, consider using the 'en' Docker Image to save that time. 
+**Disclimer:** Processing English Wikipedia latest full dump (15GB .bz2 AND 66GB unpacked as .xml) including extraction of relations fields, 
+will take about **5 days** (tested on MacBook pro, using stanford parser to extract relations).<br/>
+In case of using this data in order to identify semantic relations between phrases, consider using the 'en' Docker Image to save that time. 
 
-In case relation fields norm not needed or relations not needed all together, set normalizeFields/extractRelationFields to false in `conf.json` (as shown in "Project Configuration Files"), for a much faster data export into elastic **(< 2 hours)**.<br />
+In case relations not needed, set extractRelationFields to false in `conf.json` (as shown in "Project Configuration Files"), for a much faster data export into elastic **(< 2 hours)**.<br />
 
 ### Requisites
 * Java 11
@@ -103,7 +103,6 @@ In case relation fields norm not needed or relations not needed all together, se
 ```
     "indexName" : "enwiki_v3" (Set your desired Elastic Search index name)  
     "docType" : "wikipage" (Set your desired Elastic Search documnent type)
-    "normalizeFields" : true (Weather to run normalization of fields while processing the data)
     "extractRelationFields" : true (Weather to extract relations fields while processing the data, support only english wikipedia)
     "insertBulkSize": 100 (Number of pages to bulk insert to elastic search every iteration (found this number to give best preformence))
     "mapping" : "mapping.json" (Elastic Mapping file, should point to src/main/resources/mapping.json)
@@ -182,23 +181,7 @@ Pages that have been created with the following structures (also see "Created Fi
       "categories": [
         "disambiguation"
       ],
-      "titleParenthesis": [],
-      "disambiguationLinksNorm": [
-        "natural language processing",
-        "natural law party",
-        "national labour party",
-        "natural language programming",
-        "national library philippine",
-        "neuro linguistic programming",
-        "new labour party",
-        "national liberal party",
-        "new labour",
-        "normal link pulse"
-      ],
-      "categoriesNorm": [
-        "disambiguation"
-      ],
-      "titleParenthesisNorm": []
+      "titleParenthesis": []
     }
   }
 }
@@ -232,13 +215,10 @@ Pages that have been created with the following structures (also see "Created Fi
 | _source.text | Text | Wikipedia page text |
 | _source.redirectTitle | Text (optional) | Wikipedia page redirect title |
 | _source.relations.beCompRelations | List (optional) | Be-Comp (or 'Is A') relation list |
-| _source.relations.beCompRelationsNorm | List (optional) | Be-Comp (or 'Is A') relation list norm |
 | _source.relations.categories | List (optional) | Categories relation list |
-| _source.relations.categoriesNorm | List (optional) | Categories relation list norm |
 | _source.relations.isDisambiguation | Bool (optional) | is Wikipedia disambiguation page |
 | _source.relations.isPartName | List (optional) | is Wikipedia page name description |
 | _source.relations.titleParenthesis | List (optional) | List of disambiguation secondary links  |
-| _source.relations.titleParenthesisNorm | List (optional) | List of disambiguation secondary links norm |
 
 ### Citing
 If you use this project or the created data in your research, please use the following citation https://doi.org/10.5281/zenodo.3239509
