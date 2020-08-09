@@ -56,7 +56,7 @@ public class WikiToElasticMain {
         InfoboxRelationExtractor.initResources(langConfiguration);
         LinkAndParenthesisRelationExtractor.initResources(langConfiguration);
         CategoryRelationExtractor.initResources(langConfiguration);
-        BeCompRelationExtractor.initResources(langConfiguration);
+//        BeCompRelationExtractor.initResources(langConfiguration);
         PartNameRelationExtractor.initResources(langConfiguration);
     }
 

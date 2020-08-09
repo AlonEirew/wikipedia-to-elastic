@@ -35,7 +35,7 @@ public class WikiParsedPageRelationsBuilder {
         IRelationsExtractor<Set<String>> categoryExtractor = new CategoryRelationExtractor();
         IRelationsExtractor<Boolean> partNameExtractor = new PartNameRelationExtractor();
         IRelationsExtractor<LinkParenthesisPair> pairExtractor = new LinkAndParenthesisRelationExtractor();
-        IRelationsExtractor<BeCompRelationResult> beCompExtractor = new BeCompRelationExtractor();
+//        IRelationsExtractor<BeCompRelationResult> beCompExtractor = new BeCompRelationExtractor();
         IRelationsExtractor<String> infoboxExtrator = new InfoboxRelationExtractor();
 
         this.infobox = infoboxExtrator.extract(pageText);
@@ -62,11 +62,11 @@ public class WikiParsedPageRelationsBuilder {
             this.isDisambiguation = true;
             this.disambiguationLinks = extLinks;
             this.titleParenthesis = extParenthesis;
-        } else {
-            String firstParagraph = WikiPageParser.extractFirstPageParagraph(pageText);
-            final BeCompRelationResult beCompRelations = beCompExtractor.extract(firstParagraph);
-            this.beCompRelations = beCompRelations.getBeCompRelations();
-        }
+        } //else {
+//            String firstParagraph = WikiPageParser.extractFirstPageParagraph(pageText);
+//            final BeCompRelationResult beCompRelations = beCompExtractor.extract(firstParagraph);
+//            this.beCompRelations = beCompRelations.getBeCompRelations();
+//        }
         return this.build();
     }
 }
