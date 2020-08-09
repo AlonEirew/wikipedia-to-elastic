@@ -14,6 +14,7 @@ import wiki.handlers.IPageHandler;
 import wiki.utils.*;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
@@ -25,9 +26,10 @@ public class WikiToElasticMain {
 
     public static void main(String[] args) {
         try {
+            LOGGER.info("Initiating all resources...");
             WikiToElasticConfiguration config = GSON.fromJson(new FileReader("conf.json"), WikiToElasticConfiguration.class);
-            String langConfigFile = Objects.requireNonNull(WikiToElasticMain.class.getClassLoader().getResource("lang/" + config.getLang() + ".json")).getFile();
-            LangConfiguration langConfiguration = GSON.fromJson(new FileReader(langConfigFile), LangConfiguration.class);
+            InputStream inputStream = Objects.requireNonNull(WikiToElasticMain.class.getClassLoader().getResourceAsStream("lang/" + config.getLang() + ".json"));
+            LangConfiguration langConfiguration = GSON.fromJson(new InputStreamReader(inputStream, StandardCharsets.UTF_8), LangConfiguration.class);
 
             initExtractors(config, langConfiguration);
             LOGGER.info("Process configuration loaded");

@@ -1,13 +1,18 @@
 package wiki.data.relations;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import wiki.utils.LangConfiguration;
 
 public class InfoboxRelationExtractor implements IRelationsExtractor<String> {
+    private final static Logger LOGGER = LogManager.getLogger(InfoboxRelationExtractor.class);
 
     private static String infoboxText;
 
     public static void initResources(LangConfiguration lang) {
+        LOGGER.info("Initiating InfoboxRelationExtractor");
         infoboxText = lang.getInfoboxText();
+        LOGGER.info("InfoboxRelationExtractor initialized");
     }
 
     @Override

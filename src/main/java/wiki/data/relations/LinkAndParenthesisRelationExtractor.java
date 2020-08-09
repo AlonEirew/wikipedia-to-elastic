@@ -1,5 +1,7 @@
 package wiki.data.relations;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import wiki.data.obj.LinkParenthesisPair;
 import wiki.utils.LangConfiguration;
 import wiki.utils.WikiPageParser;
@@ -10,6 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class LinkAndParenthesisRelationExtractor implements IRelationsExtractor<LinkParenthesisPair> {
+    private final static Logger LOGGER = LogManager.getLogger(LinkAndParenthesisRelationExtractor.class);
 
     private static final String PARENTHESIS_REGEX_1 = "\\[\\[((?>\\P{M}\\p{M}*)+)\\]\\]";
     private static final Pattern PARENTHESIS_PATTERN_1 = Pattern.compile(PARENTHESIS_REGEX_1);
@@ -20,7 +23,9 @@ public class LinkAndParenthesisRelationExtractor implements IRelationsExtractor<
     private static String disambiguationTitle;
 
     public static void initResources(LangConfiguration lang) {
+        LOGGER.info("Initiating LinkAndParenthesisRelationExtractor");
         disambiguationTitle = "(" + lang.getDisambiguation() + ")";
+        LOGGER.info("LinkAndParenthesisRelationExtractor initialized");
     }
 
     @Override

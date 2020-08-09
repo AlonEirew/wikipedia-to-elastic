@@ -11,7 +11,9 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.TreeSet;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TestBeCompRelationExtraction {
@@ -34,8 +36,7 @@ public class TestBeCompRelationExtraction {
         List<String> jimList = new ArrayList<>(Arrays.asList(jimIsA));
         final String firstPageParagraph0 = WikiPageParser.extractFirstPageParagraph(textsLists.get(0));
         final BeCompRelationResult jimResultSet = beCompExtractor.extract(firstPageParagraph0);
-        assertTrue(jimResultSet.getBeCompRelations().containsAll(jimList));
-        assertTrue(jimList.containsAll(jimResultSet.getBeCompRelations()));
+        assertEquals(new TreeSet<>(jimList), new TreeSet<>(jimResultSet.getBeCompRelations()));
 
         String[] ellenIsA = {"Ellen Lee DeGeneres", "DeGeneres", "Lee DeGeneres", "Ellen DeGeneres", "American comedian", "activist",
                 "actress", "comedian", "host", "LGBT activist", "producer", "television host", "writer"};

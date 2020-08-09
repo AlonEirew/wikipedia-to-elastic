@@ -6,6 +6,9 @@ import edu.stanford.nlp.pipeline.CoreDocument;
 import edu.stanford.nlp.pipeline.CoreSentence;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import wiki.WikiToElasticMain;
 import wiki.data.obj.BeCompRelationResult;
 import wiki.utils.LangConfiguration;
 import wiki.utils.WikiPageParser;
@@ -17,9 +20,12 @@ import java.util.Stack;
 
 public class BeCompRelationExtractor implements IRelationsExtractor<BeCompRelationResult> {
 
+    private final static Logger LOGGER = LogManager.getLogger(BeCompRelationExtractor.class);
+
     private static StanfordCoreNLP sPipeline;
 
     public static void initResources(LangConfiguration langConfig) {
+        LOGGER.info("Initiating BeCompRelationExtractor");
         String lang = langConfig.getCoreNlpLang();
         if(sPipeline == null && lang != null) {
             if(lang.equals("english")) {
@@ -30,11 +36,12 @@ public class BeCompRelationExtractor implements IRelationsExtractor<BeCompRelati
                 sPipeline = new StanfordCoreNLP(lang);
             }
         }
+        LOGGER.info("BeCompRelationExtractor initialized");
     }
 
     @Override
     public BeCompRelationResult extract(String firstSentence) throws Exception {
-        if(firstSentence.contains(".")) {
+        if(firstSentence != null && firstSentence.contains(".")) {
             firstSentence = firstSentence.substring(0, firstSentence.indexOf("."));
         }
         return extractBeCompRelation(firstSentence);

@@ -4,6 +4,7 @@ import edu.stanford.nlp.simple.Sentence;
 import info.bliki.wiki.model.WikiModel;
 import joptsimple.internal.Strings;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jsoup.Jsoup;
@@ -13,6 +14,9 @@ import org.jsoup.select.Elements;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,11 +34,9 @@ public class WikiPageParser {
         disambiguationCategories = langConfig.getDisambiguation();
 
         if(STOP_WORDS == null) {
-            String stopWordsFile = Objects.requireNonNull(WikiPageParser.class.getClassLoader().getResource("stop_words/" + lang + ".txt")).getFile();
+            InputStream stopWordsFile = Objects.requireNonNull(WikiPageParser.class.getClassLoader().getResourceAsStream("stop_words/" + lang + ".txt"));
             try {
-                if(stopWordsFile != null) {
-                    STOP_WORDS = FileUtils.readLines(new File(stopWordsFile), "UTF-8");
-                }
+                STOP_WORDS = IOUtils.readLines(stopWordsFile, StandardCharsets.UTF_8);
             } catch (IOException e) {
                 LOGGER.error("failed to load STOP_WORDS", e);
             }
