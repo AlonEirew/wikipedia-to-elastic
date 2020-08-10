@@ -26,7 +26,6 @@ semantic features for tasks such as Identifying Semantic Relations, Entity Linki
 * Link Title Parenthesis - See details at paper <a href="http://u.cs.biu.ac.il/~dagan/publications/ACL09%20camera%20ready.pdf">"Extracting Lexical Reference Rules from Wikipedia"</a>
 * Infobox - See details at <a href="https://en.wikipedia.org/wiki/Help:Infobox">Wikipedia Infobox</a>
 * Term Frequency (TBD/WIP) - Hold a map of term frequency for computing TFIDF on Wikipadia
-[//]: # * 'Is A' (extracted from page first paragraph) - See details at paper <a href="http://u.cs.biu.ac.il/~dagan/publications/ACL09%20camera%20ready.pdf">"Extracting Lexical Reference Rules from Wikipedia"</a>
 
 ***
 
