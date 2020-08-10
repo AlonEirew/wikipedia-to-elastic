@@ -24,79 +24,19 @@ semantic features for tasks such as Identifying Semantic Relations, Entity Linki
 * Disambiguation Links - See details at <a href="https://en.wikipedia.org/wiki/Category:Disambiguation_pages">Wikipedia Disambiguation</a>
 * Category Links - See details at <a href="https://en.wikipedia.org/wiki/Help:Category">Wikipedia Category</a>
 * Link Title Parenthesis - See details at paper <a href="http://u.cs.biu.ac.il/~dagan/publications/ACL09%20camera%20ready.pdf">"Extracting Lexical Reference Rules from Wikipedia"</a>
-* 'Is A' (extracted from page first paragraph) - See details at paper <a href="http://u.cs.biu.ac.il/~dagan/publications/ACL09%20camera%20ready.pdf">"Extracting Lexical Reference Rules from Wikipedia"</a>
+* Infobox - See details at <a href="https://en.wikipedia.org/wiki/Help:Infobox">Wikipedia Infobox</a>
 * Term Frequency (TBD/WIP) - Hold a map of term frequency for computing TFIDF on Wikipadia
-
-***
-
-### Getting the index with Docker
-This is the preferred and fastest way to get the elastic index locally.<br/>
-Docker images for English contains all extracted fields. For other languages, docker images won't contain the `relations` field.
-
-#### Docker Prerequisites
-1) Before starting this one-time process, make sure docker disk image size (*in your Docker Engine Preferences*) is not limited under 150GB.
-Once below one-time process done, you can decrease image size
-2) If working with a Linux host, you might need to increase host vm.max_map_count,
-in order to verify you have the right value (i.e 262144), run: 
-        
-        $>sudo sysctl vm.max_map_count
-        You should see: vm.max_map_count = 262144
-        If you see instead: vm.max_map_count = 65530, 
-        Fix by running:
-        $>sudo sysctl -w vm.max_map_count=262144
-        
-
-#### Get Image and Build Container
-
-* Pull the latest image, use *one* of those commands (processed dump year):
-
-    `#>docker pull aeirew/elastic-wiki` // English (August 2019) <br/>
-    `#>docker pull aeirew/elastic-wiki-fr` // French (July 2020) <br/>
-    `#>docker pull aeirew/elastic-wiki-es` // Spanish (July 2020) <br/>
-    `#>docker pull aeirew/elastic-wiki-de` // German (July 2020) <br/>
-
-* Once pulled, run it (all commands below use the English docker image, replace with the actual pulled image): 
-   
-    `#>docker run -d -p 9200:9200 -p 9300:9300 aeirew/elastic-wiki`
-
-* The Elastic container index is still empty, all data is in a compressed file within the image,
-in order to create and export the wiki data into the Elastic index (which takes a while) run the following command
-
-    `#>docker exec <REPLACE_WITH_RUNNING_CONTAINER_ID> /tmp/build.sh`
-    
-* Save to new image (after done you can delete the original aeirew/elastic-wiki image, in order to save disk space)
-
-    `#>docker commit <CONTAINER_ID> <IMAGE_NEW_NAME>`
-    
-* after saving stop the running container with 
-
-    `#>docker stop <CONTAINER_ID>`
-
-* That's it! now you can run your created image
-
-    `#>docker run -d -p 9200:9200 -p 9300:9300 <IMAGE_NEW_NAME>`
-
-   To test/query, you can run from terminal:
-   
-    `curl -XGET 'http://localhost:9200/enwiki_v3/_search?pretty=true' -H 'Content-Type: application/json' -d '{"size": 5, "query": {"match_phrase": { "title.near_match": "Alan Turing"}}}'`
-    
-   This should return a wikipedia page on Alan Turing.
+[//]: # * 'Is A' (extracted from page first paragraph) - See details at paper <a href="http://u.cs.biu.ac.il/~dagan/publications/ACL09%20camera%20ready.pdf">"Extracting Lexical Reference Rules from Wikipedia"</a>
 
 ***
 
 ### Building the index From Source
 
-**Disclimer:** Processing English Wikipedia latest full dump (15GB .bz2 AND 66GB unpacked as .xml) including extraction of relations fields, 
-will take about **5 days** (tested on MacBook pro, using stanford parser to extract relations).<br/>
-In case of using this data in order to identify semantic relations between phrases, consider using the 'en' Docker Image to save that time. 
-
-In case relations not needed, set extractRelationFields to false in `conf.json` (as shown in "Project Configuration Files"), for a much faster data export into elastic **(< 2 hours)**.<br />
-
 ### Requisites
 * Java 11
-* ElasticSearch 6.2 (<a href=https://www.elastic.co/downloads/elasticsearch>Installation Guide</a>)
+* ElasticSearch 6.2.3 (<a href=https://www.elastic.co/downloads/elasticsearch>Installation Guide</a>)
+* Elastic plugins: analysis-icu, analysis-smartcn
 * Wikipedia xml.bz2 dump file in required language (English for example<a href=https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles.xml.bz2>download enwiki latest dump xml</a>)
-* project `build.gradle` - In case of building **none** English index (and `conf.json` - `extractRelationFields=true`), remove the comment for the `stanford-model` of the required language
 
 ### Project Configuration Files
 * `src/main/resources/conf.json` - basic process configuration
@@ -181,6 +121,7 @@ Pages that have been created with the following structures (also see "Created Fi
       "categories": [
         "disambiguation"
       ],
+      "infobox": "",
       "titleParenthesis": []
     }
   }
@@ -214,7 +155,7 @@ Pages that have been created with the following structures (also see "Created Fi
 | _source.title | Text | Wikipedia page title |
 | _source.text | Text | Wikipedia page text |
 | _source.redirectTitle | Text (optional) | Wikipedia page redirect title |
-| _source.relations.beCompRelations | List (optional) | Be-Comp (or 'Is A') relation list |
+| _source.relations.infobox | Text (optional) | The article infobox element |
 | _source.relations.categories | List (optional) | Categories relation list |
 | _source.relations.isDisambiguation | Bool (optional) | is Wikipedia disambiguation page |
 | _source.relations.isPartName | List (optional) | is Wikipedia page name description |

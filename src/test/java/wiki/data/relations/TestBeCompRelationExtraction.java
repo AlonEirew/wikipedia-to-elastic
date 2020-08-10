@@ -18,14 +18,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TestBeCompRelationExtraction {
 
-    @BeforeAll
+//    @BeforeAll
     public static void initResources() throws FileNotFoundException {
         LangConfiguration langConfig = TestUtils.getLangConfig("en");
         WikiPageParser.initResources("en", langConfig);
         BeCompRelationExtractor.initResources(langConfig);
     }
 
-    @Test
+//    @Test
     public void testExtractBeComp() throws Exception {
         IRelationsExtractor<BeCompRelationResult> beCompExtractor = new BeCompRelationExtractor();
 
