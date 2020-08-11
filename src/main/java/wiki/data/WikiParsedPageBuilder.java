@@ -7,7 +7,7 @@ package wiki.data;
 public class WikiParsedPageBuilder {
     private String title;
     private long id;
-    private String text;
+    private String text = "";
     private String redirectTitle;
     private WikiParsedPageRelations relations;
 

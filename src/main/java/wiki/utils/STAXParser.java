@@ -6,7 +6,6 @@ package wiki.utils;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import wiki.data.WikiParsedPage;
 import wiki.data.WikiParsedPageBuilder;
 import wiki.data.WikiParsedPageRelations;
 import wiki.data.WikiParsedPageRelationsBuilder;
@@ -39,6 +38,7 @@ public class STAXParser {
 
     private final static Logger LOGGER = LogManager.getLogger(STAXParser.class);
 
+    private final boolean includeRawText;
     private final RejectedExecutionHandler rejectedExecutionHandler = new ThreadPoolExecutor.CallerRunsPolicy();
     private final BlockingQueue<Runnable> blockingQueue = new ArrayBlockingQueue<>(100);
     private final IPageHandler handler;
@@ -48,17 +48,18 @@ public class STAXParser {
     private DeleteUpdateMode deleteUpdateMode;
 
 
-    public STAXParser(IPageHandler handler, LangConfiguration langConfig) {
+    public STAXParser(IPageHandler handler, LangConfiguration langConfig, boolean includeRawText) {
         this.executorService = initExecutorService();
         this.handler = handler;
         this.extractFields = true;
         this.deleteUpdateMode = DeleteUpdateMode.NA;
         this.filterTitles = langConfig.getTitlesPref().toArray(new String[0]);
         this.redirectTextPrefix = "#" + langConfig.getRedirect();
+        this.includeRawText = includeRawText;
     }
 
     public STAXParser(IPageHandler handler, WikiToElasticConfiguration config, LangConfiguration langConfig, DeleteUpdateMode mode) {
-        this(handler, langConfig);
+        this(handler, langConfig, config.isIncludeRawText());
         this.deleteUpdateMode = mode;
         this.extractFields = config.isExtractRelationFields();
     }
@@ -187,16 +188,18 @@ public class STAXParser {
                         relations = new WikiParsedPageRelationsBuilder().build();
                     }
 
-                    final WikiParsedPage page = new WikiParsedPageBuilder()
+                    final WikiParsedPageBuilder pageBuilder = new WikiParsedPageBuilder()
                             .setId(id)
                             .setTitle(title)
                             .setRedirectTitle(redirect)
-                            .setText(text)
-                            .setRelations(relations)
-                            .build();
+                            .setRelations(relations);
+
+                    if(includeRawText) {
+                        pageBuilder.setText(text);
+                    }
 
                     // Adding the page to the elastic search queue handler
-                    handler.addPage(page);
+                    handler.addPage(pageBuilder.build());
                 } catch (Exception ex) {
                     LOGGER.error("Got Exception in thread", ex);
                 }

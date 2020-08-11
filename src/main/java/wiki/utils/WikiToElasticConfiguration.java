@@ -32,6 +32,7 @@ public class WikiToElasticConfiguration {
     private int insertBulkSize;
     private boolean extractRelationFields;
     private String lang;
+    private boolean includeRawText;
     private List<RelationType> relationTypes;
 
     private transient String mappingFileContent = null;
@@ -167,5 +168,13 @@ public class WikiToElasticConfiguration {
 
     public void setLang(String lang) {
         this.lang = lang;
+    }
+
+    public boolean isIncludeRawText() {
+        return includeRawText;
+    }
+
+    public void setIncludeRawText(boolean includeRawText) {
+        this.includeRawText = includeRawText;
     }
 }

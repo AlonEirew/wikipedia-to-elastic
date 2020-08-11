@@ -12,6 +12,7 @@
   "shards": 1,
   "replicas": 0,
   "lang": "en",
+  "includeRawText" : true,
   "relationTypes": [
     "Category",
     "Infobox",
