@@ -18,10 +18,9 @@ public class TestWordFrequencyAndRep {
     public void testCountLineFrequency() throws FileNotFoundException {
         String testConfig = Objects.requireNonNull(WikiToElasticMain.class.getClassLoader().getResource("test_config.json")).getFile();
         WikiToElasticConfiguration config = GSON.fromJson(new FileReader(testConfig), WikiToElasticConfiguration.class);
-        String langConfigFile = Objects.requireNonNull(WikiToElasticMain.class.getClassLoader().getResource("lang/" + config.getLang() + ".json")).getFile();
-        LangConfiguration langConfiguration = GSON.fromJson(new FileReader(langConfigFile), LangConfiguration.class);
 
-        WordFrequencyAndRepresentation wfar = new WordFrequencyAndRepresentation(langConfiguration, config.getLang());
+        WordFrequencyAndRepresentation.initResources(config.getLang());
+        WordFrequencyAndRepresentation wfar = new WordFrequencyAndRepresentation();
         String text = TestUtils.getFileJsonContent("nlp_wiki_test_text.json");
         wfar.countDocFrequency(text);
 

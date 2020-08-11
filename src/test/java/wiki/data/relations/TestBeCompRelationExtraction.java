@@ -21,7 +21,6 @@ public class TestBeCompRelationExtraction {
 //    @BeforeAll
     public static void initResources() throws FileNotFoundException {
         LangConfiguration langConfig = TestUtils.getLangConfig("en");
-        WikiPageParser.initResources("en", langConfig);
         BeCompRelationExtractor.initResources(langConfig);
     }
 

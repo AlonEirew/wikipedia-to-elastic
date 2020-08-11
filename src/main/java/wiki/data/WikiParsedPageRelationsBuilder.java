@@ -5,7 +5,6 @@ import wiki.data.relations.*;
 import wiki.utils.WikiPageParser;
 
 public class WikiParsedPageRelationsBuilder {
-    private boolean isDisambiguation = false;
     private boolean isPartName = false;
 
     private final CategoryRelationExtractor categoryExtractor = new CategoryRelationExtractor();
@@ -18,7 +17,7 @@ public class WikiParsedPageRelationsBuilder {
         return new WikiParsedPageRelations(
                 this.infoboxExtrator.getResult(),
                 this.isPartName,
-                this.isDisambiguation,
+                this.categoryExtractor.isDisambiguation(),
                 this.pairExtractor.getLinks(),
                 this.categoryExtractor.getResult(),
                 this.pairExtractor.getTitleParenthesis(),
@@ -39,11 +38,8 @@ public class WikiParsedPageRelationsBuilder {
             this.isPartName = this.categoryExtractor.isPartNameInCategories();
         }
 
-        if (WikiPageParser.isDisambiguation(this.categoryExtractor.getResult())) { // need to replace with utils method to check in categories if disambig
-            this.isDisambiguation = true;
-        } else {
+        if (!this.categoryExtractor.isDisambiguation()) { // need to replace with utils method to check in categories if disambig
             String firstParagraph = WikiPageParser.extractFirstPageParagraph(pageText);
-            beCompExtractor.extract(firstParagraph);
             this.beCompExtractor.extract(firstParagraph);
         }
         return this.build();

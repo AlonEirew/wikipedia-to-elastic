@@ -60,10 +60,4 @@ public class TestRelationsBuilderAndPageParser {
         assertEquals(new TreeSet<>(wikiParsedPageRelations.getDisambiguationLinks()), new TreeSet<>(jsonResult.getDisambiguationLinks()));
 
     }
-
-    @Test
-    public void testNormalizeString() {
-        String result = WikiPageParser.normalizeString("The New Orleans Saints");
-        assertEquals("new orlean saint", result);
-    }
 }

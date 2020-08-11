@@ -16,7 +16,6 @@ public class TestWikiPageParser {
     @BeforeAll
     public static void init() throws FileNotFoundException {
         LangConfiguration langConfig = TestUtils.getLangConfig("en");
-        WikiPageParser.initResources("en", langConfig);
     }
 
     @Test

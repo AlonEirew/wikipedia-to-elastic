@@ -5,10 +5,7 @@ import org.apache.logging.log4j.Logger;
 import wiki.utils.LangConfiguration;
 import wiki.utils.WikiPageParser;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,12 +17,15 @@ public class CategoryRelationExtractor implements IRelationsExtractor<Set<String
     private static Pattern catPattern;
     private static Pattern disPattern;
 
+    private static List<String> disambiguationCategories;
+
     private final Set<String> categories = new HashSet<>();
 
     public static void initResources(LangConfiguration lang) {
         LOGGER.info("Initiating CategoryRelationExtractor");
         disambiguationTitles = lang.getDisambiguation();
         partNameCategories = lang.getPartNames();
+        disambiguationCategories = lang.getDisambiguation();
 
         String catRegex = "\\[\\[(" + String.join("|", lang.getCategory()) + "):((?>\\P{M}\\p{M}*)+)\\]\\]";
         catPattern = Pattern.compile(catRegex);
@@ -82,5 +82,9 @@ public class CategoryRelationExtractor implements IRelationsExtractor<Set<String
         }
 
         return false;
+    }
+
+    public boolean isDisambiguation() {
+        return !Collections.disjoint(this.categories, disambiguationCategories);
     }
 }

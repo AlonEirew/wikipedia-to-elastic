@@ -51,8 +51,6 @@ public class WikiToElasticMain {
     }
 
     public static void initExtractors(WikiToElasticConfiguration config, LangConfiguration langConfiguration) {
-        WikiPageParser.initResources(config.getLang(), langConfiguration);
-
         InfoboxRelationExtractor.initResources(langConfiguration);
         LinkAndParenthesisRelationExtractor.initResources(langConfiguration);
         CategoryRelationExtractor.initResources(langConfiguration);
