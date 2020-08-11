@@ -4,13 +4,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import wiki.utils.LangConfiguration;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class PartNameRelationExtractor implements IRelationsExtractor<Boolean> {
     private final static Logger LOGGER = LogManager.getLogger(PartNameRelationExtractor.class);
 
-    private static List<String> partNames;
-    private static List<String> category;
+    private static List<String> partNames = new ArrayList<>();
+    private static List<String> category = new ArrayList<>();
 
     private boolean isPartName = false;
 

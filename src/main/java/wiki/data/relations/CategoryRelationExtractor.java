@@ -11,13 +11,13 @@ import java.util.regex.Pattern;
 
 public class CategoryRelationExtractor implements IRelationsExtractor<Set<String>> {
     private final static Logger LOGGER = LogManager.getLogger(CategoryRelationExtractor.class);
-    private static List<String> disambiguationTitles;
-    private static List<String> partNameCategories;
+    private static List<String> disambiguationTitles = new ArrayList<>();
+    private static List<String> partNameCategories = new ArrayList<>();
 
     private static Pattern catPattern;
     private static Pattern disPattern;
 
-    private static List<String> disambiguationCategories;
+    private static List<String> disambiguationCategories = new ArrayList<>();
 
     private final Set<String> categories = new HashSet<>();
 

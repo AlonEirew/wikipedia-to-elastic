@@ -1,5 +1,6 @@
 package wiki.data;
 
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -7,7 +8,7 @@ public class WikiParsedPageRelations {
     private final String infobox;
     private final boolean isPartName;
     private final boolean isDisambiguation;
-    private final Set<String> disambiguationLinks;
+    private final Set<String> disambiguationLinks = new HashSet<>();
     private final Set<String> categories;
     private final Set<String> titleParenthesis;
     private final Set<String> beCompRelations;
@@ -19,7 +20,11 @@ public class WikiParsedPageRelations {
         this.infobox = infobox;
         this.isPartName = isPartName;
         this.isDisambiguation = isDisambiguation;
-        this.disambiguationLinks = disambiguationLinks;
+
+        if(isDisambiguation) {
+            this.disambiguationLinks.addAll(disambiguationLinks);
+        }
+
         this.categories = categories;
         this.titleParenthesis = titleParenthesis;
         this.beCompRelations = beCompRelations;

@@ -13,7 +13,6 @@
   "replicas": 0,
   "lang": "en",
   "relationTypes": [
-    "BeComp",
     "Category",
     "Infobox",
     "Parenthesis",

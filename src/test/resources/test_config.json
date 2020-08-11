@@ -1,7 +1,6 @@
 {
   "indexName": "wikitestingindex",
   "docType": "wikipage",
-  "normalizeFields": false,
   "extractRelationFields": false,
   "insertBulkSize": 100,
   "mapping": "mapping.json",
@@ -12,5 +11,12 @@
   "scheme": "http",
   "shards": 1,
   "replicas": 0,
-  "lang": "en"
+  "lang": "en",
+  "relationTypes": [
+    "BeComp",
+    "Category",
+    "Infobox",
+    "Parenthesis",
+    "PartName"
+  ]
 }

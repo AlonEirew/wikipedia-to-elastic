@@ -6,6 +6,7 @@ import wiki.TestUtils;
 import wiki.WikiToElasticMain;
 import wiki.data.obj.BeCompRelationResult;
 import wiki.data.relations.BeCompRelationExtractor;
+import wiki.data.relations.ExtractorsManager;
 import wiki.data.relations.IRelationsExtractor;
 import wiki.utils.LangConfiguration;
 import wiki.utils.WikiPageParser;
@@ -13,10 +14,11 @@ import wiki.utils.WikiToElasticConfiguration;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.TreeSet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TestRelationsBuilderAndPageParser {
 
@@ -27,7 +29,7 @@ public class TestRelationsBuilderAndPageParser {
         String langConfigFile = Objects.requireNonNull(WikiToElasticMain.class.getClassLoader().getResource("lang/" + config.getLang() + ".json")).getFile();
         LangConfiguration langConfiguration = TestUtils.GSON.fromJson(new FileReader(langConfigFile), LangConfiguration.class);
 
-        WikiToElasticMain.initExtractors(config, langConfiguration);
+        ExtractorsManager.initExtractors(config, langConfiguration);
     }
 
     @Test

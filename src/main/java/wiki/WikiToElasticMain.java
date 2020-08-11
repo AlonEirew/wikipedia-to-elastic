@@ -31,7 +31,7 @@ public class WikiToElasticMain {
             InputStream inputStream = Objects.requireNonNull(WikiToElasticMain.class.getClassLoader().getResourceAsStream("lang/" + config.getLang() + ".json"));
             LangConfiguration langConfiguration = GSON.fromJson(new InputStreamReader(inputStream, StandardCharsets.UTF_8), LangConfiguration.class);
 
-            initExtractors(config, langConfiguration);
+            ExtractorsManager.initExtractors(config, langConfiguration);
             LOGGER.info("Process configuration loaded");
 
             long startTime = System.currentTimeMillis();
@@ -48,14 +48,6 @@ public class WikiToElasticMain {
         } catch (Exception e) {
             LOGGER.error("Something went wrong..", e);
         }
-    }
-
-    public static void initExtractors(WikiToElasticConfiguration config, LangConfiguration langConfiguration) {
-        InfoboxRelationExtractor.initResources(langConfiguration);
-        LinkAndParenthesisRelationExtractor.initResources(langConfiguration);
-        CategoryRelationExtractor.initResources(langConfiguration);
-        BeCompRelationExtractor.initResources(langConfiguration);
-        PartNameRelationExtractor.initResources(langConfiguration);
     }
 
     /**
