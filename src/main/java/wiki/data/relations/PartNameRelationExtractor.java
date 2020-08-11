@@ -12,6 +12,8 @@ public class PartNameRelationExtractor implements IRelationsExtractor<Boolean> {
     private static List<String> partNames;
     private static List<String> category;
 
+    private boolean isPartName = false;
+
     public static void initResources(LangConfiguration langConfig) {
         LOGGER.info("Initiating PartNameRelationExtractor");
         partNames = langConfig.getPartNames();
@@ -20,21 +22,31 @@ public class PartNameRelationExtractor implements IRelationsExtractor<Boolean> {
     }
 
     @Override
-    public Boolean extract(String line) throws Exception {
-        if (line != null && !line.isEmpty()) {
-            line = line.toLowerCase();
-            for(String name : partNames) {
-                if (line.contains("===" + name + "===")) {
-                    return true;
-                }
+    public IRelationsExtractor<Boolean> extract(String line) throws Exception {
+        if(!this.isPartName) {
+            if (line != null && !line.isEmpty()) {
+                line = line.toLowerCase();
+                for (String name : partNames) {
+                    if (line.contains("===" + name + "===")) {
+                        this.isPartName = true;
+                        return this;
+                    }
 
-                for(String cat : category) {
-                    if (line.contains(cat + ":" + name)) {
-                        return true;
+                    for (String cat : category) {
+                        if (line.contains(cat + ":" + name)) {
+                            this.isPartName = true;
+                            return this;
+                        }
                     }
                 }
             }
         }
-        return false;
+
+        return this;
+    }
+
+    @Override
+    public Boolean getResult() {
+        return this.isPartName;
     }
 }

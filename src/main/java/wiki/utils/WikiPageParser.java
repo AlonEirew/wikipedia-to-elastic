@@ -24,13 +24,11 @@ import java.util.regex.Pattern;
 public class WikiPageParser {
     private final static Logger LOGGER = LogManager.getLogger(WikiPageParser.class);
 
-    private static List<String> partNameCategories;
     private static List<String> disambiguationCategories;
 
     public static List<String> STOP_WORDS;
 
     public static void initResources(String lang, LangConfiguration langConfig) {
-        partNameCategories = langConfig.getPartNames();
         disambiguationCategories = langConfig.getDisambiguation();
 
         if(STOP_WORDS == null) {
@@ -41,19 +39,6 @@ public class WikiPageParser {
                 LOGGER.error("failed to load STOP_WORDS", e);
             }
         }
-    }
-
-    public static boolean isPartNameInCategories(Collection<String> categories) {
-        if (categories != null) {
-            for (String cat : categories) {
-                for (String partName : partNameCategories) {
-                    if (cat.equalsIgnoreCase(partName)) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
     }
 
     public static String normalizeString(String toNorm) {

@@ -8,6 +8,7 @@ public class InfoboxRelationExtractor implements IRelationsExtractor<String> {
     private final static Logger LOGGER = LogManager.getLogger(InfoboxRelationExtractor.class);
 
     private static String infoboxText;
+    private String infobox;
 
     public static void initResources(LangConfiguration lang) {
         LOGGER.info("Initiating InfoboxRelationExtractor");
@@ -16,7 +17,7 @@ public class InfoboxRelationExtractor implements IRelationsExtractor<String> {
     }
 
     @Override
-    public String extract(String pageText) throws Exception {
+    public IRelationsExtractor<String> extract(String pageText) throws Exception {
         StringBuilder infoBoxFinal = new StringBuilder();
 
         final int beginIndex = pageText.indexOf("{{" + infoboxText);
@@ -39,6 +40,12 @@ public class InfoboxRelationExtractor implements IRelationsExtractor<String> {
             }
         }
 
-        return infoBoxFinal.toString();
+        this.infobox = infoBoxFinal.toString();
+        return this;
+    }
+
+    @Override
+    public String getResult() {
+        return this.infobox;
     }
 }

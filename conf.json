@@ -11,5 +11,12 @@
   "scheme": "http",
   "shards": 1,
   "replicas": 0,
-  "lang": "en"
+  "lang": "en",
+  "relationTypes": [
+    "BeComp",
+    "Category",
+    "Infobox",
+    "Parenthesis",
+    "PartName"
+  ]
 }

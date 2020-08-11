@@ -1,5 +1,6 @@
 package wiki.data.relations;
 
 public interface IRelationsExtractor<Result> {
-    Result extract(String lineToExtractFrom) throws Exception;
+    IRelationsExtractor<Result> extract(String lineToExtractFrom) throws Exception;
+    Result getResult();
 }

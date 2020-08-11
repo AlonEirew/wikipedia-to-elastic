@@ -3,7 +3,6 @@ package wiki.data.relations;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import wiki.TestUtils;
-import wiki.data.obj.LinkParenthesisPair;
 import wiki.utils.LangConfiguration;
 
 import java.io.FileNotFoundException;
@@ -21,20 +20,22 @@ public class TestLinkAndParenthesisRelationExtractor {
 
     @Test
     public void textExtractLinksAndParenthesis() throws Exception {
-        IRelationsExtractor<LinkParenthesisPair> linkParenthExtractor = new LinkAndParenthesisRelationExtractor();
+        LinkAndParenthesisRelationExtractor linkParenthExtractor1 = new LinkAndParenthesisRelationExtractor();
 
-        LinkParenthesisPair linkParenthesisPair1 = linkParenthExtractor.extract("[[Artificial intelligence|Machine Learning]]");
-        assertTrue(linkParenthesisPair1.getLinks().contains("Artificial intelligence"));
-        assertTrue(linkParenthesisPair1.getLinks().contains("Machine Learning"));
+        linkParenthExtractor1.extract("[[Artificial intelligence|Machine Learning]]");
+        assertTrue(linkParenthExtractor1.getLinks().contains("Artificial intelligence"));
+        assertTrue(linkParenthExtractor1.getLinks().contains("Machine Learning"));
 
-        LinkParenthesisPair linkParenthesisPair2 = linkParenthExtractor.extract("[[Artificial intelligence (Machine Learning)]]");
-        assertTrue(linkParenthesisPair2.getLinks().contains("Artificial intelligence"));
-        assertFalse(linkParenthesisPair2.getLinks().contains("Machine Learning"));
-        assertTrue(linkParenthesisPair2.getParenthesis().contains("Machine Learning"));
+        LinkAndParenthesisRelationExtractor linkParenthExtractor2 = new LinkAndParenthesisRelationExtractor();
+        linkParenthExtractor2.extract("[[Artificial intelligence (Machine Learning)]]");
+        assertTrue(linkParenthExtractor2.getLinks().contains("Artificial intelligence"));
+        assertFalse(linkParenthExtractor2.getLinks().contains("Machine Learning"));
+        assertTrue(linkParenthExtractor2.getTitleParenthesis().contains("Machine Learning"));
 
-        LinkParenthesisPair linkParenthesisPair3 = linkParenthExtractor.extract("[[Artificial intelligence(Machine Learning)]]");
-        assertTrue(linkParenthesisPair3.getLinks().contains("Artificial intelligence"));
-        assertFalse(linkParenthesisPair3.getLinks().contains("Machine Learning"));
-        assertTrue(linkParenthesisPair3.getParenthesis().contains("Machine Learning"));
+        LinkAndParenthesisRelationExtractor linkParenthExtractor3 = new LinkAndParenthesisRelationExtractor();
+        linkParenthExtractor3.extract("[[Artificial intelligence(Machine Learning)]]");
+        assertTrue(linkParenthExtractor3.getLinks().contains("Artificial intelligence"));
+        assertFalse(linkParenthExtractor3.getLinks().contains("Machine Learning"));
+        assertTrue(linkParenthExtractor3.getTitleParenthesis().contains("Machine Learning"));
     }
 }

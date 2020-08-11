@@ -6,11 +6,13 @@ package wiki.utils;
 
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.io.FileUtils;
+import wiki.data.relations.RelationType;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Objects;
 
 public class WikiToElasticConfiguration {
@@ -30,6 +32,7 @@ public class WikiToElasticConfiguration {
     private int insertBulkSize;
     private boolean extractRelationFields;
     private String lang;
+    private List<RelationType> relationTypes;
 
     private transient String mappingFileContent = null;
     private transient String settingFileContent = null;
@@ -128,6 +131,14 @@ public class WikiToElasticConfiguration {
 
     public void setExtractRelationFields(boolean extractRelationFields) {
         this.extractRelationFields = extractRelationFields;
+    }
+
+    public List<RelationType> getRelationTypes() {
+        return relationTypes;
+    }
+
+    public void setRelationTypes(List<RelationType> relationTypes) {
+        this.relationTypes = relationTypes;
     }
 
     public String getMappingFileContent() throws IOException {

@@ -6,12 +6,14 @@ import wiki.data.obj.LinkParenthesisPair;
 import wiki.utils.LangConfiguration;
 import wiki.utils.WikiPageParser;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class LinkAndParenthesisRelationExtractor implements IRelationsExtractor<LinkParenthesisPair> {
+public class LinkAndParenthesisRelationExtractor implements IRelationsExtractor<List<LinkParenthesisPair>> {
     private final static Logger LOGGER = LogManager.getLogger(LinkAndParenthesisRelationExtractor.class);
 
     private static final String PARENTHESIS_REGEX_1 = "\\[\\[((?>\\P{M}\\p{M}*)+)\\]\\]";
@@ -22,6 +24,8 @@ public class LinkAndParenthesisRelationExtractor implements IRelationsExtractor<
 
     private static String disambiguationTitle;
 
+    private final List<LinkParenthesisPair> titleParenthesis = new ArrayList<>();
+
     public static void initResources(LangConfiguration lang) {
         LOGGER.info("Initiating LinkAndParenthesisRelationExtractor");
         disambiguationTitle = "(" + lang.getDisambiguation() + ")";
@@ -29,7 +33,7 @@ public class LinkAndParenthesisRelationExtractor implements IRelationsExtractor<
     }
 
     @Override
-    public LinkParenthesisPair extract(String line) throws Exception {
+    public IRelationsExtractor<List<LinkParenthesisPair>> extract(String line) throws Exception {
         Set<String> parenthesis = new HashSet<>();
         Set<String> links = new HashSet<>();
 
@@ -56,6 +60,31 @@ public class LinkAndParenthesisRelationExtractor implements IRelationsExtractor<
                 }
             }
         }
-        return new LinkParenthesisPair(links, parenthesis);
+
+        this.titleParenthesis.add(new LinkParenthesisPair(links, parenthesis));
+        return this;
+    }
+
+    @Override
+    public List<LinkParenthesisPair> getResult() {
+        return this.titleParenthesis;
+    }
+
+    public Set<String> getLinks() {
+        Set<String> result = new HashSet<>();
+        for(LinkParenthesisPair pair : this.titleParenthesis) {
+            result.addAll(pair.getLinks());
+        }
+
+        return result;
+    }
+
+    public Set<String> getTitleParenthesis() {
+        Set<String> result = new HashSet<>();
+        for(LinkParenthesisPair pair : this.titleParenthesis) {
+            result.addAll(pair.getParenthesis());
+        }
+
+        return result;
     }
 }

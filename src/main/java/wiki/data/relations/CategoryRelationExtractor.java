@@ -15,13 +15,17 @@ import java.util.regex.Pattern;
 public class CategoryRelationExtractor implements IRelationsExtractor<Set<String>> {
     private final static Logger LOGGER = LogManager.getLogger(CategoryRelationExtractor.class);
     private static List<String> disambiguationTitles;
+    private static List<String> partNameCategories;
 
     private static Pattern catPattern;
     private static Pattern disPattern;
 
+    private final Set<String> categories = new HashSet<>();
+
     public static void initResources(LangConfiguration lang) {
         LOGGER.info("Initiating CategoryRelationExtractor");
         disambiguationTitles = lang.getDisambiguation();
+        partNameCategories = lang.getPartNames();
 
         String catRegex = "\\[\\[(" + String.join("|", lang.getCategory()) + "):((?>\\P{M}\\p{M}*)+)\\]\\]";
         catPattern = Pattern.compile(catRegex);
@@ -32,7 +36,7 @@ public class CategoryRelationExtractor implements IRelationsExtractor<Set<String
     }
 
     @Override
-    public Set<String> extract(String line) throws Exception {
+    public IRelationsExtractor<Set<String>> extract(String line) throws Exception {
         Set<String> categories = new HashSet<>();
         if (line != null && !line.isEmpty()) {
             Matcher catMatch = catPattern.matcher(line);
@@ -54,6 +58,29 @@ public class CategoryRelationExtractor implements IRelationsExtractor<Set<String
                 categories.addAll(disambiguationTitles);
             }
         }
+
+        this.categories.addAll(categories);
+        return this;
+    }
+
+    @Override
+    public Set<String> getResult() {
+        return this.categories;
+    }
+
+    public Set<String> getCategories() {
         return categories;
+    }
+
+    public boolean isPartNameInCategories() {
+        for (String cat : categories) {
+            for (String partName : partNameCategories) {
+                if (cat.equalsIgnoreCase(partName)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }

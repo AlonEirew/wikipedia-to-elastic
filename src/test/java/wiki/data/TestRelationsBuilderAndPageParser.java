@@ -46,7 +46,7 @@ public class TestRelationsBuilderAndPageParser {
 
         String text = "'''Alabama''' is a [[U.S. state|state]] in the [[Southern United States|southeastern region]] of the [[United States]]. It is bordered by [[Tennessee]] to the north, [[Georgia (U.S. state)|Georgia]] to the east, [[Florida]] and the [[Gulf of Mexico]] to the south, and [[Mississippi]] to the west. Alabama is the [[List of U.S. states and territories by area|30th largest by area]] and the [[List of U.S. states and territories by population|24th-most populous]] of the [[List of U.S. states|U.S. states]]. With a total of {{convert|1500|mi|km}} of [[inland waterway]]s, Alabama has among the most of any state.<ref>{{cite web|title=Alabama Transportation Overview|url=https://www.edpa.org/wp-content/uploads/Alabama-Transportation-Overview-1.pdf|publisher=Economic Development Partnership of Alabama|accessdate=21 January 2017}}</ref>\n";
         String firstPar = WikiPageParser.extractFirstPageParagraph(text);
-        final BeCompRelationResult jimResultSet = beCompExtractor.extract(firstPar);
+        final BeCompRelationResult jimResultSet = beCompExtractor.extract(firstPar).getResult();
         System.out.println(Arrays.toString(jimResultSet.getBeCompRelations().toArray()));
     }
 

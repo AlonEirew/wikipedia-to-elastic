@@ -8,7 +8,6 @@ import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import wiki.WikiToElasticMain;
 import wiki.data.obj.BeCompRelationResult;
 import wiki.utils.LangConfiguration;
 import wiki.utils.WikiPageParser;
@@ -23,6 +22,8 @@ public class BeCompRelationExtractor implements IRelationsExtractor<BeCompRelati
     private final static Logger LOGGER = LogManager.getLogger(BeCompRelationExtractor.class);
 
     private static StanfordCoreNLP sPipeline;
+
+    private BeCompRelationResult beCompRelations = new BeCompRelationResult();
 
     public static void initResources(LangConfiguration langConfig) {
         LOGGER.info("Initiating BeCompRelationExtractor");
@@ -40,11 +41,17 @@ public class BeCompRelationExtractor implements IRelationsExtractor<BeCompRelati
     }
 
     @Override
-    public BeCompRelationResult extract(String firstSentence) throws Exception {
+    public IRelationsExtractor<BeCompRelationResult> extract(String firstSentence) throws Exception {
         if(firstSentence != null && firstSentence.contains(".")) {
             firstSentence = firstSentence.substring(0, firstSentence.indexOf("."));
         }
-        return extractBeCompRelation(firstSentence);
+        this.beCompRelations = extractBeCompRelation(firstSentence);
+        return this;
+    }
+
+    @Override
+    public BeCompRelationResult getResult() {
+        return this.beCompRelations;
     }
 
     private BeCompRelationResult extractBeCompRelation(String text) {
@@ -57,34 +64,25 @@ public class BeCompRelationExtractor implements IRelationsExtractor<BeCompRelati
             while(!semStack.empty()) {
                 final SemanticGraphEdge edge = semStack.pop();
                 String govValue = edge.getGovernor().get(CoreAnnotations.ValueAnnotation.class);
-                String govValueNorm = WikiPageParser.cleanValue(edge.getGovernor().get(CoreAnnotations.LemmaAnnotation.class));
                 String relation = edge.getRelation().getShortName();
                 String tarValue = edge.getDependent().get(CoreAnnotations.ValueAnnotation.class);
-                String tarValueNorm = WikiPageParser.cleanValue(edge.getDependent().get(CoreAnnotations.LemmaAnnotation.class));
                 if (relation.equalsIgnoreCase("acl")) {
                     break;
                 } else if (relation.equalsIgnoreCase("cop")) {
                     beCompRel.addBeCompRelation(govValue);
-                    beCompRel.addBeCompRelationsNorm(govValueNorm);
                 } else if (relation.equalsIgnoreCase("nsubj")) {
                     beCompRel.addBeCompRelation(tarValue);
-                    beCompRel.addBeCompRelationsNorm(tarValueNorm);
                 } else if (relation.equalsIgnoreCase("dep")) {
                     beCompRel.addBeCompRelation(govValue);
-                    beCompRel.addBeCompRelationsNorm(govValueNorm);
                 } else if (relation.equalsIgnoreCase("compound")) {
                     beCompRel.addBeCompRelation(tarValue + " " + govValue);
-                    beCompRel.addBeCompRelationsNorm(tarValueNorm + " " + govValueNorm);
                     final LinkedList<IndexedWord> amodRel = extractAmodRel(edge, semStack);
                     beCompRel.addBeCompRelationList(amodRel);
-                    beCompRel.addBeCompRelationListNorm(amodRel);
                 } else if (relation.equalsIgnoreCase("amod")) {
                     final LinkedList<IndexedWord> amodRel = extractAmodRel(edge, semStack);
                     beCompRel.addBeCompRelationList(amodRel);
-                    beCompRel.addBeCompRelationListNorm(amodRel);
                 } else if (relation.equalsIgnoreCase("conj") || relation.equalsIgnoreCase("appos")) {
                     beCompRel.addBeCompRelation(tarValue);
-                    beCompRel.addBeCompRelationsNorm(tarValueNorm);
                 }
             }
         }
