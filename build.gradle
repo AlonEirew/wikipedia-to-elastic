@@ -31,6 +31,8 @@ dependencies {
 //    compile group: 'edu.stanford.nlp', name: 'stanford-corenlp', classifier: 'models-french', version: '4.0.0'
 //    compile group: 'edu.stanford.nlp', name: 'stanford-corenlp', classifier: 'models-chinese', version: '4.0.0'
     compile group: 'info.bliki.wiki', name: 'bliki-core', version: '3.1.0'
+    compile group: 'me.tongfei', name: 'progressbar', version: '0.8.1'
+
     compile group: 'org.jsoup', name: 'jsoup', version: '1.13.1'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
