@@ -6,6 +6,7 @@ package wiki.utils;
 
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import wiki.data.relations.RelationType;
 
 import java.io.File;
@@ -144,20 +145,16 @@ public class WikiToElasticConfiguration {
 
     public String getMappingFileContent() throws IOException {
         if(this.mappingFileContent == null && this.mapping != null) {
-            this.mappingFileContent = FileUtils.readFileToString(
-                    new File(Objects.requireNonNull(
-                            WikiToElasticUtils.class.getClassLoader().getResource(
-                                    this.mapping)).getFile()), StandardCharsets.UTF_8);
+            this.mappingFileContent = IOUtils.toString(Objects.requireNonNull(
+                    WikiToElasticUtils.class.getClassLoader().getResourceAsStream(this.mapping)), StandardCharsets.UTF_8);
         }
         return this.mappingFileContent;
     }
 
     public String getSettingFileContent() throws IOException {
         if(this.settingFileContent == null && this.setting != null) {
-            this.settingFileContent = FileUtils.readFileToString(
-                    new File(Objects.requireNonNull(
-                            WikiToElasticUtils.class.getClassLoader().getResource(this.setting)).getFile()),
-                    StandardCharsets.UTF_8);
+            this.settingFileContent = IOUtils.toString(Objects.requireNonNull(
+                            WikiToElasticUtils.class.getClassLoader().getResourceAsStream(this.setting)), StandardCharsets.UTF_8);
         }
         return this.settingFileContent;
     }

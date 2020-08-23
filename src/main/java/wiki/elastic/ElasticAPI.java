@@ -31,6 +31,7 @@ import wiki.utils.WikiToElasticConfiguration;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import java.net.ConnectException;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -64,10 +65,11 @@ public class ElasticAPI implements Closeable {
                                     configuration.getScheme())));
         } else {
             this.client = null;
+            throw new IllegalArgumentException("Dump not found at-" + configuration.getWikiDump());
         }
     }
 
-    public DeleteIndexResponse deleteIndex(String indexName) {
+    public DeleteIndexResponse deleteIndex(String indexName) throws ConnectException {
         DeleteIndexResponse deleteIndexResponse = null;
         try {
             DeleteIndexRequest delRequest = new DeleteIndexRequest(indexName);
@@ -81,6 +83,9 @@ public class ElasticAPI implements Closeable {
             } else {
                 LOGGER.debug(ese);
             }
+        } catch (ConnectException e) {
+            LOGGER.error("Could not connect to elasticsearch...");
+            throw e;
         } catch (IOException | InterruptedException e) {
             LOGGER.debug(e);
         }
@@ -88,7 +93,7 @@ public class ElasticAPI implements Closeable {
         return deleteIndexResponse;
     }
 
-    public CreateIndexResponse createIndex(WikiToElasticConfiguration configuration) {
+    public CreateIndexResponse createIndex(WikiToElasticConfiguration configuration) throws IOException {
         CreateIndexResponse createIndexResponse = null;
         try {
             // Create the index
@@ -117,8 +122,8 @@ public class ElasticAPI implements Closeable {
             this.available.release();
 
             LOGGER.info("Index " + configuration.getIndexName() + " created successfully: " + createIndexResponse.isAcknowledged());
-        } catch(IOException | InterruptedException ex) {
-            LOGGER.error(ex);
+        } catch (InterruptedException e) {
+            LOGGER.error("Could not creat elasticsearch index");
         }
 
         return createIndexResponse;
