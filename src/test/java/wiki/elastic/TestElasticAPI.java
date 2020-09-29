@@ -8,11 +8,10 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
-import wiki.data.WikiParsedPage;
-import wiki.data.WikiParsedPageBuilder;
+import wiki.data.WikipediaParsedPage;
+import wiki.data.WikipediaParsedPageBuilder;
 import wiki.utils.WikiToElasticConfiguration;
 
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
@@ -30,7 +29,7 @@ public class TestElasticAPI {
     private ElasticAPI elasicApi;
 
 
-    public void prepareText() throws FileNotFoundException {
+    public void prepareText() throws IOException {
         URL url = TestElasticAPI.class.getClassLoader().getResource("test_config.json");
         if(this.configuration == null && url != null) {
             String file = url.getFile();
@@ -56,8 +55,8 @@ public class TestElasticAPI {
     public void testPutDocOnElastic() throws IOException, InterruptedException {
         // Create/Add Page
         // Create page
-        List<WikiParsedPage> testPages = createTestPages();
-        for (WikiParsedPage page : testPages) {
+        List<WikipediaParsedPage> testPages = createTestPages();
+        for (WikipediaParsedPage page : testPages) {
             this.elasicApi.addDocAsnc(this.configuration.getIndexName(), this.configuration.getDocType(), page);
         }
 
@@ -69,7 +68,7 @@ public class TestElasticAPI {
     public void testPutBulkOnElastic() throws IOException, InterruptedException {
         // Create/Add Page
         // Create page
-        List<WikiParsedPage> testPages = createTestPages();
+        List<WikipediaParsedPage> testPages = createTestPages();
 
         this.elasicApi.addBulkAsnc(this.configuration.getIndexName(), this.configuration.getDocType(), testPages);
 
@@ -80,12 +79,12 @@ public class TestElasticAPI {
 
     public void testIsDocExist() throws InterruptedException {
         // Create page
-        List<WikiParsedPage> testPages = createTestPages();
+        List<WikipediaParsedPage> testPages = createTestPages();
         this.elasicApi.addBulkAsnc(this.configuration.getIndexName(), this.configuration.getDocType(), testPages);
 
         Thread.sleep(2000);
 
-        for(WikiParsedPage page : testPages) {
+        for(WikipediaParsedPage page : testPages) {
             assertTrue(this.elasicApi.isDocExists(this.configuration.getIndexName(),
                     this.configuration.getDocType(), String.valueOf(page.getId())));
         }
@@ -94,24 +93,24 @@ public class TestElasticAPI {
                 this.configuration.getDocType(), "1234"));
     }
 
-    private List<WikiParsedPage> createTestPages() {
-        List<WikiParsedPage> wikiPages = new ArrayList<>();
+    private List<WikipediaParsedPage> createTestPages() {
+        List<WikipediaParsedPage> wikiPages = new ArrayList<>();
 
-        wikiPages.add(new WikiParsedPageBuilder()
+        wikiPages.add(new WikipediaParsedPageBuilder()
                 .setTitle("Test Doc")
                 .setText("Testing elastic search")
                 .setId(555)
                 .setRedirectTitle("Redirect Test Doc Title")
                 .build());
 
-        wikiPages.add(new WikiParsedPageBuilder()
+        wikiPages.add(new WikipediaParsedPageBuilder()
                 .setTitle("Test")
                 .setText("Testing elastic search")
                 .setId(556)
                 .setRedirectTitle("Redirect Test Doc Title")
                 .build());
 
-        wikiPages.add(new WikiParsedPageBuilder()
+        wikiPages.add(new WikipediaParsedPageBuilder()
                 .setTitle("Te st")
                 .setText("Testing elastic search")
                 .setId(557)

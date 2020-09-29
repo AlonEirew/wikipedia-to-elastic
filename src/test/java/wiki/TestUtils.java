@@ -6,7 +6,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.apache.commons.io.FileUtils;
 import wiki.data.TestRelationsBuilderAndPageParser;
-import wiki.data.WikiParsedPageRelations;
+import wiki.data.WikipediaParsedPageRelations;
 import wiki.utils.LangConfiguration;
 
 import java.io.*;
@@ -41,10 +41,10 @@ public class TestUtils {
         return resultList;
     }
 
-    public static WikiParsedPageRelations getFileRelationContent(String fileName) {
+    public static WikipediaParsedPageRelations getFileRelationContent(String fileName) {
         InputStream resultStream = TestRelationsBuilderAndPageParser.class.getClassLoader().getResourceAsStream(fileName);
         assert resultStream != null;
-        return GSON.fromJson(new InputStreamReader(resultStream), WikiParsedPageRelations.class);
+        return GSON.fromJson(new InputStreamReader(resultStream), WikipediaParsedPageRelations.class);
     }
 
     public static LangConfiguration getLangConfig(String lang) throws FileNotFoundException {
@@ -52,7 +52,7 @@ public class TestUtils {
         return GSON.fromJson(new FileReader(langConfigFile), LangConfiguration.class);
     }
 
-    private void writeResultToFile(String fileLocation, WikiParsedPageRelations relations) throws IOException {
+    private void writeResultToFile(String fileLocation, WikipediaParsedPageRelations relations) throws IOException {
         FileUtils.write(new File(fileLocation), GSON.toJson(relations), "UTF-8");
     }
 }

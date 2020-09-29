@@ -6,14 +6,14 @@ package wiki.data;
 
 import java.util.Objects;
 
-public class WikiParsedPage {
+public class WikipediaParsedPage {
     private final String title;
     private final transient long id;
     private final String text;
     private final String redirectTitle;
-    private final WikiParsedPageRelations relations;
+    private final WikipediaParsedPageRelations relations;
 
-    public WikiParsedPage(String title, long id, String text, String redirectTitle, WikiParsedPageRelations relations) {
+    public WikipediaParsedPage(String title, long id, String text, String redirectTitle, WikipediaParsedPageRelations relations) {
         this.title = title;
         this.id = id;
         this.text = text;
@@ -21,7 +21,7 @@ public class WikiParsedPage {
         this.relations = relations;
     }
 
-    public WikiParsedPage(WikiParsedPage page) {
+    public WikipediaParsedPage(WikipediaParsedPage page) {
         this.title = page.title;
         this.id = page.id;
         this.text = page.text;
@@ -45,7 +45,7 @@ public class WikiParsedPage {
         return redirectTitle;
     }
 
-    public WikiParsedPageRelations getRelations() {
+    public WikipediaParsedPageRelations getRelations() {
         return relations;
     }
 
@@ -53,7 +53,7 @@ public class WikiParsedPage {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        WikiParsedPage that = (WikiParsedPage) o;
+        WikipediaParsedPage that = (WikipediaParsedPage) o;
         return id == that.id &&
                 Objects.equals(title, that.title) &&
                 Objects.equals(text, that.text) &&
@@ -69,7 +69,7 @@ public class WikiParsedPage {
 
     @Override
     public String toString() {
-        return "WikiParsedPage{" +
+        return "WikipediaParsedPage{" +
                 "title='" + title + '\'' +
                 ", id='" + id + '\'' +
                 ", redirectTitle='" + redirectTitle + '\'' +

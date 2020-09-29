@@ -4,7 +4,7 @@
 
 package wiki.handlers;
 
-import wiki.data.WikiParsedPage;
+import wiki.data.WikipediaParsedPage;
 import wiki.elastic.ElasticAPI;
 import wiki.utils.WikiToElasticConfiguration;
 
@@ -21,7 +21,7 @@ public class ElasticPageHandler implements IPageHandler {
 
     private final Object lock = new Object();
 
-    private final List<WikiParsedPage> pages = new ArrayList<>();
+    private final List<WikipediaParsedPage> pages = new ArrayList<>();
 
     public ElasticPageHandler(ElasticAPI elasticApi, WikiToElasticConfiguration config) {
         this.elasticApi = elasticApi;
@@ -45,7 +45,7 @@ public class ElasticPageHandler implements IPageHandler {
      * @param page
      */
     @Override
-    public void addPage(WikiParsedPage page) {
+    public void addPage(WikipediaParsedPage page) {
         synchronized (this.lock) {
             if (page != null) {
                 pages.add(page);
@@ -60,7 +60,7 @@ public class ElasticPageHandler implements IPageHandler {
     public void flush() {
         synchronized (this.lock) {
             if (this.pages.size() > 0) {
-                List<WikiParsedPage> copyPages = new ArrayList<>(this.pages);
+                List<WikipediaParsedPage> copyPages = new ArrayList<>(this.pages);
                 this.pages.clear();
                 elasticApi.addBulkAsnc(this.indexName, this.docType, copyPages);
             }
@@ -73,9 +73,9 @@ public class ElasticPageHandler implements IPageHandler {
 
     @Override
     public void close() throws IOException {
-        List<WikiParsedPage> copyPages = new ArrayList<>(this.pages);
+        List<WikipediaParsedPage> copyPages = new ArrayList<>(this.pages);
         this.pages.clear();
-        for(WikiParsedPage page : copyPages) {
+        for(WikipediaParsedPage page : copyPages) {
             elasticApi.addDoc(this.indexName, this.docType, page);
         }
     }

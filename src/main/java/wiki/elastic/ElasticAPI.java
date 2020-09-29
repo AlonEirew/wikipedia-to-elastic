@@ -25,7 +25,7 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.rest.RestStatus;
-import wiki.data.WikiParsedPage;
+import wiki.data.WikipediaParsedPage;
 import wiki.utils.WikiToElasticConfiguration;
 
 import java.io.Closeable;
@@ -146,7 +146,7 @@ public class ElasticAPI implements Closeable {
         }
     }
 
-    public void addDocAsnc(String indexName, String indexType, WikiParsedPage page) {
+    public void addDocAsnc(String indexName, String indexType, WikipediaParsedPage page) {
         if(isValidRequest(indexName, indexType, page)) {
             IndexRequest indexRequest = createIndexRequest(
                     indexName,
@@ -177,7 +177,7 @@ public class ElasticAPI implements Closeable {
         }
     }
 
-    public IndexResponse addDoc(String indexName, String indexType, WikiParsedPage page) {
+    public IndexResponse addDoc(String indexName, String indexType, WikipediaParsedPage page) {
         IndexResponse res = null;
 
         try {
@@ -199,11 +199,11 @@ public class ElasticAPI implements Closeable {
         return res;
     }
 
-    public void addBulkAsnc(String indexName, String indexType, List<WikiParsedPage> pages) {
+    public void addBulkAsnc(String indexName, String indexType, List<WikipediaParsedPage> pages) {
         BulkRequest bulkRequest = new BulkRequest();
 
         if(pages != null) {
-            for (WikiParsedPage page : pages) {
+            for (WikipediaParsedPage page : pages) {
                 if (isValidRequest(indexName, indexType, page)) {
                     IndexRequest request = createIndexRequest(indexName, indexType, page);
                     bulkRequest.add(request);
@@ -275,7 +275,7 @@ public class ElasticAPI implements Closeable {
         return totalIdsSuccessfullyCommitted.get();
     }
 
-    private IndexRequest createIndexRequest(String indexName, String indexType, WikiParsedPage page) {
+    private IndexRequest createIndexRequest(String indexName, String indexType, WikipediaParsedPage page) {
         IndexRequest indexRequest = new IndexRequest(
                 indexName,
                 indexType,
@@ -286,7 +286,7 @@ public class ElasticAPI implements Closeable {
         return indexRequest;
     }
 
-    private boolean isValidRequest(String indexName, String indexType, WikiParsedPage page) {
+    private boolean isValidRequest(String indexName, String indexType, WikipediaParsedPage page) {
         return page != null && page.getId() > 0 && page.getTitle() != null && !page.getTitle().isEmpty() &&
                 indexName != null && !indexName.isEmpty() && indexType != null && !indexType.isEmpty();
     }

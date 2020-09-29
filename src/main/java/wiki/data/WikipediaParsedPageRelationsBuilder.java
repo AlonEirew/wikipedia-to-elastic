@@ -3,13 +3,13 @@ package wiki.data;
 import wiki.data.relations.ExtractorsManager;
 import wiki.utils.WikiPageParser;
 
-public class WikiParsedPageRelationsBuilder {
+public class WikipediaParsedPageRelationsBuilder {
     private boolean isPartName = false;
 
     private final ExtractorsManager extractorsManager = new ExtractorsManager();
 
-    public WikiParsedPageRelations build() {
-        return new WikiParsedPageRelations(
+    public WikipediaParsedPageRelations build() {
+        return new WikipediaParsedPageRelations(
                 this.extractorsManager.getInfoboxExtrator().getResult(),
                 this.isPartName,
                 this.extractorsManager.getCategoryExtractor().isDisambiguation(),
@@ -19,7 +19,7 @@ public class WikiParsedPageRelationsBuilder {
                 this.extractorsManager.getBeCompExtractor().getResult().getBeCompRelations());
     }
 
-    public WikiParsedPageRelations buildFromText(String pageText) throws Exception {
+    public WikipediaParsedPageRelations buildFromText(String pageText) throws Exception {
         this.extractorsManager.runExtractFromPageText(pageText);
 
         String[] textLines = pageText.split("\n");

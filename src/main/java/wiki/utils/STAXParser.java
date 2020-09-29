@@ -6,9 +6,9 @@ package wiki.utils;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import wiki.data.WikiParsedPageBuilder;
-import wiki.data.WikiParsedPageRelations;
-import wiki.data.WikiParsedPageRelationsBuilder;
+import wiki.data.WikipediaParsedPageBuilder;
+import wiki.data.WikipediaParsedPageRelations;
+import wiki.data.WikipediaParsedPageRelationsBuilder;
 import wiki.handlers.IPageHandler;
 
 import javax.xml.namespace.QName;
@@ -179,16 +179,16 @@ public class STAXParser {
             this.executorService.submit(() -> {
                 try {
                     LOGGER.info("prepare to commit page with id-" + id + ", title-" + title);
-                    WikiParsedPageRelations relations;
+                    WikipediaParsedPageRelations relations;
                     // Redirect pages text are not processed (can be found in the underline redirected page)
                     if (this.extractFields && (redirect == null || redirect.isEmpty())) {
-                        relations = new WikiParsedPageRelationsBuilder().buildFromText(text);
+                        relations = new WikipediaParsedPageRelationsBuilder().buildFromText(text);
                     } else {
                         // Empty relations for redirect pages (Relations can be found in the underline redirected page)
-                        relations = new WikiParsedPageRelationsBuilder().build();
+                        relations = new WikipediaParsedPageRelationsBuilder().build();
                     }
 
-                    final WikiParsedPageBuilder pageBuilder = new WikiParsedPageBuilder()
+                    final WikipediaParsedPageBuilder pageBuilder = new WikipediaParsedPageBuilder()
                             .setId(id)
                             .setTitle(title)
                             .setRedirectTitle(redirect)

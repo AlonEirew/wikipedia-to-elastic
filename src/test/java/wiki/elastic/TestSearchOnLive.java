@@ -8,8 +8,8 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
-import wiki.data.WikiParsedPage;
-import wiki.data.WikiParsedPageBuilder;
+import wiki.data.WikipediaParsedPage;
+import wiki.data.WikipediaParsedPageBuilder;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -35,7 +35,7 @@ public class TestSearchOnLive {
     public void testPutAndSearchDocOnElastic() throws InterruptedException, IOException {
         // Create/Add Page
         // Create page
-        WikiParsedPage page = createRealPages();
+        WikipediaParsedPage page = createRealPages();
         this.elasicApi.addDocAsnc("enwiki_v2", "wikipage", page);
 
         // Search page
@@ -53,8 +53,8 @@ public class TestSearchOnLive {
         System.out.println(searchResponse.toString());
     }
 
-    private WikiParsedPage createRealPages() {
-        return new WikiParsedPageBuilder()
+    private WikipediaParsedPage createRealPages() {
+        return new WikipediaParsedPageBuilder()
                 .setTitle("Land")
                 .setText("Testing elastic search")
                 .setId(555)

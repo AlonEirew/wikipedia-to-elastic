@@ -35,9 +35,9 @@ public class TestRelationsBuilderAndPageParser {
     @Test
     public void testPageAndRelationExtractPageLinks() throws Exception {
         String text = TestUtils.getFileJsonContent("nlp_wiki_test_text.json");
-        WikiParsedPageRelations jsonResult = TestUtils.getFileRelationContent("nlp_relation_result.json");
-        WikiParsedPageRelationsBuilder builder = new WikiParsedPageRelationsBuilder();
-        WikiParsedPageRelations wikiParsedPageRelations = builder.buildFromText(text);
+        WikipediaParsedPageRelations jsonResult = TestUtils.getFileRelationContent("nlp_relation_result.json");
+        WikipediaParsedPageRelationsBuilder builder = new WikipediaParsedPageRelationsBuilder();
+        WikipediaParsedPageRelations wikiParsedPageRelations = builder.buildFromText(text);
 //        writeResultToFile("/Users/aeirew/workspace/WikipediaToElastic/src/frequency/resources/nlp_relation_result.json", wikiParsedPageRelations);
         assertEquals(jsonResult.getCategories(), wikiParsedPageRelations.getCategories());
     }
@@ -55,9 +55,9 @@ public class TestRelationsBuilderAndPageParser {
     @Test
     public void testPageAndRelationExtractDisambiguation() throws Exception {
         String text = TestUtils.getFileJsonContent("nlp_disambig_wiki_test_text.json");
-        WikiParsedPageRelations jsonResult = TestUtils.getFileRelationContent("nlp_disambig_relation_result.json");
-        WikiParsedPageRelationsBuilder builder = new WikiParsedPageRelationsBuilder();
-        WikiParsedPageRelations wikiParsedPageRelations = builder.buildFromText(text);
+        WikipediaParsedPageRelations jsonResult = TestUtils.getFileRelationContent("nlp_disambig_relation_result.json");
+        WikipediaParsedPageRelationsBuilder builder = new WikipediaParsedPageRelationsBuilder();
+        WikipediaParsedPageRelations wikiParsedPageRelations = builder.buildFromText(text);
 //        writeResultToFile("/Users/aeirew/workspace/WikipediaToElastic/src/frequency/resources/nlp_disambig_relation_result.json", wikiParsedPageRelations);
         assertEquals(new TreeSet<>(wikiParsedPageRelations.getDisambiguationLinks()), new TreeSet<>(jsonResult.getDisambiguationLinks()));
 

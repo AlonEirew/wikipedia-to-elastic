@@ -4,12 +4,12 @@
 
 package wiki.handlers;
 
-import wiki.data.WikiParsedPage;
+import wiki.data.WikipediaParsedPage;
 
 import java.io.Closeable;
 
 public interface IPageHandler extends Closeable {
     boolean isPageExists(String pageId);
-    void addPage(WikiParsedPage page);
+    void addPage(WikipediaParsedPage page);
     void flush();
 }

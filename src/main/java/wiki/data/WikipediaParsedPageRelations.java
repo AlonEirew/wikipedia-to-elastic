@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-public class WikiParsedPageRelations {
+public class WikipediaParsedPageRelations {
     private final String infobox;
     private final boolean isPartName;
     private final boolean isDisambiguation;
@@ -13,10 +13,10 @@ public class WikiParsedPageRelations {
     private final Set<String> titleParenthesis;
     private final Set<String> beCompRelations;
 
-    public WikiParsedPageRelations(String infobox, boolean isPartName, boolean isDisambiguation,
-                                   Set<String> disambiguationLinks,
-                                   Set<String> categories, Set<String> titleParenthesis,
-                                   Set<String> beCompRelations) {
+    public WikipediaParsedPageRelations(String infobox, boolean isPartName, boolean isDisambiguation,
+                                        Set<String> disambiguationLinks,
+                                        Set<String> categories, Set<String> titleParenthesis,
+                                        Set<String> beCompRelations) {
         this.infobox = infobox;
         this.isPartName = isPartName;
         this.isDisambiguation = isDisambiguation;
@@ -62,7 +62,7 @@ public class WikiParsedPageRelations {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        WikiParsedPageRelations that = (WikiParsedPageRelations) o;
+        WikipediaParsedPageRelations that = (WikipediaParsedPageRelations) o;
         return isPartName == that.isPartName &&
                 isDisambiguation == that.isDisambiguation &&
                 Objects.equals(infobox, that.infobox) &&

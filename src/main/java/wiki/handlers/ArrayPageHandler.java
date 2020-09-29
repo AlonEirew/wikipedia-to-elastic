@@ -4,7 +4,7 @@
 
 package wiki.handlers;
 
-import wiki.data.WikiParsedPage;
+import wiki.data.WikipediaParsedPage;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,11 +12,11 @@ import java.util.List;
 
 public class ArrayPageHandler implements IPageHandler {
 
-    private final List<WikiParsedPage> pages = new ArrayList<>();
+    private final List<WikipediaParsedPage> pages = new ArrayList<>();
 
     @Override
     public boolean isPageExists(String pageId) {
-        for(WikiParsedPage page : this.pages) {
+        for(WikipediaParsedPage page : this.pages) {
             if(String.valueOf(page.getId()).equals(pageId)) {
                 return true;
             }
@@ -26,7 +26,7 @@ public class ArrayPageHandler implements IPageHandler {
     }
 
     @Override
-    public void addPage(WikiParsedPage page) {
+    public void addPage(WikipediaParsedPage page) {
         if(page != null) {
             pages.add(page);
         }
@@ -37,7 +37,7 @@ public class ArrayPageHandler implements IPageHandler {
 
     }
 
-    public List<WikiParsedPage> getPages() {
+    public List<WikipediaParsedPage> getPages() {
         return this.pages;
     }
 
