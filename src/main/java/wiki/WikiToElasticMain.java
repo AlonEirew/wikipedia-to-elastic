@@ -57,10 +57,10 @@ public class WikiToElasticMain {
      */
     static void startProcess(WikiToElasticConfiguration configuration, LangConfiguration langConfiguration) throws IOException {
         InputStream inputStream = null;
-        STAXParser parser = null;
+        WikipediaSTAXParser parser = null;
         IPageHandler pageHandler = null;
         ElasticAPI elasicApi = null;
-        STAXParser.DeleteUpdateMode mode;
+        WikipediaSTAXParser.DeleteUpdateMode mode;
         try(Scanner reader = new Scanner(System.in)) {
             LOGGER.info("Reading wikidump: " + configuration.getWikiDump());
             File wikifile = new File(configuration.getWikiDump());
@@ -76,27 +76,27 @@ public class WikiToElasticMain {
                 String ans = reader.nextLine();
 
                 if(ans.equalsIgnoreCase("d") || ans.equalsIgnoreCase("delete")) {
-                    elasicApi.deleteIndex(configuration.getIndexName());
+                    elasicApi.deleteIndex();
 
                     // Create the elastic search index
                     elasicApi.createIndex(configuration);
-                    mode = STAXParser.DeleteUpdateMode.DELETE;
+                    mode = WikipediaSTAXParser.DeleteUpdateMode.DELETE;
                 } else if(ans.equalsIgnoreCase("u") || ans.equalsIgnoreCase("update")) {
-                    if(!elasicApi.isIndexExists(configuration.getIndexName())) {
+                    if(!elasicApi.isIndexExists()) {
                         LOGGER.info("Index \"" + configuration.getIndexName() +
                                 "\" not found, exit application.");
                         return;
                     }
 
-                    mode = STAXParser.DeleteUpdateMode.UPDATE;
+                    mode = WikipediaSTAXParser.DeleteUpdateMode.UPDATE;
                 } else {
                     return;
                 }
 
                 // Start parsing the xml and adding pages to elastic
-                pageHandler = new ElasticPageHandler(elasicApi, configuration);
+                pageHandler = new ElasticPageHandler(elasicApi, configuration.getInsertBulkSize());
 
-                parser = new STAXParser(pageHandler, configuration, langConfiguration, mode);
+                parser = new WikipediaSTAXParser(pageHandler, configuration, langConfiguration, mode);
                 parser.parse(inputStream);
             } else {
                 LOGGER.error("Cannot find dump file-" + wikifile.getAbsolutePath());

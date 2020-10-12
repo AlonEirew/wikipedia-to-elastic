@@ -21,22 +21,11 @@ public class TestSearchOnLive {
     private RestHighLevelClient client;
     private ElasticAPI elasicApi;
 
-    public void prepareText() {
-        // init elastic client
-        if(this.elasicApi == null) {
-            this.client = new RestHighLevelClient(
-                    RestClient.builder(
-                                new HttpHost("localhost", 9200, "http")));
-
-            this.elasicApi = new ElasticAPI(client);
-        }
-    }
-
     public void testPutAndSearchDocOnElastic() throws InterruptedException, IOException {
         // Create/Add Page
         // Create page
         WikipediaParsedPage page = createRealPages();
-        this.elasicApi.addDocAsnc("enwiki_v2", "wikipage", page);
+        this.elasicApi.addDocAsnc(page);
 
         // Search page
         SearchRequest searchRequest = new SearchRequest("enwiki_v2");

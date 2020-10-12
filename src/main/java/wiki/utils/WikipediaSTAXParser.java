@@ -23,7 +23,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.*;
 
-public class STAXParser {
+public class WikipediaSTAXParser {
 
     public enum DeleteUpdateMode {DELETE, UPDATE, NA}
 
@@ -36,7 +36,7 @@ public class STAXParser {
     private final String redirectTextPrefix;
     private final String[] filterTitles;
 
-    private final static Logger LOGGER = LogManager.getLogger(STAXParser.class);
+    private final static Logger LOGGER = LogManager.getLogger(WikipediaSTAXParser.class);
 
     private final boolean includeRawText;
     private final RejectedExecutionHandler rejectedExecutionHandler = new ThreadPoolExecutor.CallerRunsPolicy();
@@ -48,7 +48,7 @@ public class STAXParser {
     private DeleteUpdateMode deleteUpdateMode;
 
 
-    public STAXParser(IPageHandler handler, LangConfiguration langConfig, boolean includeRawText) {
+    public WikipediaSTAXParser(IPageHandler handler, LangConfiguration langConfig, boolean includeRawText) {
         this.executorService = initExecutorService();
         this.handler = handler;
         this.extractFields = true;
@@ -58,7 +58,7 @@ public class STAXParser {
         this.includeRawText = includeRawText;
     }
 
-    public STAXParser(IPageHandler handler, WikiToElasticConfiguration config, LangConfiguration langConfig, DeleteUpdateMode mode) {
+    public WikipediaSTAXParser(IPageHandler handler, WikiToElasticConfiguration config, LangConfiguration langConfig, DeleteUpdateMode mode) {
         this(handler, langConfig, config.isIncludeRawText());
         this.deleteUpdateMode = mode;
         this.extractFields = config.isExtractRelationFields();

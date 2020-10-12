@@ -46,7 +46,7 @@ public class TestElasticAPI {
 
 
         // Delete if index already exists
-        this.elasicApi.deleteIndex(configuration.getIndexName());
+        this.elasicApi.deleteIndex();
 
         // Create the index
         this.elasicApi.createIndex(configuration);
@@ -57,7 +57,7 @@ public class TestElasticAPI {
         // Create page
         List<WikipediaParsedPage> testPages = createTestPages();
         for (WikipediaParsedPage page : testPages) {
-            this.elasicApi.addDocAsnc(this.configuration.getIndexName(), this.configuration.getDocType(), page);
+            this.elasicApi.addDocAsnc(page);
         }
 
         // Need to wait for index to be searchable
@@ -70,7 +70,7 @@ public class TestElasticAPI {
         // Create page
         List<WikipediaParsedPage> testPages = createTestPages();
 
-        this.elasicApi.addBulkAsnc(this.configuration.getIndexName(), this.configuration.getDocType(), testPages);
+        this.elasicApi.addBulkAsnc(testPages);
 
         Thread.sleep(2000);
 
@@ -80,17 +80,15 @@ public class TestElasticAPI {
     public void testIsDocExist() throws InterruptedException {
         // Create page
         List<WikipediaParsedPage> testPages = createTestPages();
-        this.elasicApi.addBulkAsnc(this.configuration.getIndexName(), this.configuration.getDocType(), testPages);
+        this.elasicApi.addBulkAsnc(testPages);
 
         Thread.sleep(2000);
 
         for(WikipediaParsedPage page : testPages) {
-            assertTrue(this.elasicApi.isDocExists(this.configuration.getIndexName(),
-                    this.configuration.getDocType(), String.valueOf(page.getId())));
+            assertTrue(this.elasicApi.isDocExists(String.valueOf(page.getId())));
         }
 
-        assertFalse(this.elasicApi.isDocExists(this.configuration.getIndexName(),
-                this.configuration.getDocType(), "1234"));
+        assertFalse(this.elasicApi.isDocExists("1234"));
     }
 
     private List<WikipediaParsedPage> createTestPages() {
@@ -135,6 +133,6 @@ public class TestElasticAPI {
         assertNotNull(searchResponse);
         System.out.println(searchResponse.toString());
 
-        elasicApi.deleteIndex(configuration.getIndexName());
+        elasicApi.deleteIndex();
     }
 }

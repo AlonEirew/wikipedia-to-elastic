@@ -41,7 +41,7 @@ public class TestWikiToElasticUtils {
                 inputStream = WikiToElasticUtils.openCompressedFileInputStream(tinyWikifile);
 
                 ArrayPageHandler arrayPageHandler = new ArrayPageHandler();
-                STAXParser parser = new STAXParser(arrayPageHandler, langConfig, true);
+                WikipediaSTAXParser parser = new WikipediaSTAXParser(arrayPageHandler, langConfig, true);
                 parser.parse(inputStream);
 
                 System.out.println("total time took to parse: " + (System.currentTimeMillis() - startTime));

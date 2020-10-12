@@ -15,25 +15,21 @@ import java.util.List;
 public class ElasticPageHandler implements IPageHandler {
 
     private final ElasticAPI elasticApi;
-    private final String indexName;
-    private final String docType;
     private final int bulkSize;
 
     private final Object lock = new Object();
 
     private final List<WikipediaParsedPage> pages = new ArrayList<>();
 
-    public ElasticPageHandler(ElasticAPI elasticApi, WikiToElasticConfiguration config) {
+    public ElasticPageHandler(ElasticAPI elasticApi, int bulkSize) {
         this.elasticApi = elasticApi;
-        this.indexName = config.getIndexName();
-        this.docType = config.getDocType();
-        this.bulkSize = config.getInsertBulkSize();
+        this.bulkSize = bulkSize;
     }
 
     @Override
     public boolean isPageExists(String pageId) {
         if(pageId != null && !pageId.isEmpty()) {
-            return this.elasticApi.isDocExists(this.indexName, this.docType, pageId);
+            return this.elasticApi.isDocExists(pageId);
         }
 
         return false;
@@ -62,7 +58,7 @@ public class ElasticPageHandler implements IPageHandler {
             if (this.pages.size() > 0) {
                 List<WikipediaParsedPage> copyPages = new ArrayList<>(this.pages);
                 this.pages.clear();
-                elasticApi.addBulkAsnc(this.indexName, this.docType, copyPages);
+                elasticApi.addBulkAsnc(copyPages);
             }
         }
     }
@@ -76,7 +72,7 @@ public class ElasticPageHandler implements IPageHandler {
         List<WikipediaParsedPage> copyPages = new ArrayList<>(this.pages);
         this.pages.clear();
         for(WikipediaParsedPage page : copyPages) {
-            elasticApi.addDoc(this.indexName, this.docType, page);
+            elasticApi.addDoc(page);
         }
     }
 }
