@@ -51,22 +51,25 @@ public class WikiDataEnrich {
     private static List<WikiDataParsedPage> generateWikidata(final File inputDump, final ElasticAPI elasticAPI, String lang)
             throws ExecutionException, InterruptedException {
         ExecutorService executor = Executors.newFixedThreadPool(2);
-        final WikidataJsonParser wikidataJsonParser = new WikidataJsonParser();
-        Callable<Map<String, WikiDataParsedPage>> wikiRun = () -> {
-            Map<String, WikiDataParsedPage> parsePages = wikidataJsonParser.parse(inputDump, lang);
-            WikiDataParsedPage.replaceIdsWithTitles(parsePages);
-            return parsePages;
-        };
-        Future<Map<String, WikiDataParsedPage>> submitWikidata = executor.submit(wikiRun);
+        try {
+            final WikidataJsonParser wikidataJsonParser = new WikidataJsonParser();
+            Callable<Map<String, WikiDataParsedPage>> wikiRun = () -> {
+                Map<String, WikiDataParsedPage> parsePages = wikidataJsonParser.parse(inputDump, lang);
+                WikiDataParsedPage.replaceIdsWithTitles(parsePages);
+                return parsePages;
+            };
+            Future<Map<String, WikiDataParsedPage>> submitWikidata = executor.submit(wikiRun);
 
-        Callable<Map<String, String>> wikipediaRun = () -> elasticAPI.readAllWikipediaIdsTitles(-1);
-        Future<Map<String, String>> submitElastic = executor.submit(wikipediaRun);
+            Callable<Map<String, String>> wikipediaRun = () -> elasticAPI.readAllWikipediaIdsTitles(-1);
+            Future<Map<String, String>> submitElastic = executor.submit(wikipediaRun);
 
-        Map<String, String> wikipediaTitleToId = submitElastic.get();
-        Map<String, WikiDataParsedPage> parsedPagesWikidata = submitWikidata.get();
-        SimpleExecutorService.shutDownPool(executor);
+            Map<String, String> wikipediaTitleToId = submitElastic.get();
+            Map<String, WikiDataParsedPage> parsedPagesWikidata = submitWikidata.get();
 
-        return WikiDataParsedPage.updateElasticIds(parsedPagesWikidata, wikipediaTitleToId);
+            return WikiDataParsedPage.updateElasticIds(parsedPagesWikidata, wikipediaTitleToId);
+        } finally {
+            SimpleExecutorService.shutDownPool(executor);
+        }
     }
 
     private static void updateAll(ElasticAPI elasticAPI, List<WikiDataParsedPage> wikiDataParsedPages, int bulkSize) throws IOException {

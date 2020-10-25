@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import wiki.WikiToElasticMain;
+import wiki.data.relations.ExtractorsManager;
 import wiki.handlers.ArrayPageHandler;
 
 import java.io.FileNotFoundException;
@@ -27,6 +28,7 @@ public class TestWikiToElasticUtils {
         WikiToElasticConfiguration config = GSON.fromJson(new FileReader(testConfig), WikiToElasticConfiguration.class);
         String langConfigFile = Objects.requireNonNull(WikiToElasticMain.class.getClassLoader().getResource("lang/" + config.getLang() + ".json")).getFile();
         langConfig = GSON.fromJson(new FileReader(langConfigFile), LangConfiguration.class);
+        ExtractorsManager.initExtractors(config, langConfig);
     }
 
     @Test
