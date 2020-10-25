@@ -12,7 +12,6 @@ import org.elasticsearch.action.DocWriteResponse;
 import org.elasticsearch.action.bulk.BulkItemResponse;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
-import org.elasticsearch.action.index.IndexResponse;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -33,23 +32,28 @@ public class ElasticBulkDocCreateListener implements ActionListener<BulkResponse
     @Override
     public void onResponse(BulkResponse bulkResponse) {
         this.elasicApi.onSuccess(bulkResponse.getItems().length);
+        int noops = 0;
         StringBuilder sb = new StringBuilder();
         sb.append("Bulk Created/Updated done successfully, ids: [");
         for (BulkItemResponse bulkItemResponse : bulkResponse) {
             DocWriteResponse itemResponse = bulkItemResponse.getResponse();
 
             if (bulkItemResponse.getOpType() == DocWriteRequest.OpType.INDEX
-                    || bulkItemResponse.getOpType() == DocWriteRequest.OpType.CREATE) {
-                IndexResponse indexResponse = (IndexResponse) itemResponse;
-                String id = indexResponse.getId();
-                if (indexResponse.getResult() == DocWriteResponse.Result.CREATED) {
+                    || bulkItemResponse.getOpType() == DocWriteRequest.OpType.CREATE ||
+                    bulkItemResponse.getOpType() == DocWriteRequest.OpType.UPDATE) {
+                String id = itemResponse.getId();
+                if (itemResponse.getResult() == DocWriteResponse.Result.CREATED) {
                     sb.append(id).append(";");
-                } else if (indexResponse.getResult() == DocWriteResponse.Result.UPDATED) {
+                } else if (itemResponse.getResult() == DocWriteResponse.Result.UPDATED) {
                     sb.append(id).append(";");
+                } else if(itemResponse.getResult() == DocWriteResponse.Result.NOOP) {
+                    noops ++;
                 }
             }
         }
         sb.append("]");
+
+        this.elasicApi.updateNOOPs(noops);
         LOGGER.debug(sb.toString());
     }
 

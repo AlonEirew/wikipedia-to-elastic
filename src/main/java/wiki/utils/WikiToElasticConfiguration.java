@@ -5,11 +5,9 @@
 package wiki.utils;
 
 import com.google.gson.reflect.TypeToken;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import wiki.data.relations.RelationType;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
@@ -26,7 +24,8 @@ public class WikiToElasticConfiguration {
     private String setting;
     private String host;
     private String scheme;
-    private String wikiDump;
+    private String wikipediaDump;
+    private String wikidataDump;
     private int port;
     private int shards;
     private int replicas;
@@ -103,12 +102,12 @@ public class WikiToElasticConfiguration {
         this.replicas = replicas;
     }
 
-    public String getWikiDump() {
-        return wikiDump;
+    public String getWikipediaDump() {
+        return wikipediaDump;
     }
 
-    public void setWikiDump(String wikiDump) {
-        this.wikiDump = wikiDump;
+    public void setWikipediaDump(String wikipediaDump) {
+        this.wikipediaDump = wikipediaDump;
     }
 
     public String getSetting() {
@@ -173,5 +172,13 @@ public class WikiToElasticConfiguration {
 
     public void setIncludeRawText(boolean includeRawText) {
         this.includeRawText = includeRawText;
+    }
+
+    public String getWikidataDump() {
+        return wikidataDump;
+    }
+
+    public void setWikidataDump(String wikidataDump) {
+        this.wikidataDump = wikidataDump;
     }
 }

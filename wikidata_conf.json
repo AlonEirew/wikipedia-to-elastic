@@ -1,0 +1,10 @@
+{
+  "indexName": "test_en",
+  "docType": "wikipage",
+  "host": "localhost",
+  "port": 9200,
+  "scheme": "http",
+  "lang": "en",
+  "insertBulkSize": 100,
+  "wikidataDump": "dumps/small_wikidata.json.bz2"
+}

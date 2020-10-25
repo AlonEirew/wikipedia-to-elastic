@@ -31,18 +31,23 @@ public class WikiToElasticMain {
             InputStream inputStream = Objects.requireNonNull(WikiToElasticMain.class.getClassLoader().getResourceAsStream("lang/" + config.getLang() + ".json"));
             LangConfiguration langConfiguration = GSON.fromJson(new InputStreamReader(inputStream, StandardCharsets.UTF_8), LangConfiguration.class);
 
-            ExtractorsManager.initExtractors(config, langConfiguration);
-            LOGGER.info("Process configuration loaded");
+            if(config.getWikipediaDump() != null && !config.getWikipediaDump().isEmpty()) {
 
-            long startTime = System.currentTimeMillis();
-            startProcess(config, langConfiguration);
-            long endTime = System.currentTimeMillis();
+                ExtractorsManager.initExtractors(config, langConfiguration);
+                LOGGER.info("Process configuration loaded");
 
-            long durationInMillis = endTime - startTime;
-            long took = TimeUnit.MILLISECONDS.toMinutes(durationInMillis);
-            LOGGER.info("Process Done, took~" + took + "min (" + durationInMillis + "ms)" );
+                long startTime = System.currentTimeMillis();
+                startProcess(config, langConfiguration);
+                long endTime = System.currentTimeMillis();
+
+                long durationInMillis = endTime - startTime;
+                long took = TimeUnit.MILLISECONDS.toMinutes(durationInMillis);
+                LOGGER.info("Process Done, took~" + took + "min (" + durationInMillis + "ms)");
+            } else {
+                LOGGER.error("Wikipedia dump file not set in configuration");
+            }
         } catch (FileNotFoundException e) {
-            LOGGER.error("Failed to start process", e);
+        LOGGER.error("Failed to start process", e);
         } catch (IOException e) {
             LOGGER.error("I/O Error", e);
         } catch (Exception e) {
@@ -62,8 +67,8 @@ public class WikiToElasticMain {
         ElasticAPI elasicApi = null;
         WikipediaSTAXParser.DeleteUpdateMode mode;
         try(Scanner reader = new Scanner(System.in)) {
-            LOGGER.info("Reading wikidump: " + configuration.getWikiDump());
-            File wikifile = new File(configuration.getWikiDump());
+            LOGGER.info("Reading wikidump: " + configuration.getWikipediaDump());
+            File wikifile = new File(configuration.getWikipediaDump());
             if(wikifile.exists()) {
                 inputStream = WikiToElasticUtils.openCompressedFileInputStream(wikifile.getPath());
                 elasicApi = new ElasticAPI(configuration);
@@ -109,7 +114,7 @@ public class WikiToElasticMain {
                 inputStream.close();
             }
             if(parser != null) {
-                parser.shutDownPool();
+                parser.close();
                 pageHandler.close();
                 LOGGER.info("*** Total id's extracted=" + parser.getTotalIds().size());
                 LOGGER.info("*** In commit queue=" + ((ElasticPageHandler) pageHandler).getPagesQueueSize() + " (should be 0)");

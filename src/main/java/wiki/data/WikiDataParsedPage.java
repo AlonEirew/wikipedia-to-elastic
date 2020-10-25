@@ -6,36 +6,41 @@ import java.util.List;
 import java.util.Map;
 
 public class WikiDataParsedPage {
-    private final static HashMap<String, String> wikidataIdsToTitles = new HashMap<>();
+    private final static Map<String, String> wikidataIdsToTitles = new HashMap<>();
 
-    private final String pageId;
-    private final String pageTitle;
+    private transient String elasticPageId;
+    private transient String wikidataPageId;
+    private transient final String pageTitle;
     private final List<String> aliases;
     private List<String> partOf;
     private List<String> hasPart;
     private List<String> hasEffect;
     private List<String> hasCause;
-    private List<String> hasImmidiateCause;
+    private List<String> hasImmediateCause;
 
-    public WikiDataParsedPage(String pageId, String pageTitle,
+    public WikiDataParsedPage(String wikidataPageId, String pageTitle,
                               List<String> aliases, List<String> partOf, List<String> hasPart,
-                              List<String> hasEffect, List<String> hasCause, List<String> hasImmidiateCause) {
-        this.pageId = pageId;
+                              List<String> hasEffect, List<String> hasCause, List<String> hasImmediateCause) {
         this.pageTitle = pageTitle;
         this.aliases = aliases;
         this.partOf = partOf;
         this.hasPart = hasPart;
         this.hasEffect = hasEffect;
         this.hasCause = hasCause;
-        this.hasImmidiateCause = hasImmidiateCause;
+        this.hasImmediateCause = hasImmediateCause;
+        this.wikidataPageId = wikidataPageId;
 
-        if(!wikidataIdsToTitles.containsKey(pageId)) {
-            wikidataIdsToTitles.put(pageId, pageTitle);
+        if(!wikidataIdsToTitles.containsKey(wikidataPageId)) {
+            wikidataIdsToTitles.put(wikidataPageId, pageTitle);
         }
     }
 
-    public String getPageId() {
-        return pageId;
+    public String getElasticPageId() {
+        return elasticPageId;
+    }
+
+    public void setElasticPageId(String elasticPageId) {
+        this.elasticPageId = elasticPageId;
     }
 
     public String getPageTitle() {
@@ -62,8 +67,8 @@ public class WikiDataParsedPage {
         return hasCause;
     }
 
-    public List<String> getHasImmidiateCause() {
-        return hasImmidiateCause;
+    public List<String> getHasImmediateCause() {
+        return hasImmediateCause;
     }
 
     public void setPartOf(List<String> partOf) {
@@ -82,18 +87,31 @@ public class WikiDataParsedPage {
         this.hasCause = hasCause;
     }
 
-    public void setHasImmidiateCause(List<String> hasImmidiateCause) {
-        this.hasImmidiateCause = hasImmidiateCause;
+    public void setHasImmediateCause(List<String> hasImmediateCause) {
+        this.hasImmediateCause = hasImmediateCause;
     }
 
     public static void replaceIdsWithTitles(Map<String, WikiDataParsedPage> wikiDataParsedPages) {
         for (WikiDataParsedPage page : wikiDataParsedPages.values()) {
             page.setHasCause(convertToTitles(page.hasCause));
             page.setHasEffect(convertToTitles(page.hasEffect));
-            page.setHasImmidiateCause(convertToTitles(page.hasImmidiateCause));
+            page.setHasImmediateCause(convertToTitles(page.hasImmediateCause));
             page.setHasPart(convertToTitles(page.hasPart));
             page.setPartOf(convertToTitles(page.partOf));
         }
+    }
+
+    public static List<WikiDataParsedPage> updateElasticIds(Map<String, WikiDataParsedPage> wikiDataParsedPages,
+                                                                   Map<String, String> elasticIds) {
+        List<WikiDataParsedPage> updatedWikiDataPages = new ArrayList<>();
+        for (WikiDataParsedPage page : wikiDataParsedPages.values()) {
+            if(elasticIds.containsKey(page.getPageTitle())) {
+                page.setElasticPageId(elasticIds.get(page.getPageTitle()));
+                updatedWikiDataPages.add(page);
+            }
+        }
+
+        return updatedWikiDataPages;
     }
 
     private static List<String> convertToTitles(List<String> idsList) {

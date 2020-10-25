@@ -75,18 +75,12 @@ public class ElasticAPI implements Closeable {
             throw new IOException("Missing mandatory values of \"indexName\" & \"docType\" in configuration");
         }
 
-        File wikifile = new File(configuration.getWikiDump());
-        if (wikifile.exists()) {
-            // init elastic client
-            this.client = new RestHighLevelClient(
-                    RestClient.builder(
-                            new HttpHost(configuration.getHost(),
-                                    configuration.getPort(),
-                                    configuration.getScheme())));
-        } else {
-            this.client = null;
-            throw new IllegalArgumentException("Dump not found at-" + configuration.getWikiDump());
-        }
+        // init elastic client
+        this.client = new RestHighLevelClient(
+                RestClient.builder(
+                        new HttpHost(configuration.getHost(),
+                                configuration.getPort(),
+                                configuration.getScheme())));
     }
 
     public DeleteIndexResponse deleteIndex() throws ConnectException {
@@ -158,6 +152,11 @@ public class ElasticAPI implements Closeable {
         }
     }
 
+    // Those are requests that didnt change elastic (because nothing to update)
+    public void updateNOOPs(int noops) {
+        this.totalIdsSuccessfullyCommitted.addAndGet(-noops);
+    }
+
     public synchronized void onFail(int failedCount) {
         this.available.release();
         this.totalIdsProcessed.addAndGet(-failedCount);
@@ -224,20 +223,40 @@ public class ElasticAPI implements Closeable {
                 }
             }
 
-            try {
-                // release will happen from listener (async)
-                this.available.acquire();
-                ElasticBulkDocCreateListener listener = new ElasticBulkDocCreateListener(bulkRequest, this);
-                this.client.bulkAsync(bulkRequest, listener);
-                this.totalIdsProcessed.addAndGet(pages.size());
-                LOGGER.debug("Bulk insert will be created asynchronously");
-            } catch (InterruptedException e) {
-                LOGGER.error("Failed to acquire semaphore, lost bulk insert!", e);
-            }
+            commitBulk(bulkRequest);
         }
     }
 
-    public Map<String, String> readAllWikipedia(int totalAmountToExtract) throws IOException {
+    public void updateBulkWikidataAsnc(List<WikiDataParsedPage> pages) {
+        BulkRequest bulkRequest = new BulkRequest();
+
+        if(pages != null) {
+            for (WikiDataParsedPage page : pages) {
+                if (isValidWikidataRequest(page)) {
+                    UpdateRequest request = createUpdateRequest(page);
+                    bulkRequest.add(request);
+                }
+            }
+
+            commitBulk(bulkRequest);
+        }
+    }
+
+    private void commitBulk(BulkRequest bulkRequest) {
+        try {
+            // release will happen from listener (async)
+            this.available.acquire();
+            ElasticBulkDocCreateListener listener = new ElasticBulkDocCreateListener(bulkRequest, this);
+            this.client.bulkAsync(bulkRequest, listener);
+            this.totalIdsProcessed.addAndGet(bulkRequest.numberOfActions());
+            LOGGER.debug("Bulk insert will be created asynchronously");
+        } catch (InterruptedException e) {
+            LOGGER.error("Failed to acquire semaphore, lost bulk insert!", e);
+        }
+    }
+
+    public Map<String, String> readAllWikipediaIdsTitles(int totalAmountToExtract) throws IOException {
+        LOGGER.info("Reading all Wikipedia titles...");
         Map<String, String> allWikipediaIds = new HashMap<>();
 
         long totalDocsCount = this.getTotalDocsCount();
@@ -255,7 +274,9 @@ public class ElasticAPI implements Closeable {
             scrollId = searchResponse.getScrollId();
 
             allWikipediaIds.putAll(this.getNextScrollResults(searchHits));
-            LOGGER.info((totalDocsCount - count) + " documents to go");
+            if(count % 10000 == 0) {
+                LOGGER.info((totalDocsCount - count) + " documents to go");
+            }
 
             if(totalAmountToExtract > 0 && count >= totalAmountToExtract) {
                 break;
@@ -300,30 +321,6 @@ public class ElasticAPI implements Closeable {
         searchRequest.source(searchSourceBuilder);
         searchRequest.scroll(scroll);
         return this.client.search(searchRequest);
-    }
-
-    public void updateBulkWikidataAsnc(List<WikiDataParsedPage> pages) {
-        BulkRequest bulkRequest = new BulkRequest();
-
-        if(pages != null) {
-            for (WikiDataParsedPage page : pages) {
-                if (isValidWikidataRequest(page)) {
-                    UpdateRequest request = createUpdateRequest(page);
-                    bulkRequest.add(request);
-                }
-            }
-
-            try {
-                // release will happen from listener (async)
-                this.available.acquire();
-                ElasticBulkDocCreateListener listener = new ElasticBulkDocCreateListener(bulkRequest, this);
-                this.client.bulkAsync(bulkRequest, listener);
-                this.totalIdsProcessed.addAndGet(pages.size());
-                LOGGER.debug("Bulk insert will be created asynchronously");
-            } catch (InterruptedException e) {
-                LOGGER.error("Failed to acquire semaphore, lost bulk insert!", e);
-            }
-        }
     }
 
     public void retryAddBulk(BulkRequest bulkRequest, ElasticBulkDocCreateListener listener) {
@@ -389,12 +386,14 @@ public class ElasticAPI implements Closeable {
     }
 
     private UpdateRequest createUpdateRequest(WikiDataParsedPage page) {
+
         UpdateRequest updateRequest = new UpdateRequest(
                 this.indexName,
                 this.docType,
-                String.valueOf("page.getId()"));
+                String.valueOf(page.getElasticPageId()));
 
-//        updateRequest.fet(GSON.toJson(page), XContentType.JSON);
+        Map<String, WikiDataParsedPage> wikidataRelations = Collections.singletonMap("relations", page);
+        updateRequest.doc(GSON.toJson(wikidataRelations), XContentType.JSON);
 
         return updateRequest;
     }
