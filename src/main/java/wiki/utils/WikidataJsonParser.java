@@ -26,7 +26,9 @@ public class WikidataJsonParser {
     private final static String HAS_PART = "P527";
     private final static String HAS_EFFECT = "P1542";
     private final static String HAS_CAUSE = "P828";
-    private final static String HAS_IMMEDIATE_CAUSE = "P1536";
+    private final static String IMMEDIATE_CAUSE_OF = "P1536";
+    private final static String HAS_IMMEDIATE_CAUSE = "P1478";
+
 
     private final static Set<String> uniqueTitles = Collections.synchronizedSet(new HashSet<>());
 
@@ -57,11 +59,12 @@ public class WikidataJsonParser {
                             List<String> hasEffect = getClaimsFromJsonArray(claims.getAsJsonArray(HAS_EFFECT));
                             List<String> hasCause = getClaimsFromJsonArray(claims.getAsJsonArray(HAS_CAUSE));
                             List<String> hasImmCause = getClaimsFromJsonArray(claims.getAsJsonArray(HAS_IMMEDIATE_CAUSE));
+                            List<String> immCauseOf = getClaimsFromJsonArray(claims.getAsJsonArray(IMMEDIATE_CAUSE_OF));
 
                             if (!(aliases.isEmpty() && partOf.isEmpty() && hasPart.isEmpty() && hasEffect.isEmpty() &&
-                                    hasCause.isEmpty() && hasImmCause.isEmpty())) {
+                                    hasCause.isEmpty() && hasImmCause.isEmpty() && immCauseOf.isEmpty())) {
                                 messages.put(pageTitle, new WikiDataParsedPage(wikidatePageId, pageTitle, aliases,
-                                        partOf, hasPart, hasEffect, hasCause, hasImmCause));
+                                        partOf, hasPart, hasEffect, hasCause, hasImmCause, immCauseOf));
                             }
                         }
                     }

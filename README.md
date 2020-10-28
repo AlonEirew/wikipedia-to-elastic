@@ -38,6 +38,7 @@ Links for further details on those properties:
 * <a href="https://www.wikidata.org/wiki/Property:P527">Has Part</a>
 * <a href="https://www.wikidata.org/wiki/Property:P361">Part Of</a>
 * <a href="https://www.wikidata.org/wiki/Property:P1536">Immediate Cause Of</a>
+* <a href="https://www.wikidata.org/wiki/Property:P1478">Has Immediate Cause</a>
 
 
 ***
@@ -46,7 +47,8 @@ Links for further details on those properties:
 * Java 11
 * ElasticSearch 6.2.3 (<a href=https://www.elastic.co/downloads/elasticsearch>Installation Guide</a>)
 * Elastic plugins: analysis-icu, analysis-smartcn
-* Wikipedia xml.bz2 dump file in required language (English for example<a href=https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles.xml.bz2>download enwiki latest dump xml</a>)
+* Wikipedia xml.bz2 dump file in required language (For example <a href=https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles.xml.bz2>latest en XML dump</a>)
+* Optional: Wikidata json.bz2 dump file (<a href=https://dumps.wikimedia.org/wikidatawiki/entities/latest-all.json.bz2>latest JSON dump</a>)
 
 
 ### Building Wikipedia Elasticsearch Index From Source

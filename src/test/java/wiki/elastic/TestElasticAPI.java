@@ -105,7 +105,7 @@ public class TestElasticAPI {
         aliases.add("Vla Cla");
         WikiDataParsedPage wikiDataParsedPage = new WikiDataParsedPage("Q1", "Derrick Martin",
                 aliases, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(),
-                new ArrayList<>(), new ArrayList<>());
+                new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
         wikiDataParsedPage.setElasticPageId("7701435");
 
         List<WikiDataParsedPage> parsedPages = new ArrayList<>();

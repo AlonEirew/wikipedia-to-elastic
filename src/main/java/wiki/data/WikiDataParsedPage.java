@@ -9,7 +9,6 @@ public class WikiDataParsedPage {
     private final static Map<String, String> wikidataIdsToTitles = new HashMap<>();
 
     private transient String elasticPageId;
-    private transient String wikidataPageId;
     private transient final String pageTitle;
     private final List<String> aliases;
     private List<String> partOf;
@@ -17,10 +16,12 @@ public class WikiDataParsedPage {
     private List<String> hasEffect;
     private List<String> hasCause;
     private List<String> hasImmediateCause;
+    private List<String> immediateCauseOf;
 
     public WikiDataParsedPage(String wikidataPageId, String pageTitle,
                               List<String> aliases, List<String> partOf, List<String> hasPart,
-                              List<String> hasEffect, List<String> hasCause, List<String> hasImmediateCause) {
+                              List<String> hasEffect, List<String> hasCause, List<String> hasImmediateCause,
+                              List<String> immediateCauseOf) {
         this.pageTitle = pageTitle;
         this.aliases = aliases;
         this.partOf = partOf;
@@ -28,7 +29,7 @@ public class WikiDataParsedPage {
         this.hasEffect = hasEffect;
         this.hasCause = hasCause;
         this.hasImmediateCause = hasImmediateCause;
-        this.wikidataPageId = wikidataPageId;
+        this.immediateCauseOf = immediateCauseOf;
 
         if(!wikidataIdsToTitles.containsKey(wikidataPageId)) {
             wikidataIdsToTitles.put(wikidataPageId, pageTitle);
@@ -91,11 +92,20 @@ public class WikiDataParsedPage {
         this.hasImmediateCause = hasImmediateCause;
     }
 
+    public List<String> getImmediateCauseOf() {
+        return immediateCauseOf;
+    }
+
+    public void setImmediateCauseOf(List<String> immediateCauseOf) {
+        this.immediateCauseOf = immediateCauseOf;
+    }
+
     public static void replaceIdsWithTitles(Map<String, WikiDataParsedPage> wikiDataParsedPages) {
         for (WikiDataParsedPage page : wikiDataParsedPages.values()) {
             page.setHasCause(convertToTitles(page.hasCause));
             page.setHasEffect(convertToTitles(page.hasEffect));
             page.setHasImmediateCause(convertToTitles(page.hasImmediateCause));
+            page.setImmediateCauseOf(convertToTitles(page.immediateCauseOf));
             page.setHasPart(convertToTitles(page.hasPart));
             page.setPartOf(convertToTitles(page.partOf));
         }
