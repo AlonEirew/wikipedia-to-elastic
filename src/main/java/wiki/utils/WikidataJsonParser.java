@@ -13,7 +13,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -29,14 +32,11 @@ public class WikidataJsonParser {
     private final static String IMMEDIATE_CAUSE_OF = "P1536";
     private final static String HAS_IMMEDIATE_CAUSE = "P1478";
 
-
-    private final static Set<String> uniqueTitles = Collections.synchronizedSet(new HashSet<>());
-
     private final AtomicInteger counter = new AtomicInteger(1);
-    private final Map<String, WikiDataParsedPage> messages = new Hashtable<>();
 
     public Map<String, WikiDataParsedPage> parse(File inputDump, final String lang) throws IOException {
         ExecutorService executorService = SimpleExecutorService.initExecutorService();
+        final Map<String, WikiDataParsedPage> allParsedWikidataPages = new ConcurrentHashMap<>();
 
         try(final JsonReader reader = new JsonReader(new InputStreamReader(WikiToElasticUtils.openCompressedFileInputStream(
                         inputDump.getPath()), StandardCharsets.UTF_8))) {
@@ -47,25 +47,27 @@ public class WikidataJsonParser {
                     JsonObject labels = message.get("labels").getAsJsonObject();
                     JsonObject pageLang = labels.getAsJsonObject(lang);
                     if(pageLang != null) {
-                        String pageTitle = pageLang.get("value").getAsString();
-                        if(!uniqueTitles.contains(pageTitle) && isValidPage(pageTitle)) {
+                        String wikidataPageId = message.get("id").getAsString();
+                        String wikipediaPageLangTitle = pageLang.get("value").getAsString();
+                        if(isValidPage(wikipediaPageLangTitle) && isValidPage(wikidataPageId)) {
+                            WikiDataParsedPage wikidataParsedPage;
+                            if (allParsedWikidataPages.containsKey(wikidataPageId)) {
+                                wikidataParsedPage = allParsedWikidataPages.get(wikidataPageId);
+                            } else {
+                                wikidataParsedPage = new WikiDataParsedPage(wikidataPageId, wikipediaPageLangTitle);
+                                allParsedWikidataPages.put(wikidataPageId, wikidataParsedPage);
+                            }
+
                             JsonObject aliasesJson = message.get("aliases").getAsJsonObject();
                             JsonObject claims = message.get("claims").getAsJsonObject();
-                            String wikidatePageId = message.get("id").getAsString();
 
-                            List<String> aliases = getAliasesFromJsonArray(aliasesJson.getAsJsonArray("en"));
-                            List<String> partOf = getClaimsFromJsonArray(claims.getAsJsonArray(PART_OF));
-                            List<String> hasPart = getClaimsFromJsonArray(claims.getAsJsonArray(HAS_PART));
-                            List<String> hasEffect = getClaimsFromJsonArray(claims.getAsJsonArray(HAS_EFFECT));
-                            List<String> hasCause = getClaimsFromJsonArray(claims.getAsJsonArray(HAS_CAUSE));
-                            List<String> hasImmCause = getClaimsFromJsonArray(claims.getAsJsonArray(HAS_IMMEDIATE_CAUSE));
-                            List<String> immCauseOf = getClaimsFromJsonArray(claims.getAsJsonArray(IMMEDIATE_CAUSE_OF));
-
-                            if (!(aliases.isEmpty() && partOf.isEmpty() && hasPart.isEmpty() && hasEffect.isEmpty() &&
-                                    hasCause.isEmpty() && hasImmCause.isEmpty() && immCauseOf.isEmpty())) {
-                                messages.put(pageTitle, new WikiDataParsedPage(wikidatePageId, pageTitle, aliases,
-                                        partOf, hasPart, hasEffect, hasCause, hasImmCause, immCauseOf));
-                            }
+                            wikidataParsedPage.getAliases().addAll(getAliasesFromJsonArray(aliasesJson.getAsJsonArray(lang)));
+                            wikidataParsedPage.getPartOf().addAll(getClaimsFromJsonArray(claims.getAsJsonArray(PART_OF)));
+                            wikidataParsedPage.getHasPart().addAll(getClaimsFromJsonArray(claims.getAsJsonArray(HAS_PART)));
+                            wikidataParsedPage.getHasEffect().addAll(getClaimsFromJsonArray(claims.getAsJsonArray(HAS_EFFECT)));
+                            wikidataParsedPage.getHasCause().addAll(getClaimsFromJsonArray(claims.getAsJsonArray(HAS_CAUSE)));
+                            wikidataParsedPage.getHasImmediateCause().addAll(getClaimsFromJsonArray(claims.getAsJsonArray(HAS_IMMEDIATE_CAUSE)));
+                            wikidataParsedPage.getImmediateCauseOf().addAll(getClaimsFromJsonArray(claims.getAsJsonArray(IMMEDIATE_CAUSE_OF)));
                         }
                     }
 
@@ -82,7 +84,7 @@ public class WikidataJsonParser {
 
         SimpleExecutorService.shutDownPool(executorService);
         LOGGER.info("Done Loading Json!");
-        return this.messages;
+        return allParsedWikidataPages;
     }
 
     private boolean isValidPage(String title) {
@@ -90,8 +92,8 @@ public class WikidataJsonParser {
                 title.startsWith("Help:") || StringUtils.isNumericSpace(title) || title.length() == 1);
     }
 
-    private List<String> getClaimsFromJsonArray(JsonArray array) {
-        List<String> retList = new ArrayList<>();
+    private Set<String> getClaimsFromJsonArray(JsonArray array) {
+        Set<String> retList = new HashSet<>();
         if(array != null) {
             for (int i = 0; i < array.size(); i++) {
                 JsonObject datavalue = array.get(i).getAsJsonObject().getAsJsonObject("mainsnak").getAsJsonObject("datavalue");
@@ -108,8 +110,8 @@ public class WikidataJsonParser {
         return retList;
     }
 
-    private List<String> getAliasesFromJsonArray(JsonArray array) {
-        List<String> retList = new ArrayList<>();
+    private Set<String> getAliasesFromJsonArray(JsonArray array) {
+        Set<String> retList = new HashSet<>();
         if(array != null) {
             for (int i = 0; i < array.size(); i++) {
                 JsonObject elem = array.get(i).getAsJsonObject();

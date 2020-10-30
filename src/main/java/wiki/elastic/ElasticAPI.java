@@ -39,7 +39,6 @@ import wiki.data.WikipediaParsedPage;
 import wiki.utils.WikiToElasticConfiguration;
 
 import java.io.Closeable;
-import java.io.File;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.util.*;
@@ -255,9 +254,9 @@ public class ElasticAPI implements Closeable {
         }
     }
 
-    public Map<String, String> readAllWikipediaIdsTitles(int totalAmountToExtract) throws IOException {
+    public Map<String, WikipediaParsedPage> readAllWikipediaIdsTitles(int totalAmountToExtract) throws IOException {
         LOGGER.info("Reading all Wikipedia titles...");
-        Map<String, String> allWikipediaIds = new HashMap<>();
+        Map<String, WikipediaParsedPage> allWikipediaIds = new HashMap<>();
 
         long totalDocsCount = this.getTotalDocsCount();
         final Scroll scroll = new Scroll(TimeValue.timeValueHours(5L));
@@ -289,13 +288,18 @@ public class ElasticAPI implements Closeable {
         return allWikipediaIds;
     }
 
-    private Map<String, String> getNextScrollResults(SearchHit[] searchHits) {
-        Map<String, String> wikiPairs = new HashMap<>();
+    private Map<String, WikipediaParsedPage> getNextScrollResults(SearchHit[] searchHits) {
+        Map<String, WikipediaParsedPage> wikiPairs = new HashMap<>();
         for (SearchHit hit : searchHits) {
-            final String id = hit.getId();
+            final long id = Long.parseLong(hit.getId());
             final Map map = hit.getSourceAsMap();
             final String title = (String) map.get("title");
-            wikiPairs.put(title, id);
+            final String text = (String) map.get("text");
+            String redirect = null;
+            if (text.startsWith("#REDIRECT")) {
+                redirect = (String) map.get("redirectTitle");
+            }
+            wikiPairs.put(title, new WikipediaParsedPage(title, id, null, redirect, null));
         }
 
         return wikiPairs;
@@ -403,7 +407,7 @@ public class ElasticAPI implements Closeable {
     }
 
     private boolean isValidWikidataRequest(WikiDataParsedPage page) {
-        return page != null && page.getPageTitle() != null && !page.getPageTitle().isEmpty();
+        return page != null && page.getWikipediaLangPageTitle() != null && !page.getWikipediaLangPageTitle().isEmpty();
     }
 
     @Override

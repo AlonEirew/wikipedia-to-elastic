@@ -1,39 +1,26 @@
 package wiki.data;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class WikiDataParsedPage {
-    private final static Map<String, String> wikidataIdsToTitles = new HashMap<>();
-
+    private final transient String wikidataPageId;
+    private final transient String wikipediaLangPageTitle;
     private transient String elasticPageId;
-    private transient final String pageTitle;
-    private final List<String> aliases;
-    private List<String> partOf;
-    private List<String> hasPart;
-    private List<String> hasEffect;
-    private List<String> hasCause;
-    private List<String> hasImmediateCause;
-    private List<String> immediateCauseOf;
+    private final Set<String> aliases = new HashSet<>();
+    private Set<String> partOf = new HashSet<>();
+    private Set<String> hasPart = new HashSet<>();
+    private Set<String> hasEffect = new HashSet<>();
+    private Set<String> hasCause = new HashSet<>();
+    private Set<String> hasImmediateCause = new HashSet<>();
+    private Set<String> immediateCauseOf = new HashSet<>();
 
-    public WikiDataParsedPage(String wikidataPageId, String pageTitle,
-                              List<String> aliases, List<String> partOf, List<String> hasPart,
-                              List<String> hasEffect, List<String> hasCause, List<String> hasImmediateCause,
-                              List<String> immediateCauseOf) {
-        this.pageTitle = pageTitle;
-        this.aliases = aliases;
-        this.partOf = partOf;
-        this.hasPart = hasPart;
-        this.hasEffect = hasEffect;
-        this.hasCause = hasCause;
-        this.hasImmediateCause = hasImmediateCause;
-        this.immediateCauseOf = immediateCauseOf;
+    public WikiDataParsedPage(String wikidataPageId, String wikipediaLangPageTitle) {
+        this.wikidataPageId = wikidataPageId;
+        this.wikipediaLangPageTitle = wikipediaLangPageTitle;
+    }
 
-        if(!wikidataIdsToTitles.containsKey(wikidataPageId)) {
-            wikidataIdsToTitles.put(wikidataPageId, pageTitle);
-        }
+    public String getWikidataPageId() {
+        return wikidataPageId;
     }
 
     public String getElasticPageId() {
@@ -44,96 +31,120 @@ public class WikiDataParsedPage {
         this.elasticPageId = elasticPageId;
     }
 
-    public String getPageTitle() {
-        return pageTitle;
+    public String getWikipediaLangPageTitle() {
+        return wikipediaLangPageTitle;
     }
 
-    public List<String> getAliases() {
+    public Set<String> getAliases() {
         return aliases;
     }
 
-    public List<String> getPartOf() {
+    public Set<String> getPartOf() {
         return partOf;
     }
 
-    public List<String> getHasPart() {
+    public Set<String> getHasPart() {
         return hasPart;
     }
 
-    public List<String> getHasEffect() {
+    public Set<String> getHasEffect() {
         return hasEffect;
     }
 
-    public List<String> getHasCause() {
+    public Set<String> getHasCause() {
         return hasCause;
     }
 
-    public List<String> getHasImmediateCause() {
+    public Set<String> getHasImmediateCause() {
         return hasImmediateCause;
     }
 
-    public void setPartOf(List<String> partOf) {
+    public void setPartOf(Set<String> partOf) {
         this.partOf = partOf;
     }
 
-    public void setHasPart(List<String> hasPart) {
+    public void setHasPart(Set<String> hasPart) {
         this.hasPart = hasPart;
     }
 
-    public void setHasEffect(List<String> hasEffect) {
+    public void setHasEffect(Set<String> hasEffect) {
         this.hasEffect = hasEffect;
     }
 
-    public void setHasCause(List<String> hasCause) {
+    public void setHasCause(Set<String> hasCause) {
         this.hasCause = hasCause;
     }
 
-    public void setHasImmediateCause(List<String> hasImmediateCause) {
+    public void setHasImmediateCause(Set<String> hasImmediateCause) {
         this.hasImmediateCause = hasImmediateCause;
     }
 
-    public List<String> getImmediateCauseOf() {
+    public Set<String> getImmediateCauseOf() {
         return immediateCauseOf;
     }
 
-    public void setImmediateCauseOf(List<String> immediateCauseOf) {
+    public void setImmediateCauseOf(Set<String> immediateCauseOf) {
         this.immediateCauseOf = immediateCauseOf;
     }
 
-    public static void replaceIdsWithTitles(Map<String, WikiDataParsedPage> wikiDataParsedPages) {
+    public static List<WikiDataParsedPage> prepareWikipediaWikidataMergeList(Map<String, WikiDataParsedPage> wikiDataParsedPages,
+                                                                             Map<String, WikipediaParsedPage> wikipediaTitleToId) {
+        replaceRelIdsWithTitles(wikiDataParsedPages, wikipediaTitleToId);
+        return updateElasticIds(wikiDataParsedPages, wikipediaTitleToId);
+    }
+
+    private static void replaceRelIdsWithTitles(Map<String, WikiDataParsedPage> wikiDataParsedPages,
+                                            Map<String, WikipediaParsedPage> wikipediaTitleToId) {
         for (WikiDataParsedPage page : wikiDataParsedPages.values()) {
-            page.setHasCause(convertToTitles(page.hasCause));
-            page.setHasEffect(convertToTitles(page.hasEffect));
-            page.setHasImmediateCause(convertToTitles(page.hasImmediateCause));
-            page.setImmediateCauseOf(convertToTitles(page.immediateCauseOf));
-            page.setHasPart(convertToTitles(page.hasPart));
-            page.setPartOf(convertToTitles(page.partOf));
+            page.setHasCause(convertWikidataIdToWikipediaTitles(wikiDataParsedPages, wikipediaTitleToId, page.hasCause));
+            page.setHasEffect(convertWikidataIdToWikipediaTitles(wikiDataParsedPages, wikipediaTitleToId, page.hasEffect));
+            page.setHasImmediateCause(convertWikidataIdToWikipediaTitles(wikiDataParsedPages, wikipediaTitleToId, page.hasImmediateCause));
+            page.setImmediateCauseOf(convertWikidataIdToWikipediaTitles(wikiDataParsedPages, wikipediaTitleToId, page.immediateCauseOf));
+            page.setHasPart(convertWikidataIdToWikipediaTitles(wikiDataParsedPages, wikipediaTitleToId, page.hasPart));
+            page.setPartOf(convertWikidataIdToWikipediaTitles(wikiDataParsedPages, wikipediaTitleToId, page.partOf));
         }
     }
 
-    public static List<WikiDataParsedPage> updateElasticIds(Map<String, WikiDataParsedPage> wikiDataParsedPages,
-                                                                   Map<String, String> elasticIds) {
+    private static List<WikiDataParsedPage> updateElasticIds(Map<String, WikiDataParsedPage> wikiDataParsedPages,
+                                                                   Map<String, WikipediaParsedPage> elasticTitleToIds) {
         List<WikiDataParsedPage> updatedWikiDataPages = new ArrayList<>();
         for (WikiDataParsedPage page : wikiDataParsedPages.values()) {
-            if(elasticIds.containsKey(page.getPageTitle())) {
-                page.setElasticPageId(elasticIds.get(page.getPageTitle()));
-                updatedWikiDataPages.add(page);
+            if(elasticTitleToIds.containsKey(page.getWikipediaLangPageTitle())) {
+                WikipediaParsedPage wikipediaParsedPage = elasticTitleToIds.get(page.getWikipediaLangPageTitle());
+                if(wikipediaParsedPage.getRedirectTitle() != null && !wikipediaParsedPage.getRedirectTitle().isEmpty()) {
+                    if(elasticTitleToIds.containsKey(wikipediaParsedPage.getRedirectTitle())) {
+                        WikipediaParsedPage redirectPage = elasticTitleToIds.get(wikipediaParsedPage.getRedirectTitle());
+                        page.setElasticPageId(String.valueOf(redirectPage.getId()));
+                        updatedWikiDataPages.add(page);
+                    }
+                } else {
+                    page.setElasticPageId(String.valueOf(wikipediaParsedPage.getId()));
+                    updatedWikiDataPages.add(page);
+                }
             }
         }
 
         return updatedWikiDataPages;
     }
 
-    private static List<String> convertToTitles(List<String> idsList) {
-        List<String> titels = new ArrayList<>();
+    private static Set<String> convertWikidataIdToWikipediaTitles(Map<String, WikiDataParsedPage> wikiDataParsedPages,
+                                                                  Map<String, WikipediaParsedPage> wikipediaTitleToId,
+                                                                  Set<String> idsList) {
+        Set<String> replacedTitels = new HashSet<>();
         if(idsList != null) {
             for(String id : idsList) {
-                if (wikidataIdsToTitles.containsKey(id)) {
-                    titels.add(wikidataIdsToTitles.get(id));
+                if (wikiDataParsedPages.containsKey(id)) {
+                    String wikipediaLangPageTitle = wikiDataParsedPages.get(id).getWikipediaLangPageTitle();
+                    String redirectTitle = wikipediaTitleToId.get(wikipediaLangPageTitle).getRedirectTitle();
+                    if(redirectTitle != null && !redirectTitle.isEmpty()) {
+                        replacedTitels.add(redirectTitle);
+                    } else {
+                        replacedTitels.add(wikipediaLangPageTitle);
+                    }
                 }
             }
         }
 
-        return titels;
+        return replacedTitels;
     }
 }

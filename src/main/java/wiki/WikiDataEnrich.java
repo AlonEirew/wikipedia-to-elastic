@@ -5,6 +5,7 @@ import org.apache.commons.collections4.ListUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import wiki.data.WikiDataParsedPage;
+import wiki.data.WikipediaParsedPage;
 import wiki.elastic.ElasticAPI;
 import wiki.utils.SimpleExecutorService;
 import wiki.utils.WikiToElasticConfiguration;
@@ -53,20 +54,16 @@ public class WikiDataEnrich {
         ExecutorService executor = Executors.newFixedThreadPool(2);
         try {
             final WikidataJsonParser wikidataJsonParser = new WikidataJsonParser();
-            Callable<Map<String, WikiDataParsedPage>> wikiRun = () -> {
-                Map<String, WikiDataParsedPage> parsePages = wikidataJsonParser.parse(inputDump, lang);
-                WikiDataParsedPage.replaceIdsWithTitles(parsePages);
-                return parsePages;
-            };
-            Future<Map<String, WikiDataParsedPage>> submitWikidata = executor.submit(wikiRun);
+            Callable<Map<String, WikiDataParsedPage>> wikidataParseRun = () -> wikidataJsonParser.parse(inputDump, lang);
+            Future<Map<String, WikiDataParsedPage>> wikidataParseSubmit = executor.submit(wikidataParseRun);
 
-            Callable<Map<String, String>> wikipediaRun = () -> elasticAPI.readAllWikipediaIdsTitles(-1);
-            Future<Map<String, String>> submitElastic = executor.submit(wikipediaRun);
+            Callable<Map<String, WikipediaParsedPage>> wikipediaRun = () -> elasticAPI.readAllWikipediaIdsTitles(-1);
+            Future<Map<String, WikipediaParsedPage>> elasticReadIdsSubmit = executor.submit(wikipediaRun);
 
-            Map<String, String> wikipediaTitleToId = submitElastic.get();
-            Map<String, WikiDataParsedPage> parsedPagesWikidata = submitWikidata.get();
+            Map<String, WikiDataParsedPage> parsedPagesWikidata = wikidataParseSubmit.get();
+            Map<String, WikipediaParsedPage> wikipediaTitleToId = elasticReadIdsSubmit.get();
 
-            return WikiDataParsedPage.updateElasticIds(parsedPagesWikidata, wikipediaTitleToId);
+            return WikiDataParsedPage.prepareWikipediaWikidataMergeList(parsedPagesWikidata, wikipediaTitleToId);
         } finally {
             SimpleExecutorService.shutDownPool(executor);
         }
