@@ -49,25 +49,23 @@ public class WikidataJsonParser {
                     if(pageLang != null) {
                         String wikidataPageId = message.get("id").getAsString();
                         String wikipediaPageLangTitle = pageLang.get("value").getAsString();
-                        if(isValidPage(wikipediaPageLangTitle) && isValidPage(wikidataPageId)) {
-                            WikiDataParsedPage wikidataParsedPage;
-                            if (allParsedWikidataPages.containsKey(wikidataPageId)) {
-                                wikidataParsedPage = allParsedWikidataPages.get(wikidataPageId);
-                            } else {
-                                wikidataParsedPage = new WikiDataParsedPage(wikidataPageId, wikipediaPageLangTitle);
-                                allParsedWikidataPages.put(wikidataPageId, wikidataParsedPage);
-                            }
+                        if(isValidPage(wikipediaPageLangTitle)) {
+                            WikiDataParsedPage wikidataParsedPage = new WikiDataParsedPage(wikidataPageId, wikipediaPageLangTitle);
 
                             JsonObject aliasesJson = message.get("aliases").getAsJsonObject();
                             JsonObject claims = message.get("claims").getAsJsonObject();
 
-                            wikidataParsedPage.getAliases().addAll(getAliasesFromJsonArray(aliasesJson.getAsJsonArray(lang)));
-                            wikidataParsedPage.getPartOf().addAll(getClaimsFromJsonArray(claims.getAsJsonArray(PART_OF)));
-                            wikidataParsedPage.getHasPart().addAll(getClaimsFromJsonArray(claims.getAsJsonArray(HAS_PART)));
-                            wikidataParsedPage.getHasEffect().addAll(getClaimsFromJsonArray(claims.getAsJsonArray(HAS_EFFECT)));
-                            wikidataParsedPage.getHasCause().addAll(getClaimsFromJsonArray(claims.getAsJsonArray(HAS_CAUSE)));
-                            wikidataParsedPage.getHasImmediateCause().addAll(getClaimsFromJsonArray(claims.getAsJsonArray(HAS_IMMEDIATE_CAUSE)));
-                            wikidataParsedPage.getImmediateCauseOf().addAll(getClaimsFromJsonArray(claims.getAsJsonArray(IMMEDIATE_CAUSE_OF)));
+                            wikidataParsedPage.setAliases(getAliasesFromJsonArray(aliasesJson.getAsJsonArray(lang)));
+                            wikidataParsedPage.setPartOf(getClaimsFromJsonArray(claims.getAsJsonArray(PART_OF)));
+                            wikidataParsedPage.setHasPart(getClaimsFromJsonArray(claims.getAsJsonArray(HAS_PART)));
+                            wikidataParsedPage.setHasEffect(getClaimsFromJsonArray(claims.getAsJsonArray(HAS_EFFECT)));
+                            wikidataParsedPage.setHasCause(getClaimsFromJsonArray(claims.getAsJsonArray(HAS_CAUSE)));
+                            wikidataParsedPage.setHasImmediateCause(getClaimsFromJsonArray(claims.getAsJsonArray(HAS_IMMEDIATE_CAUSE)));
+                            wikidataParsedPage.setImmediateCauseOf(getClaimsFromJsonArray(claims.getAsJsonArray(IMMEDIATE_CAUSE_OF)));
+
+                            if(!wikidataParsedPage.isEmpty()) {
+                                allParsedWikidataPages.put(wikidataPageId, wikidataParsedPage);
+                            }
                         }
                     }
 
@@ -107,6 +105,10 @@ public class WikidataJsonParser {
             }
         }
 
+        if(retList.isEmpty()) {
+            return null;
+        }
+
         return retList;
     }
 
@@ -120,6 +122,10 @@ public class WikidataJsonParser {
                     retList.add(aliasValue);
                 }
             }
+        }
+
+        if(retList.isEmpty()) {
+            return null;
         }
 
         return retList;

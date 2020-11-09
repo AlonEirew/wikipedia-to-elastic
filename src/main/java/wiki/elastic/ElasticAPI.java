@@ -294,12 +294,13 @@ public class ElasticAPI implements Closeable {
             final long id = Long.parseLong(hit.getId());
             final Map map = hit.getSourceAsMap();
             final String title = (String) map.get("title");
-            final String text = (String) map.get("text");
-            String redirect = null;
-            if (text.startsWith("#REDIRECT")) {
-                redirect = (String) map.get("redirectTitle");
+            String redirect = (String) map.get("redirectTitle");
+            if (redirect != null && !redirect.isEmpty()) {
+                wikiPairs.put(title, new WikipediaParsedPage(title, id, null, redirect, null));
+            } else {
+                wikiPairs.put(title, new WikipediaParsedPage(title, id, null, null, null));
             }
-            wikiPairs.put(title, new WikipediaParsedPage(title, id, null, redirect, null));
+
         }
 
         return wikiPairs;

@@ -6,13 +6,13 @@ public class WikiDataParsedPage {
     private final transient String wikidataPageId;
     private final transient String wikipediaLangPageTitle;
     private transient String elasticPageId;
-    private final Set<String> aliases = new HashSet<>();
-    private Set<String> partOf = new HashSet<>();
-    private Set<String> hasPart = new HashSet<>();
-    private Set<String> hasEffect = new HashSet<>();
-    private Set<String> hasCause = new HashSet<>();
-    private Set<String> hasImmediateCause = new HashSet<>();
-    private Set<String> immediateCauseOf = new HashSet<>();
+    private Set<String> aliases;
+    private Set<String> partOf;
+    private Set<String> hasPart;
+    private Set<String> hasEffect;
+    private Set<String> hasCause;
+    private Set<String> hasImmediateCause;
+    private Set<String> immediateCauseOf;
 
     public WikiDataParsedPage(String wikidataPageId, String wikipediaLangPageTitle) {
         this.wikidataPageId = wikidataPageId;
@@ -59,6 +59,10 @@ public class WikiDataParsedPage {
         return hasImmediateCause;
     }
 
+    public void setAliases(Set<String> aliases) {
+        this.aliases = aliases;
+    }
+
     public void setPartOf(Set<String> partOf) {
         this.partOf = partOf;
     }
@@ -85,6 +89,14 @@ public class WikiDataParsedPage {
 
     public void setImmediateCauseOf(Set<String> immediateCauseOf) {
         this.immediateCauseOf = immediateCauseOf;
+    }
+
+    public boolean isEmpty() {
+        return (this.aliases == null || this.aliases.isEmpty()) && (this.partOf == null || this.partOf.isEmpty()) &&
+                (this.hasPart == null || this.hasPart.isEmpty()) && (this.hasEffect == null || this.hasEffect.isEmpty()) &&
+                (this.hasCause == null || this.hasCause.isEmpty()) &&
+                (this.immediateCauseOf == null || this.immediateCauseOf.isEmpty()) &&
+                (this.hasImmediateCause == null || this.hasImmediateCause.isEmpty());
     }
 
     public static List<WikiDataParsedPage> prepareWikipediaWikidataMergeList(Map<String, WikiDataParsedPage> wikiDataParsedPages,
@@ -129,22 +141,24 @@ public class WikiDataParsedPage {
 
     private static Set<String> convertWikidataIdToWikipediaTitles(Map<String, WikiDataParsedPage> wikiDataParsedPages,
                                                                   Map<String, WikipediaParsedPage> wikipediaTitleToId,
-                                                                  Set<String> idsList) {
-        Set<String> replacedTitels = new HashSet<>();
-        if(idsList != null) {
-            for(String id : idsList) {
+                                                                  Set<String> wikiDataIdsList) {
+        Set<String> replacedTitles = new HashSet<>();
+        if(wikiDataIdsList != null) {
+            for(String id : wikiDataIdsList) {
                 if (wikiDataParsedPages.containsKey(id)) {
                     String wikipediaLangPageTitle = wikiDataParsedPages.get(id).getWikipediaLangPageTitle();
-                    String redirectTitle = wikipediaTitleToId.get(wikipediaLangPageTitle).getRedirectTitle();
-                    if(redirectTitle != null && !redirectTitle.isEmpty()) {
-                        replacedTitels.add(redirectTitle);
-                    } else {
-                        replacedTitels.add(wikipediaLangPageTitle);
+                    if(wikipediaTitleToId.containsKey(wikipediaLangPageTitle)) {
+                        String redirectTitle = wikipediaTitleToId.get(wikipediaLangPageTitle).getRedirectTitle();
+                        if (redirectTitle != null && !redirectTitle.isEmpty()) {
+                            replacedTitles.add(redirectTitle);
+                        } else {
+                            replacedTitles.add(wikipediaLangPageTitle);
+                        }
                     }
                 }
             }
         }
 
-        return replacedTitels;
+        return replacedTitles;
     }
 }
