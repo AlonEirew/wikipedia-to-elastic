@@ -8,7 +8,7 @@ public class WikipediaParsedPageRelations {
     private final String infobox;
     private final boolean isPartName;
     private final boolean isDisambiguation;
-    private final Set<String> disambiguationLinks = new HashSet<>();
+    private final Set<String> disambiguationLinks;
     private final Set<String> categories;
     private final Set<String> titleParenthesis;
     private final Set<String> beCompRelations;
@@ -22,7 +22,9 @@ public class WikipediaParsedPageRelations {
         this.isDisambiguation = isDisambiguation;
 
         if(isDisambiguation) {
-            this.disambiguationLinks.addAll(disambiguationLinks);
+            this.disambiguationLinks = disambiguationLinks;
+        } else {
+            this.disambiguationLinks = null;
         }
 
         this.categories = categories;

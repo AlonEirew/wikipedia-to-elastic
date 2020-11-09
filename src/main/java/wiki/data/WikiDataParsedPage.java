@@ -1,10 +1,12 @@
 package wiki.data;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.*;
 
 public class WikiDataParsedPage {
-    private final transient String wikidataPageId;
-    private final transient String wikipediaLangPageTitle;
+    private transient String wikidataPageId;
+    private transient String wikipediaLangPageTitle;
     private transient String elasticPageId;
     private Set<String> aliases;
     private Set<String> partOf;
@@ -14,8 +16,11 @@ public class WikiDataParsedPage {
     private Set<String> hasImmediateCause;
     private Set<String> immediateCauseOf;
 
-    public WikiDataParsedPage(String wikidataPageId, String wikipediaLangPageTitle) {
+    public void setWikidataPageId(String wikidataPageId) {
         this.wikidataPageId = wikidataPageId;
+    }
+
+    public void setWikipediaLangPageTitle(String wikipediaLangPageTitle) {
         this.wikipediaLangPageTitle = wikipediaLangPageTitle;
     }
 
@@ -91,12 +96,23 @@ public class WikiDataParsedPage {
         this.immediateCauseOf = immediateCauseOf;
     }
 
-    public boolean isEmpty() {
+    private boolean isEmpty() {
         return (this.aliases == null || this.aliases.isEmpty()) && (this.partOf == null || this.partOf.isEmpty()) &&
                 (this.hasPart == null || this.hasPart.isEmpty()) && (this.hasEffect == null || this.hasEffect.isEmpty()) &&
                 (this.hasCause == null || this.hasCause.isEmpty()) &&
                 (this.immediateCauseOf == null || this.immediateCauseOf.isEmpty()) &&
                 (this.hasImmediateCause == null || this.hasImmediateCause.isEmpty());
+    }
+
+    public boolean isValid() {
+        boolean retVal = false;
+        if(!isEmpty()) {
+            String title = this.wikipediaLangPageTitle;
+            retVal = title != null && !(title.startsWith("Wikipedia:") || title.startsWith("Template:") || title.startsWith("Category:") ||
+                    title.startsWith("Help:") || StringUtils.isNumericSpace(title) || title.length() == 1);
+        }
+
+        return retVal;
     }
 
     public static List<WikiDataParsedPage> prepareWikipediaWikidataMergeList(Map<String, WikiDataParsedPage> wikiDataParsedPages,

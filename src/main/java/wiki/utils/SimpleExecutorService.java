@@ -19,21 +19,44 @@ public class SimpleExecutorService {
     }
 
     public static void shutDownPool(ExecutorService executorService) {
-        LOGGER.info("Shutting down thread pool and preparing to close process...");
-        executorService.shutdown(); // Disable new tasks from being submitted
-        try {
-            // Wait a while for existing tasks to terminate
-            if (!executorService.awaitTermination(5, TimeUnit.HOURS)) {
-                executorService.shutdownNow(); // Cancel currently executing tasks
-                // Wait a while for tasks to respond to being cancelled
-                if (!executorService.awaitTermination(60, TimeUnit.SECONDS))
-                    LOGGER.error("Pool did not terminate");
+        if(executorService != null) {
+            LOGGER.info("Shutting down thread pool and preparing to close process...");
+            executorService.shutdown(); // Disable new tasks from being submitted
+            try {
+                // Wait a while for existing tasks to terminate
+                if (!executorService.awaitTermination(5, TimeUnit.HOURS)) {
+                    executorService.shutdownNow(); // Cancel currently executing tasks
+                    // Wait a while for tasks to respond to being cancelled
+                    if (!executorService.awaitTermination(60, TimeUnit.SECONDS))
+                        LOGGER.error("Pool did not terminate");
+                }
+            } catch (InterruptedException ie) {
+                // (Re-)Cancel if current thread also interrupted
+                executorService.shutdownNow();
+                // Preserve interrupt status
+                Thread.currentThread().interrupt();
             }
-        } catch (InterruptedException ie) {
-            // (Re-)Cancel if current thread also interrupted
-            executorService.shutdownNow();
-            // Preserve interrupt status
-            Thread.currentThread().interrupt();
+        }
+    }
+
+    public static void shutDownPoolNow(ExecutorService executorService) {
+        if (executorService != null) {
+            LOGGER.info("Shutting down thread pool and preparing to close process...");
+            executorService.shutdown(); // Disable new tasks from being submitted
+            try {
+                // Wait a while for existing tasks to terminate
+                if (!executorService.awaitTermination(5, TimeUnit.SECONDS)) {
+                    executorService.shutdownNow(); // Cancel currently executing tasks
+                    // Wait a while for tasks to respond to being cancelled
+                    if (!executorService.awaitTermination(1, TimeUnit.SECONDS))
+                        LOGGER.error("Pool did not terminate");
+                }
+            } catch (InterruptedException ie) {
+                // (Re-)Cancel if current thread also interrupted
+                executorService.shutdownNow();
+                // Preserve interrupt status
+                Thread.currentThread().interrupt();
+            }
         }
     }
 }

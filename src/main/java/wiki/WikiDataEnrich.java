@@ -23,7 +23,7 @@ public class WikiDataEnrich {
     private final static Logger LOGGER = LogManager.getLogger(WikiDataEnrich.class);
     private final static Gson GSON = new Gson();
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
         long startTime = System.currentTimeMillis();
         WikiToElasticConfiguration config = GSON.fromJson(new FileReader("wikidata_conf.json"), WikiToElasticConfiguration.class);
 
@@ -50,11 +50,11 @@ public class WikiDataEnrich {
     }
 
     private static List<WikiDataParsedPage> generateWikidata(final File inputDump, final ElasticAPI elasticAPI, String lang)
-            throws ExecutionException, InterruptedException {
+            throws Exception {
         ExecutorService executor = Executors.newFixedThreadPool(2);
         try {
-            final WikidataJsonParser wikidataJsonParser = new WikidataJsonParser();
-            Callable<Map<String, WikiDataParsedPage>> wikidataParseRun = () -> wikidataJsonParser.parse(inputDump, lang);
+            final WikidataJsonParser wikidataJsonParser = new WikidataJsonParser(lang);
+            Callable<Map<String, WikiDataParsedPage>> wikidataParseRun = () -> wikidataJsonParser.parse(inputDump);
             Future<Map<String, WikiDataParsedPage>> wikidataParseSubmit = executor.submit(wikidataParseRun);
 
             Callable<Map<String, WikipediaParsedPage>> wikipediaRun = () -> elasticAPI.readAllWikipediaIdsTitles(-1);
@@ -63,9 +63,12 @@ public class WikiDataEnrich {
             Map<String, WikiDataParsedPage> parsedPagesWikidata = wikidataParseSubmit.get();
             Map<String, WikipediaParsedPage> wikipediaTitleToId = elasticReadIdsSubmit.get();
 
-            return WikiDataParsedPage.prepareWikipediaWikidataMergeList(parsedPagesWikidata, wikipediaTitleToId);
-        } finally {
             SimpleExecutorService.shutDownPool(executor);
+            return WikiDataParsedPage.prepareWikipediaWikidataMergeList(parsedPagesWikidata, wikipediaTitleToId);
+        } catch (Exception ex) {
+            LOGGER.error("Failed processing wikidata to wikipedia", ex);
+            SimpleExecutorService.shutDownPoolNow(executor);
+            throw ex;
         }
     }
 

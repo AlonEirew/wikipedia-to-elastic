@@ -2,6 +2,7 @@ package wiki.utils;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonReader;
 import org.apache.commons.lang3.StringUtils;
@@ -33,8 +34,13 @@ public class WikidataJsonParser {
     private final static String HAS_IMMEDIATE_CAUSE = "P1478";
 
     private final AtomicInteger counter = new AtomicInteger(1);
+    private final String lang;
 
-    public Map<String, WikiDataParsedPage> parse(File inputDump, final String lang) throws IOException {
+    public WikidataJsonParser(String lang) {
+        this.lang = lang;
+    }
+
+    public Map<String, WikiDataParsedPage> parse(File inputDump) throws Exception {
         ExecutorService executorService = SimpleExecutorService.initExecutorService();
         final Map<String, WikiDataParsedPage> allParsedWikidataPages = new ConcurrentHashMap<>();
 
@@ -42,42 +48,30 @@ public class WikidataJsonParser {
                         inputDump.getPath()), StandardCharsets.UTF_8))) {
             reader.beginArray();
             while (reader.hasNext()) {
-                JsonObject message = GSON.fromJson(reader, JsonObject.class);
+                final JsonObject message = GSON.fromJson(reader, JsonObject.class);
                 executorService.submit(() -> {
-                    JsonObject labels = message.get("labels").getAsJsonObject();
-                    JsonObject pageLang = labels.getAsJsonObject(lang);
-                    if(pageLang != null) {
-                        String wikidataPageId = message.get("id").getAsString();
-                        String wikipediaPageLangTitle = pageLang.get("value").getAsString();
-                        if(isValidPage(wikipediaPageLangTitle)) {
-                            WikiDataParsedPage wikidataParsedPage = new WikiDataParsedPage(wikidataPageId, wikipediaPageLangTitle);
+                    try {
+                        WikiDataParsedPage wikiDataParsedPage = readWikidataPage(message);
 
-                            JsonObject aliasesJson = message.get("aliases").getAsJsonObject();
-                            JsonObject claims = message.get("claims").getAsJsonObject();
-
-                            wikidataParsedPage.setAliases(getAliasesFromJsonArray(aliasesJson.getAsJsonArray(lang)));
-                            wikidataParsedPage.setPartOf(getClaimsFromJsonArray(claims.getAsJsonArray(PART_OF)));
-                            wikidataParsedPage.setHasPart(getClaimsFromJsonArray(claims.getAsJsonArray(HAS_PART)));
-                            wikidataParsedPage.setHasEffect(getClaimsFromJsonArray(claims.getAsJsonArray(HAS_EFFECT)));
-                            wikidataParsedPage.setHasCause(getClaimsFromJsonArray(claims.getAsJsonArray(HAS_CAUSE)));
-                            wikidataParsedPage.setHasImmediateCause(getClaimsFromJsonArray(claims.getAsJsonArray(HAS_IMMEDIATE_CAUSE)));
-                            wikidataParsedPage.setImmediateCauseOf(getClaimsFromJsonArray(claims.getAsJsonArray(IMMEDIATE_CAUSE_OF)));
-
-                            if(!wikidataParsedPage.isEmpty()) {
-                                allParsedWikidataPages.put(wikidataPageId, wikidataParsedPage);
-                            }
+                        if (wikiDataParsedPage.isValid()) {
+                            allParsedWikidataPages.put(wikiDataParsedPage.getWikidataPageId(), wikiDataParsedPage);
                         }
-                    }
 
-                    int currentCount = counter.incrementAndGet();
-
-                    if (currentCount % 1000 == 0) {
-                        LOGGER.debug("Wikidata " + currentCount + " pages processed");
+                        int currentCount = counter.incrementAndGet();
+                        if (currentCount % 1000 == 0) {
+                            LOGGER.debug("Wikidata " + currentCount + " pages processed");
+                        }
+                    } catch (Exception ex) {
+                        LOGGER.error("Failed to parse Json object", ex);
                     }
                 });
             }
 
             reader.endArray();
+        } catch (Exception ex) {
+            LOGGER.error("Failed to parse JSON file", ex);
+            SimpleExecutorService.shutDownPoolNow(executorService);
+            throw ex;
         }
 
         SimpleExecutorService.shutDownPool(executorService);
@@ -85,28 +79,79 @@ public class WikidataJsonParser {
         return allParsedWikidataPages;
     }
 
-    private boolean isValidPage(String title) {
-        return !(title.startsWith("Wikipedia:") || title.startsWith("Template:") || title.startsWith("Category:") ||
-                title.startsWith("Help:") || StringUtils.isNumericSpace(title) || title.length() == 1);
+    private WikiDataParsedPage readWikidataPage(JsonObject message) {
+        WikiDataParsedPage wikidataParsedPage = new WikiDataParsedPage();
+        JsonObject labels = message.get("labels").getAsJsonObject();
+        JsonObject pageLang = labels.getAsJsonObject(this.lang);
+        if(pageLang != null) {
+            String wikidataPageId = message.get("id").getAsString();
+            String wikipediaPageLangTitle = pageLang.get("value").getAsString();
+
+            wikidataParsedPage.setWikipediaLangPageTitle(wikipediaPageLangTitle);
+            wikidataParsedPage.setWikidataPageId(wikidataPageId);
+
+
+            JsonElement aliasesElement = message.get("aliases");
+            if(aliasesElement != null) {
+                wikidataParsedPage.setAliases(getAliasesFromJsonArray(aliasesElement.getAsJsonObject().getAsJsonArray(lang)));
+            }
+
+            JsonElement claimsElement = message.get("claims");
+            if(claimsElement != null) {
+                extractClaims(claimsElement.getAsJsonObject(), wikidataParsedPage);
+            }
+        }
+
+        return wikidataParsedPage;
+    }
+
+    private void extractClaims(JsonObject claims, WikiDataParsedPage wikidataParsedPage) {
+        JsonArray partOf = claims.getAsJsonArray(PART_OF);
+        if(partOf != null) {
+            wikidataParsedPage.setPartOf(getClaimsFromJsonArray(partOf));
+        }
+
+        JsonArray hasPart = claims.getAsJsonArray(HAS_PART);
+        if(hasPart != null) {
+            wikidataParsedPage.setHasPart(getClaimsFromJsonArray(hasPart));
+        }
+
+        JsonArray hasEffect = claims.getAsJsonArray(HAS_EFFECT);
+        if(hasEffect != null) {
+            wikidataParsedPage.setHasEffect(getClaimsFromJsonArray(hasEffect));
+        }
+
+        JsonArray hasCause = claims.getAsJsonArray(HAS_CAUSE);
+        if(hasCause != null) {
+            wikidataParsedPage.setHasCause(getClaimsFromJsonArray(hasCause));
+        }
+
+        JsonArray hasImmCause = claims.getAsJsonArray(HAS_IMMEDIATE_CAUSE);
+        if(hasImmCause != null) {
+            wikidataParsedPage.setHasImmediateCause(getClaimsFromJsonArray(hasImmCause));
+        }
+
+        JsonArray immCauseOf = claims.getAsJsonArray(IMMEDIATE_CAUSE_OF);
+        if(immCauseOf != null) {
+            wikidataParsedPage.setImmediateCauseOf(getClaimsFromJsonArray(immCauseOf));
+        }
     }
 
     private Set<String> getClaimsFromJsonArray(JsonArray array) {
         Set<String> retList = new HashSet<>();
         if(array != null) {
-            for (int i = 0; i < array.size(); i++) {
-                JsonObject datavalue = array.get(i).getAsJsonObject().getAsJsonObject("mainsnak").getAsJsonObject("datavalue");
-                if (datavalue != null) {
-                    JsonObject value = datavalue.getAsJsonObject("value");
-                    if(value != null) {
-                        String id = value.get("id").getAsString();
-                        retList.add(id);
+            for (JsonElement elem : array) {
+                JsonObject mainsnak = elem.getAsJsonObject().getAsJsonObject("mainsnak");
+                if(mainsnak != null) {
+                    JsonObject datavalue = mainsnak.getAsJsonObject("datavalue");
+                    if (datavalue != null) {
+                        JsonObject value = datavalue.getAsJsonObject("value");
+                        if (value != null) {
+                            retList.add(value.get("id").getAsString());
+                        }
                     }
                 }
             }
-        }
-
-        if(retList.isEmpty()) {
-            return null;
         }
 
         return retList;
@@ -115,17 +160,10 @@ public class WikidataJsonParser {
     private Set<String> getAliasesFromJsonArray(JsonArray array) {
         Set<String> retList = new HashSet<>();
         if(array != null) {
-            for (int i = 0; i < array.size(); i++) {
-                JsonObject elem = array.get(i).getAsJsonObject();
-                if (elem.get("language").getAsString().equals("en")) {
-                    String aliasValue = elem.get("value").getAsString();
-                    retList.add(aliasValue);
-                }
+            for (JsonElement element : array) {
+                JsonObject alias = element.getAsJsonObject();
+                retList.add(alias.get("value").getAsString());
             }
-        }
-
-        if(retList.isEmpty()) {
-            return null;
         }
 
         return retList;
