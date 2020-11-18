@@ -5,9 +5,9 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.*;
 
 public class WikiDataParsedPage {
-    private transient String wikidataPageId;
-    private transient String wikipediaLangPageTitle;
-    private transient String elasticPageId;
+    private String wikidataPageId;
+    private String wikipediaLangPageTitle;
+    private String elasticPageId;
     private Set<String> aliases;
     private Set<String> partOf;
     private Set<String> hasPart;
@@ -143,6 +143,7 @@ public class WikiDataParsedPage {
                     if(elasticTitleToIds.containsKey(wikipediaParsedPage.getRedirectTitle())) {
                         WikipediaParsedPage redirectPage = elasticTitleToIds.get(wikipediaParsedPage.getRedirectTitle());
                         page.setElasticPageId(String.valueOf(redirectPage.getId()));
+                        page.setWikipediaLangPageTitle(redirectPage.getTitle());
                         updatedWikiDataPages.add(page);
                     }
                 } else {

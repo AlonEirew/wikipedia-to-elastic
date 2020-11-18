@@ -1,7 +1,6 @@
-package wiki;
+package wiki.wikidata;
 
 import com.google.gson.Gson;
-import org.apache.commons.collections4.ListUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import wiki.data.WikiDataParsedPage;
@@ -9,18 +8,22 @@ import wiki.data.WikipediaParsedPage;
 import wiki.elastic.ElasticAPI;
 import wiki.utils.SimpleExecutorService;
 import wiki.utils.WikiToElasticConfiguration;
-import wiki.utils.WikidataJsonParser;
+import wiki.utils.WikiToElasticUtils;
+import wiki.utils.parsers.WikidataJsonParser;
+import wiki.utils.parsers.WikidataParseThread;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.*;
 
-public class WikiDataEnrich {
-    private final static Logger LOGGER = LogManager.getLogger(WikiDataEnrich.class);
+public class WikiDataFeatToFile {
+    private final static Logger LOGGER = LogManager.getLogger(WikiDataFeatToFile.class);
     private final static Gson GSON = new Gson();
 
     public static void main(String[] args) throws Exception {
@@ -29,19 +32,22 @@ public class WikiDataEnrich {
 
         if(config.getWikidataDump() != null && !config.getWikidataDump().isEmpty()) {
             File inputDump = new File(config.getWikidataDump());
+            File outputFile = new File(config.getWikidataJsonOutput());
             ElasticAPI elasticAPI = new ElasticAPI(config);
             try (Scanner reader = new Scanner(System.in)) {
-                System.out.println("This process will integrate Wikidata information within the existing elastic " +
-                        "index of \"" + config.getIndexName() + "\",\nPress enter to continue...");
+                System.out.println("This process will extract Wikidata information to json file-\"" +
+                        config.getWikidataJsonOutput() + "\",\nPress enter to continue...");
                 reader.nextLine();
-                List<WikiDataParsedPage> wikiDataParsedPages = generateWikidata(inputDump, elasticAPI, config.getLang());
-                updateAll(elasticAPI, wikiDataParsedPages, config.getInsertBulkSize());
+
+                final WikidataJsonParser wikidataJsonParser = new WikidataJsonParser();
+                List<WikiDataParsedPage> wikiDataParsedPages = generateWikidata(inputDump, elasticAPI, wikidataJsonParser, config.getLang());
+                writeRelationToJson(outputFile, wikidataJsonParser, wikiDataParsedPages);
+                LOGGER.info("*** Total id's extracted=" + wikiDataParsedPages.size());
             } catch (IOException | ExecutionException | InterruptedException e) {
                 LOGGER.error("Something went wrong!", e);
             }
 
             elasticAPI.close();
-            LOGGER.info("*** Total id's committed=" + elasticAPI.getTotalIdsSuccessfullyCommitted());
             long endTime = System.currentTimeMillis();
             System.out.println("Done, took-" + (endTime - startTime) + "ms");
         } else {
@@ -49,12 +55,13 @@ public class WikiDataEnrich {
         }
     }
 
-    private static List<WikiDataParsedPage> generateWikidata(final File inputDump, final ElasticAPI elasticAPI, String lang)
-            throws Exception {
+    private static List<WikiDataParsedPage> generateWikidata(final File inputDump, final ElasticAPI elasticAPI,
+             WikidataJsonParser wikidataJsonParser, String lang) throws Exception {
         ExecutorService executor = Executors.newFixedThreadPool(2);
         try {
-            final WikidataJsonParser wikidataJsonParser = new WikidataJsonParser(lang);
-            Callable<Map<String, WikiDataParsedPage>> wikidataParseRun = () -> wikidataJsonParser.parse(inputDump);
+            WikidataParseThread parseThread = new WikidataParseThread(lang);
+            InputStreamReader inputStreamReader = new InputStreamReader(WikiToElasticUtils.openCompressedFileInputStream(inputDump.getPath()), StandardCharsets.UTF_8);
+            Callable<Map<String, WikiDataParsedPage>> wikidataParseRun = () -> wikidataJsonParser.parse(parseThread, inputStreamReader);
             Future<Map<String, WikiDataParsedPage>> wikidataParseSubmit = executor.submit(wikidataParseRun);
 
             Callable<Map<String, WikipediaParsedPage>> wikipediaRun = () -> elasticAPI.readAllWikipediaIdsTitles(-1);
@@ -66,15 +73,16 @@ public class WikiDataEnrich {
             SimpleExecutorService.shutDownPool(executor);
             return WikiDataParsedPage.prepareWikipediaWikidataMergeList(parsedPagesWikidata, wikipediaTitleToId);
         } catch (Exception ex) {
-            LOGGER.error("Failed processing wikidata to wikipedia", ex);
+            LOGGER.error("Failed processing parsers to wikipedia", ex);
             SimpleExecutorService.shutDownPoolNow(executor);
             throw ex;
         }
     }
 
-    private static void updateAll(ElasticAPI elasticAPI, List<WikiDataParsedPage> wikiDataParsedPages, int bulkSize) throws IOException {
+    private static void writeRelationToJson(File outputFile, WikidataJsonParser wikidataJsonParser, List<WikiDataParsedPage> wikiDataParsedPages) throws IOException {
         if(wikiDataParsedPages != null) {
-            ListUtils.partition(wikiDataParsedPages, bulkSize).forEach(elasticAPI::updateBulkWikidataAsnc);
+            wikidataJsonParser.write(outputFile, wikiDataParsedPages);
+//            ListUtils.partition(wikiDataParsedPages, bulkSize).forEach(elasticAPI::updateBulkWikidataAsnc);
         }
     }
 }

@@ -4,8 +4,7 @@ import edu.stanford.nlp.simple.Sentence;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import wiki.utils.LangConfiguration;
-import wiki.utils.WikiPageParser;
+import wiki.utils.parsers.WikiPageParser;
 
 import java.io.IOException;
 import java.io.InputStream;

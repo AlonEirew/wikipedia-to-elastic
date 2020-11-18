@@ -1,30 +1,25 @@
-package wiki.utils;
+package wiki.utils.parsers;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonReader;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import wiki.data.WikiDataParsedPage;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class WikidataJsonParser {
-    private final static Logger LOGGER = LogManager.getLogger(WikidataJsonParser.class);
-
+public class WikidataParseThread implements IWikidataJsonParser<Map<String, WikiDataParsedPage>> {
+    private final static Logger LOGGER = LogManager.getLogger(WikidataParseThread.class);
     private final static Gson GSON = new Gson();
+    private final static AtomicInteger counter = new AtomicInteger(1);
 
     private final static String PART_OF = "P361";
     private final static String HAS_PART = "P527";
@@ -33,50 +28,46 @@ public class WikidataJsonParser {
     private final static String IMMEDIATE_CAUSE_OF = "P1536";
     private final static String HAS_IMMEDIATE_CAUSE = "P1478";
 
-    private final AtomicInteger counter = new AtomicInteger(1);
     private final String lang;
 
-    public WikidataJsonParser(String lang) {
+    public WikidataParseThread(String lang) {
         this.lang = lang;
     }
 
-    public Map<String, WikiDataParsedPage> parse(File inputDump) throws Exception {
-        ExecutorService executorService = SimpleExecutorService.initExecutorService();
-        final Map<String, WikiDataParsedPage> allParsedWikidataPages = new ConcurrentHashMap<>();
-
-        try(final JsonReader reader = new JsonReader(new InputStreamReader(WikiToElasticUtils.openCompressedFileInputStream(
-                        inputDump.getPath()), StandardCharsets.UTF_8))) {
+    public Map<String, WikiDataParsedPage> read(JsonReader reader) {
+        reader.setLenient(true);
+        final Map<String, WikiDataParsedPage> allParsedWikidataPages = new HashMap<>();
+        try {
             reader.beginArray();
             while (reader.hasNext()) {
-                final JsonObject message = GSON.fromJson(reader, JsonObject.class);
-                executorService.submit(() -> {
-                    try {
-                        WikiDataParsedPage wikiDataParsedPage = readWikidataPage(message);
-
-                        if (wikiDataParsedPage.isValid()) {
-                            allParsedWikidataPages.put(wikiDataParsedPage.getWikidataPageId(), wikiDataParsedPage);
-                        }
-
-                        int currentCount = counter.incrementAndGet();
-                        if (currentCount % 1000 == 0) {
-                            LOGGER.debug("Wikidata " + currentCount + " pages processed");
-                        }
-                    } catch (Exception ex) {
-                        LOGGER.error("Failed to parse Json object", ex);
-                    }
-                });
+                runInterval(reader, allParsedWikidataPages);
             }
 
             reader.endArray();
-        } catch (Exception ex) {
-            LOGGER.error("Failed to parse JSON file", ex);
-            SimpleExecutorService.shutDownPoolNow(executorService);
-            throw ex;
+        } catch (IOException e) {
+            LOGGER.error("Failed to run JSON parser instance", e);
         }
 
-        SimpleExecutorService.shutDownPool(executorService);
-        LOGGER.info("Done Loading Json!");
         return allParsedWikidataPages;
+    }
+
+    private void runInterval(JsonReader reader, Map<String, WikiDataParsedPage> allParsedWikidataPages) throws IOException {
+        while (reader.hasNext()) {
+            try {
+                WikiDataParsedPage wikiDataParsedPage = readWikidataPage(GSON.fromJson(reader, JsonObject.class));
+                if (wikiDataParsedPage.isValid()) {
+                    allParsedWikidataPages.put(wikiDataParsedPage.getWikidataPageId(), wikiDataParsedPage);
+                }
+
+                int currentCount = counter.incrementAndGet();
+                if (currentCount % 1000 == 0) {
+                    LOGGER.debug("Wikidata " + currentCount + " pages processed");
+                }
+
+            } catch (Exception ex) {
+                LOGGER.error("Failed to parse Json object", ex);
+            }
+        }
     }
 
     private WikiDataParsedPage readWikidataPage(JsonObject message) {
@@ -85,11 +76,11 @@ public class WikidataJsonParser {
         JsonObject pageLang = labels.getAsJsonObject(this.lang);
         if(pageLang != null) {
             String wikidataPageId = message.get("id").getAsString();
+//            LOGGER.debug(wikidataPageId);
             String wikipediaPageLangTitle = pageLang.get("value").getAsString();
 
             wikidataParsedPage.setWikipediaLangPageTitle(wikipediaPageLangTitle);
             wikidataParsedPage.setWikidataPageId(wikidataPageId);
-
 
             JsonElement aliasesElement = message.get("aliases");
             if(aliasesElement != null) {

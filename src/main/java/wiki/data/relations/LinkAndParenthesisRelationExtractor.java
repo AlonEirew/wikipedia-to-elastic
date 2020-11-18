@@ -4,7 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import wiki.data.obj.LinkParenthesisPair;
 import wiki.utils.LangConfiguration;
-import wiki.utils.WikiPageParser;
+import wiki.utils.parsers.WikiPageParser;
 
 import java.util.ArrayList;
 import java.util.HashSet;

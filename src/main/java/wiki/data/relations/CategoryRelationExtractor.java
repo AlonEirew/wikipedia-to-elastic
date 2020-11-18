@@ -3,7 +3,7 @@ package wiki.data.relations;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import wiki.utils.LangConfiguration;
-import wiki.utils.WikiPageParser;
+import wiki.utils.parsers.WikiPageParser;
 
 import java.util.*;
 import java.util.regex.Matcher;

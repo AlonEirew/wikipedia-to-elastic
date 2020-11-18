@@ -12,6 +12,7 @@ import wiki.elastic.ElasticAPI;
 import wiki.handlers.ElasticPageHandler;
 import wiki.handlers.IPageHandler;
 import wiki.utils.*;
+import wiki.utils.parsers.WikipediaSTAXParser;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;

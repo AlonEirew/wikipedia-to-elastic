@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import wiki.WikiToElasticMain;
 import wiki.data.relations.ExtractorsManager;
 import wiki.handlers.ArrayPageHandler;
+import wiki.utils.parsers.WikipediaSTAXParser;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;

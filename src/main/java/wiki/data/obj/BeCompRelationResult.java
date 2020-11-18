@@ -2,7 +2,6 @@ package wiki.data.obj;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.IndexedWord;
-import wiki.utils.WikiPageParser;
 
 import java.util.HashSet;
 import java.util.List;

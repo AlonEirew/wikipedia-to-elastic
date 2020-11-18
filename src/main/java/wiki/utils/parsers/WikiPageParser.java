@@ -1,4 +1,4 @@
-package wiki.utils;
+package wiki.utils.parsers;
 
 import info.bliki.wiki.model.WikiModel;
 import org.jsoup.Jsoup;

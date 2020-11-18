@@ -1,7 +1,7 @@
 package wiki.data;
 
 import wiki.data.relations.ExtractorsManager;
-import wiki.utils.WikiPageParser;
+import wiki.utils.parsers.WikiPageParser;
 
 public class WikipediaParsedPageRelationsBuilder {
     private boolean isPartName = false;

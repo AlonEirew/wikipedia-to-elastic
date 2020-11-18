@@ -16,8 +16,6 @@ import java.util.Objects;
 
 public class WikiToElasticConfiguration {
 
-    public static final Type CONFIGURATION_TYPE = new TypeToken<WikiToElasticConfiguration>() {}.getType();
-
     private String indexName;
     private String docType;
     private String mapping;
@@ -26,6 +24,7 @@ public class WikiToElasticConfiguration {
     private String scheme;
     private String wikipediaDump;
     private String wikidataDump;
+    private String wikidataJsonOutput;
     private int port;
     private int shards;
     private int replicas;
@@ -180,5 +179,13 @@ public class WikiToElasticConfiguration {
 
     public void setWikidataDump(String wikidataDump) {
         this.wikidataDump = wikidataDump;
+    }
+
+    public String getWikidataJsonOutput() {
+        return wikidataJsonOutput;
+    }
+
+    public void setWikidataJsonOutput(String wikidataJsonOutput) {
+        this.wikidataJsonOutput = wikidataJsonOutput;
     }
 }

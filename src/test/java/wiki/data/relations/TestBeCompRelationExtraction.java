@@ -1,11 +1,9 @@
 package wiki.data.relations;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 import wiki.TestUtils;
 import wiki.data.obj.BeCompRelationResult;
 import wiki.utils.LangConfiguration;
-import wiki.utils.WikiPageParser;
+import wiki.utils.parsers.WikiPageParser;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;

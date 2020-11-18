@@ -9,7 +9,7 @@ import wiki.data.relations.BeCompRelationExtractor;
 import wiki.data.relations.ExtractorsManager;
 import wiki.data.relations.IRelationsExtractor;
 import wiki.utils.LangConfiguration;
-import wiki.utils.WikiPageParser;
+import wiki.utils.parsers.WikiPageParser;
 import wiki.utils.WikiToElasticConfiguration;
 
 import java.io.FileNotFoundException;

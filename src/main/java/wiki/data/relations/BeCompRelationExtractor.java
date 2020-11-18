@@ -10,7 +10,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import wiki.data.obj.BeCompRelationResult;
 import wiki.utils.LangConfiguration;
-import wiki.utils.WikiPageParser;
 
 import java.util.LinkedList;
 import java.util.List;

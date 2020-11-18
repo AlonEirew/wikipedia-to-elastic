@@ -6,5 +6,6 @@
   "scheme": "http",
   "lang": "en",
   "insertBulkSize": 100,
-  "wikidataDump": "dumps/small_wikidata.json.bz2"
+  "wikidataDump": "dumps/small_wikidata.json.bz2",
+  "wikidataJsonOutput" : "dumps/test_wikidata.json"
 }
