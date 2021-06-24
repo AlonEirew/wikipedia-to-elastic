@@ -68,7 +68,7 @@ Links for further details on those properties:
 
 ***
 
-## Configurations
+## Configuration
 * `conf.json` - Main project configuration
 
 ```json

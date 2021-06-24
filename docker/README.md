@@ -1,4 +1,4 @@
-# ElasticSearch Docker configuration
+# ElasticSearch Docker Configuration
 This is a step-by-step instructions on how to pull and run elasticsearch docker image with all needed plugins for the project
 
 ### Pull docker image
