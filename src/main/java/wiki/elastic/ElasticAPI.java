@@ -11,9 +11,8 @@ import org.apache.logging.log4j.Logger;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.ElasticsearchStatusException;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
-import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
-import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
+import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.action.admin.indices.open.OpenIndexRequest;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.get.GetRequest;
@@ -26,9 +25,10 @@ import org.elasticsearch.action.search.SearchScrollRequest;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.unit.TimeValue;
-import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.core.TimeValue;
+import org.elasticsearch.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.search.Scroll;
@@ -82,12 +82,12 @@ public class ElasticAPI implements Closeable {
                                 configuration.getScheme())));
     }
 
-    public DeleteIndexResponse deleteIndex() throws ConnectException {
-        DeleteIndexResponse deleteIndexResponse = null;
+    public AcknowledgedResponse deleteIndex() throws ConnectException {
+        AcknowledgedResponse deleteIndexResponse = null;
         try {
             DeleteIndexRequest delRequest = new DeleteIndexRequest(this.indexName);
             this.available.acquire();
-            deleteIndexResponse = this.client.indices().delete(delRequest);
+            deleteIndexResponse = this.client.indices().delete(delRequest, RequestOptions.DEFAULT);
             this.available.release();
             LOGGER.info("Index " + this.indexName + " deleted successfully: " + deleteIndexResponse.isAcknowledged());
         } catch (ElasticsearchException ese) {
@@ -106,8 +106,8 @@ public class ElasticAPI implements Closeable {
         return deleteIndexResponse;
     }
 
-    public CreateIndexResponse createIndex(WikiToElasticConfiguration configuration) throws IOException {
-        CreateIndexResponse createIndexResponse = null;
+    public AcknowledgedResponse createIndex(WikiToElasticConfiguration configuration) throws IOException {
+        AcknowledgedResponse createIndexResponse = null;
         try {
             // Create the index
             CreateIndexRequest crRequest = new CreateIndexRequest(configuration.getIndexName());
@@ -127,11 +127,12 @@ public class ElasticAPI implements Closeable {
             // Create index mapping
             String mappingFileContent = configuration.getMappingFileContent();
             if(mappingFileContent != null && !mappingFileContent.isEmpty()) {
-                crRequest.mapping(configuration.getDocType(), mappingFileContent, XContentType.JSON);
+                System.out.println(mappingFileContent);
+                crRequest.mapping("_doc", mappingFileContent, XContentType.JSON);
             }
 
             this.available.acquire();
-            createIndexResponse = this.client.indices().create(crRequest);
+            createIndexResponse = this.client.indices().create(crRequest, RequestOptions.DEFAULT);
             this.available.release();
 
             LOGGER.info("Index " + configuration.getIndexName() + " created successfully: " + createIndexResponse.isAcknowledged());
@@ -171,7 +172,7 @@ public class ElasticAPI implements Closeable {
             try {
                 this.available.acquire();
                 ElasticDocCreateListener listener = new ElasticDocCreateListener(indexRequest, this);
-                this.client.indexAsync(indexRequest, listener);
+                this.client.indexAsync(indexRequest, RequestOptions.DEFAULT, listener);
                 this.totalIdsProcessed.incrementAndGet();
                 LOGGER.trace("Doc with Id " + page.getId() + " will be created asynchronously");
             } catch (InterruptedException e) {
@@ -185,7 +186,7 @@ public class ElasticAPI implements Closeable {
             // Release to give chance for other threads that waiting to execute
             this.available.release();
             this.available.acquire();
-            this.client.indexAsync(indexRequest, listener);
+            this.client.indexAsync(indexRequest, RequestOptions.DEFAULT, listener);
             LOGGER.trace("Doc with Id " + indexRequest.id() + " will retry asynchronously");
         } catch (InterruptedException e) {
             LOGGER.debug(e);
@@ -200,7 +201,7 @@ public class ElasticAPI implements Closeable {
                 IndexRequest indexRequest = createIndexRequest(page);
 
                 this.available.acquire();
-                res = this.client.index(indexRequest);
+                res = this.client.index(indexRequest, RequestOptions.DEFAULT);
                 this.available.release();
                 this.totalIdsSuccessfullyCommitted.incrementAndGet();
             }
@@ -246,7 +247,7 @@ public class ElasticAPI implements Closeable {
             // release will happen from listener (async)
             this.available.acquire();
             ElasticBulkDocCreateListener listener = new ElasticBulkDocCreateListener(bulkRequest, this);
-            this.client.bulkAsync(bulkRequest, listener);
+            this.client.bulkAsync(bulkRequest, RequestOptions.DEFAULT, listener);
             this.totalIdsProcessed.addAndGet(bulkRequest.numberOfActions());
             LOGGER.debug("Bulk insert will be created asynchronously");
         } catch (InterruptedException e) {
@@ -269,7 +270,7 @@ public class ElasticAPI implements Closeable {
         while (searchHits != null && searchHits.length > 0) {
             SearchScrollRequest scrollRequest = new SearchScrollRequest(scrollId);
             scrollRequest.scroll(scroll);
-            searchResponse = this.client.searchScroll(scrollRequest);
+            searchResponse = this.client.searchScroll(scrollRequest, RequestOptions.DEFAULT);
             scrollId = searchResponse.getScrollId();
 
             allWikipediaIds.putAll(this.getNextScrollResults(searchHits));
@@ -314,8 +315,8 @@ public class ElasticAPI implements Closeable {
         SearchRequest searchRequest = new SearchRequest(this.indexName);
         searchRequest.source(sourceBuilder);
 
-        final SearchResponse search = this.client.search(searchRequest);
-        return search.getHits().getTotalHits();
+        final SearchResponse search = this.client.search(searchRequest, RequestOptions.DEFAULT);
+        return search.getHits().getTotalHits().value;
     }
 
     private SearchResponse createElasticSearchResponse(Scroll scroll) throws IOException {
@@ -325,7 +326,7 @@ public class ElasticAPI implements Closeable {
         searchSourceBuilder.size(1000);
         searchRequest.source(searchSourceBuilder);
         searchRequest.scroll(scroll);
-        return this.client.search(searchRequest);
+        return this.client.search(searchRequest, RequestOptions.DEFAULT);
     }
 
     public void retryAddBulk(BulkRequest bulkRequest, ElasticBulkDocCreateListener listener) {
@@ -333,7 +334,7 @@ public class ElasticAPI implements Closeable {
             // Release to give chance for other threads that waiting to execute
             this.available.release();
             this.available.acquire();
-            this.client.bulkAsync(bulkRequest, listener);
+            this.client.bulkAsync(bulkRequest, RequestOptions.DEFAULT, listener);
             LOGGER.debug("Bulk insert retry");
         } catch (InterruptedException e) {
             LOGGER.error("Failed to acquire semaphore, lost bulk insert!", e);
@@ -343,12 +344,11 @@ public class ElasticAPI implements Closeable {
     public boolean isDocExists(String docId) {
         GetRequest getRequest = new GetRequest(
                 this.indexName,
-                this.docType,
                 docId);
 
         try {
             this.available.acquire();
-            GetResponse getResponse = this.client.get(getRequest);
+            GetResponse getResponse = this.client.get(getRequest, RequestOptions.DEFAULT);
             this.available.release();
             if (getResponse.isExists()) {
                 return true;
@@ -364,7 +364,7 @@ public class ElasticAPI implements Closeable {
         boolean ret = false;
         try {
             OpenIndexRequest openIndexRequest = new OpenIndexRequest(this.indexName);
-            ret = client.indices().open(openIndexRequest).isAcknowledged();
+            ret = client.indices().open(openIndexRequest, RequestOptions.DEFAULT).isAcknowledged();
         } catch (ElasticsearchStatusException | IOException ignored) {
         }
 
@@ -381,9 +381,7 @@ public class ElasticAPI implements Closeable {
 
     private IndexRequest createIndexRequest(WikipediaParsedPage page) {
         IndexRequest indexRequest = new IndexRequest(
-                this.indexName,
-                this.docType,
-                String.valueOf(page.getId()));
+                this.indexName).id(String.valueOf(page.getId()));
 
         indexRequest.source(GSON.toJson(page), XContentType.JSON);
 
@@ -394,7 +392,6 @@ public class ElasticAPI implements Closeable {
 
         UpdateRequest updateRequest = new UpdateRequest(
                 this.indexName,
-                this.docType,
                 String.valueOf(page.getElasticPageId()));
 
         Map<String, WikiDataParsedPage> wikidataRelations = Collections.singletonMap("relations", page);

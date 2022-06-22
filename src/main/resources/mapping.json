@@ -1,15 +1,11 @@
 {
-  "wikipage": {
     "properties": {
       "title": {
         "type": "text",
         "similarity": "BM25",
         "fields": {
           "keyword": {
-            "type": "text",
-            "index_options": "docs",
-            "similarity": "BM25",
-            "analyzer": "keyword"
+            "type": "keyword"
           },
           "near_match": {
             "type": "text",
@@ -44,22 +40,14 @@
             "analyzer": "prefix_asciifolding",
             "search_analyzer": "near_match_asciifolding"
           }
-        },
-        "analyzer": "text",
-        "search_analyzer": "text_search",
-        "position_increment_gap": 10
+        }
       },
       "text": {
         "type": "text",
-        "index": "false"
-      },
+        "similarity": "BM25"
+       },
       "redirectTitle": {
-        "type": "text",
-        "analyzer": "keyword"
-      },
-      "relations": {
-        "type": "nested"
+        "type": "keyword"
       }
     }
-  }
 }
