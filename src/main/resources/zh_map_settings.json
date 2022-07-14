@@ -200,12 +200,12 @@
         "type": "keyword"
       },
       "trigram": {
-        "type": "nGram",
+        "type": "ngram",
         "min_gram": "3",
         "max_gram": "3"
       },
       "prefix": {
-        "type": "edgeNGram",
+        "type": "edge_ngram",
         "max_gram": "255"
       }
     },
@@ -235,7 +235,7 @@
         "type": "truncate"
       },
       "prefix_ngram_filter": {
-        "type": "edgeNGram",
+        "type": "edge_ngram",
         "max_gram": "255"
       },
       "remove_empty": {

@@ -10,7 +10,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.ElasticsearchStatusException;
-import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.action.admin.indices.open.OpenIndexRequest;
@@ -26,6 +25,7 @@ import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.core.TimeValue;
 import org.elasticsearch.xcontent.XContentType;
@@ -128,7 +128,8 @@ public class ElasticAPI implements Closeable {
             String mappingFileContent = configuration.getMappingFileContent();
             if(mappingFileContent != null && !mappingFileContent.isEmpty()) {
                 System.out.println(mappingFileContent);
-                crRequest.mapping("_doc", mappingFileContent, XContentType.JSON);
+//                crRequest.mapping("_doc", mappingFileContent, XContentType.JSON);
+                crRequest.mapping(mappingFileContent, XContentType.JSON);
             }
 
             this.available.acquire();

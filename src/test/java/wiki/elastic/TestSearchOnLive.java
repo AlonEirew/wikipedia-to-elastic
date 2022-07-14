@@ -1,11 +1,10 @@
 package wiki.elastic;
 
-import org.apache.http.HttpHost;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.common.unit.TimeValue;
+import org.elasticsearch.core.TimeValue;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import wiki.data.WikipediaParsedPage;
@@ -37,7 +36,7 @@ public class TestSearchOnLive {
         sourceBuilder.timeout(new TimeValue(5, TimeUnit.SECONDS));
         searchRequest.source(sourceBuilder);
 
-        SearchResponse searchResponse = client.search(searchRequest);
+        SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
         assertNotNull(searchResponse);
         System.out.println(searchResponse.toString());
     }

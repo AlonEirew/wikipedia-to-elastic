@@ -2,8 +2,9 @@
 This is a step-by-step instructions on how to pull and run elasticsearch docker image with all needed plugins for the project
 
 ### Pull docker image
+This will pull the docker elasticsearch 7.17.4 image with "icu" plugins
 ```
-#>docker pull aeirew/wikitoelastic
+#>docker pull aeirew/elasticsearch
 ```
 
 ### Set disk image size and `vm.max_map_count`
@@ -21,7 +22,7 @@ Fix by running:
 
 ### Run the docker image
 ```
-#>docker run -d -p 9200:9200 -p 9300:9300 aeirew/wikitoelastic
+#>docker run -p 127.0.0.1:9200:9200 -p 127.0.0.1:9300:9300 -e "discovery.type=single-node" aeirew/elasticsearch
 ```
 
 ### All Done :sunglasses:

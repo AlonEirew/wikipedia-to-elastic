@@ -58,11 +58,11 @@ Links for further details on those properties:
 
 ## Prerequisites
 * Java 11
-* ElasticSearch 6.2.3 
+* ElasticSearch 7.17.4 
     * Recommended: Set Elastic using docker (<a href=https://github.com/AlonEirew/wikipedia-to-elastic/blob/master/docker/README.md>docker/README.md</a>)
     * Alternative:
-        * Install Elastic from <a href=https://www.elastic.co/downloads/past-releases/elasticsearch-6-2-3>6.2.3 Installation</a>
-        * Install plugins: analysis-icu, analysis-smartcn
+        * Install Elastic from the official <a href=https://www.elastic.co/downloads/past-releases/#elasticsearch>Elasticsearch site</a>
+        * Install plugins: analysis-icu, analysis-smartcn (<a href=https://www.elastic.co/guide/en/elasticsearch/plugins/7.17/analysis-icu.html>guide</a>)
 * Wikipedia xml.bz2 dump file in required language (For example <a href=https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles.xml.bz2>latest en XML dump</a>)
 * Optional: Wikidata json.bz2 dump file (<a href=https://dumps.wikimedia.org/wikidatawiki/entities/latest-all.json.bz2>latest JSON dump</a>)
 
