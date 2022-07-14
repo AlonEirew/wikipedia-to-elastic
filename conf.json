@@ -6,7 +6,7 @@
   "mapping": "mapping.json",
   "setting": "en_map_settings.json",
   "host": "localhost",
-  "wikipediaDump": "dumps/smallenwiki-latest-pages.xml.bz2",
+  "wikipediaDump": "dumps/enwiki-20220601-pages-articles-multistream.xml.bz2",
   "port": 9200,
   "scheme": "http",
   "shards": 1,

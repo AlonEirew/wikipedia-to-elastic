@@ -6,6 +6,6 @@
   "scheme": "http",
   "lang": "en",
   "insertBulkSize": 100,
-  "wikidataDump": "dumps/small_wikidata.json.bz2",
+  "wikidataDump": "../enwiki-20220601-pages-articles-multistream.xml.bz2",
   "wikidataJsonOutput" : "dumps/test_wikidata.json"
 }
