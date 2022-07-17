@@ -2,7 +2,7 @@
  * @author  Alon Eirew
  */
 
-package wiki.elastic;
+package wiki.persistency;
 
 import com.google.gson.Gson;
 import org.apache.http.HttpHost;
@@ -34,9 +34,10 @@ import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.search.Scroll;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import wiki.config.ElasticConfiguration;
 import wiki.data.WikiDataParsedPage;
 import wiki.data.WikipediaParsedPage;
-import wiki.utils.WikiToElasticConfiguration;
+import wiki.config.MainConfiguration;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -65,7 +66,7 @@ public class ElasticAPI implements Closeable {
     private final String indexName;
     private final String docType;
 
-    public ElasticAPI(WikiToElasticConfiguration configuration) throws IOException {
+    public ElasticAPI(ElasticConfiguration configuration) throws IOException {
         if(configuration.getIndexName() != null && !configuration.getIndexName().isEmpty() &&
                 configuration.getDocType() != null && !configuration.getDocType().isEmpty()) {
             this.indexName = configuration.getIndexName();
@@ -106,7 +107,7 @@ public class ElasticAPI implements Closeable {
         return deleteIndexResponse;
     }
 
-    public AcknowledgedResponse createIndex(WikiToElasticConfiguration configuration) throws IOException {
+    public AcknowledgedResponse createIndex(ElasticConfiguration configuration) throws IOException {
         AcknowledgedResponse createIndexResponse = null;
         try {
             // Create the index

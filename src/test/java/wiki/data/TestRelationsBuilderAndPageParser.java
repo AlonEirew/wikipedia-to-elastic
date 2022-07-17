@@ -8,9 +8,9 @@ import wiki.data.obj.BeCompRelationResult;
 import wiki.data.relations.BeCompRelationExtractor;
 import wiki.data.relations.ExtractorsManager;
 import wiki.data.relations.IRelationsExtractor;
-import wiki.utils.LangConfiguration;
+import wiki.config.LangConfiguration;
 import wiki.utils.parsers.WikiPageParser;
-import wiki.utils.WikiToElasticConfiguration;
+import wiki.config.MainConfiguration;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -25,7 +25,7 @@ public class TestRelationsBuilderAndPageParser {
     @BeforeAll
     public static void initTests() throws FileNotFoundException {
         String testConfig = Objects.requireNonNull(WikiToElasticMain.class.getClassLoader().getResource("test_config.json")).getFile();
-        WikiToElasticConfiguration config = TestUtils.GSON.fromJson(new FileReader(testConfig), WikiToElasticConfiguration.class);
+        MainConfiguration config = TestUtils.GSON.fromJson(new FileReader(testConfig), MainConfiguration.class);
         String langConfigFile = Objects.requireNonNull(WikiToElasticMain.class.getClassLoader().getResource("lang/" + config.getLang() + ".json")).getFile();
         LangConfiguration langConfiguration = TestUtils.GSON.fromJson(new FileReader(langConfigFile), LangConfiguration.class);
 

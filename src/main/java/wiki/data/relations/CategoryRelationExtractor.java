@@ -2,7 +2,7 @@ package wiki.data.relations;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import wiki.utils.LangConfiguration;
+import wiki.config.LangConfiguration;
 import wiki.utils.parsers.WikiPageParser;
 
 import java.util.*;

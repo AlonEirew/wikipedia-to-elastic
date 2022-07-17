@@ -2,7 +2,7 @@ package wiki.data.relations;
 
 import wiki.TestUtils;
 import wiki.data.obj.BeCompRelationResult;
-import wiki.utils.LangConfiguration;
+import wiki.config.LangConfiguration;
 import wiki.utils.parsers.WikiPageParser;
 
 import java.io.FileNotFoundException;

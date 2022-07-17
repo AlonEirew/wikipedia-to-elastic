@@ -2,7 +2,7 @@
  * @author  Alon Eirew
  */
 
-package wiki.elastic;
+package wiki.persistency;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

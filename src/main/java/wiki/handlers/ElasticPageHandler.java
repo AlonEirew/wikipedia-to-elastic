@@ -5,8 +5,7 @@
 package wiki.handlers;
 
 import wiki.data.WikipediaParsedPage;
-import wiki.elastic.ElasticAPI;
-import wiki.utils.WikiToElasticConfiguration;
+import wiki.persistency.ElasticAPI;
 
 import java.io.IOException;
 import java.util.ArrayList;

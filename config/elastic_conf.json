@@ -1,0 +1,12 @@
+{
+  "indexName": "test_en",
+  "docType": "wikipage",
+  "insertBulkSize": 100,
+  "mapping": "mapping.json",
+  "setting": "en_map_settings.json",
+  "host": "localhost",
+  "port": 9200,
+  "scheme": "http",
+  "shards": 1,
+  "replicas": 0
+}

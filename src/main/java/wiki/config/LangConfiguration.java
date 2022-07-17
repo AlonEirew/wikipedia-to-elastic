@@ -1,4 +1,4 @@
-package wiki.utils;
+package wiki.config;
 
 import java.util.List;
 

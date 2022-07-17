@@ -2,7 +2,7 @@ package wiki.data.relations;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import wiki.utils.LangConfiguration;
+import wiki.config.LangConfiguration;
 
 public class InfoboxRelationExtractor implements IRelationsExtractor<String> {
     private final static Logger LOGGER = LogManager.getLogger(InfoboxRelationExtractor.class);

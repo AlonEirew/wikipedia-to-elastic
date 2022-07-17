@@ -3,11 +3,12 @@ package wiki.wikidata;
 import com.google.gson.Gson;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import wiki.config.ElasticConfiguration;
 import wiki.data.WikiDataParsedPage;
 import wiki.data.WikipediaParsedPage;
-import wiki.elastic.ElasticAPI;
+import wiki.persistency.ElasticAPI;
 import wiki.utils.SimpleExecutorService;
-import wiki.utils.WikiToElasticConfiguration;
+import wiki.config.MainConfiguration;
 import wiki.utils.WikiToElasticUtils;
 import wiki.utils.parsers.WikidataJsonParser;
 import wiki.utils.parsers.WikidataParseThread;
@@ -28,19 +29,20 @@ public class WikiDataFeatToFile {
 
     public static void main(String[] args) throws Exception {
         long startTime = System.currentTimeMillis();
-        WikiToElasticConfiguration config = GSON.fromJson(new FileReader("wikidata_conf.json"), WikiToElasticConfiguration.class);
+        MainConfiguration mainConfiguration = GSON.fromJson(new FileReader("conf.json"), MainConfiguration.class);
+        ElasticConfiguration elasticConfiguration = GSON.fromJson(new FileReader("config/wikidata_conf.json"), ElasticConfiguration.class);
 
-        if(config.getWikidataDump() != null && !config.getWikidataDump().isEmpty()) {
-            File inputDump = new File(config.getWikidataDump());
-            File outputFile = new File(config.getWikidataJsonOutput());
-            ElasticAPI elasticAPI = new ElasticAPI(config);
+        if(mainConfiguration.getWikidataDump() != null && !mainConfiguration.getWikidataDump().isEmpty()) {
+            File inputDump = new File(mainConfiguration.getWikidataDump());
+            File outputFile = new File(mainConfiguration.getWikidataJsonOutput());
+            ElasticAPI elasticAPI = new ElasticAPI(elasticConfiguration);
             try (Scanner reader = new Scanner(System.in)) {
                 System.out.println("This process will extract Wikidata information to json file-\"" +
-                        config.getWikidataJsonOutput() + "\",\nPress enter to continue...");
+                        mainConfiguration.getWikidataJsonOutput() + "\",\nPress enter to continue...");
                 reader.nextLine();
 
                 final WikidataJsonParser wikidataJsonParser = new WikidataJsonParser();
-                List<WikiDataParsedPage> wikiDataParsedPages = generateWikidata(inputDump, elasticAPI, wikidataJsonParser, config.getLang());
+                List<WikiDataParsedPage> wikiDataParsedPages = generateWikidata(inputDump, elasticAPI, wikidataJsonParser, mainConfiguration.getLang());
                 writeRelationToJson(outputFile, wikidataJsonParser, wikiDataParsedPages);
                 LOGGER.info("*** Total id's extracted=" + wikiDataParsedPages.size());
             } catch (IOException | ExecutionException | InterruptedException e) {
