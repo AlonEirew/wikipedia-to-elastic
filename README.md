@@ -6,20 +6,19 @@
 
 # Wikipedia to ElasticSearch
 
-This project generates a knowledge resource based on wikipedia. <br/>
-It also includes a *multilingual* parsing mechanism that enables parsing of Wikipedia, Wikinews, Wikidata and other Wikimedia .bz2 dumps into an ElasticSearch index.
-
+This project generates an ElasticSearch index from Wikipedia (xml dumps). The process will analyze, extract and store Wikipedia article text and several distinct Wikipedia attributes and relations (detailed below).<br/>
+* Support several Wikipedia languages *{English, French, Spanish, German, Chinese}*
+* Support other Wikimedia resources: *{Wikipedia, Wikinews, Wikidata}*
 * Integrated with Intel <a href="https://github.com/NervanaSystems/nlp-architect">NLP Architect</a>
-* Used in publication: <a href="https://www.aclweb.org/anthology/2021.naacl-main.198/">WEC: Wikipedia Event Coreference</a>
+* Used in research publication: <a href="https://www.aclweb.org/anthology/2021.naacl-main.198/">WEC: Wikipedia Event Coreference</a>
 
-Supported languages: *{English, French, Spanish, German, Chinese}* <br/> 
-*Note Relations integrity tested only for English. Other languages might require some adjustments. <br/>
+*Relations integrity tested only for English. Other languages might require some adjustments. <br/>
 
 ## Table Of Contents
 
 - [Introduction](https://github.com/AlonEirew/wikipedia-to-elastic#Introduction)
-    - [Exploited Wiki Resources](https://github.com/AlonEirew/wikipedia-to-elastic#Exploited-Wiki-Resources)
-    - [Extracted Relations Types](https://github.com/AlonEirew/wikipedia-to-elastic#Extracted-Relations-Types)
+    - [Special Wikipedia Resources and Attributes](https://github.com/AlonEirew/wikipedia-to-elastic#Exploited-Wiki-Resources)
+    - [Supported Relations Types](https://github.com/AlonEirew/wikipedia-to-elastic#Extracted-Relations-Types)
 - [Prerequisites](https://github.com/AlonEirew/wikipedia-to-elastic#Prerequisites)
 - [Configuration](https://github.com/AlonEirew/wikipedia-to-elastic#Configuration)
 - [Build Run and Test](https://github.com/AlonEirew/wikipedia-to-elastic#Build-Run-and-Test)
@@ -30,7 +29,7 @@ Supported languages: *{English, French, Spanish, German, Chinese}* <br/>
 
 ## Introduction
 
-### Exploited Wiki Resources
+### Special Wikipedia Resources and Attributes
 3 different types of Wikipedia pages are used: {Redirect/Disambiguation/Title} in order to extract 6 different 
 semantic features for tasks such as Identifying Semantic Relations, Entity Linking, Cross Document Co-Reference, Knowledge Graphs, Summarization and other.
 
@@ -41,10 +40,10 @@ semantic features for tasks such as Identifying Semantic Relations, Entity Linki
 * Infobox - See details at <a href="https://en.wikipedia.org/wiki/Help:Infobox">Wikipedia Infobox</a>
 * Term Frequency (TBD/WIP) - Hold a map of term frequency for computing TFIDF on Wikipadia
 
-### Extracted Relations Types
-List of Wikidata properties which can extend above Wikipedia relations (by running Wikidata postprocess described below).
+### Supported Relations Types
+Listed below the Wikidata properties which can extend above attributes by running the Wikidata postprocess described below.
 
-Links for further details on those properties:
+Click relation for further details:
 * <a href="https://https://www.wikidata.org/wiki/Help:Aliases">Aliases</a>
 * <a href="https://www.wikidata.org/wiki/Property:P828">Has Cause</a>
 * <a href="https://www.wikidata.org/wiki/Property:P1542">Has Effect</a>
