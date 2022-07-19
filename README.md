@@ -6,9 +6,10 @@
 
 # Wikipedia to ElasticSearch
 
-This project generates an ElasticSearch index from Wikipedia (xml dumps). The process will analyze, extract and store Wikipedia article text and several distinct Wikipedia attributes and relations (detailed below).<br/>
+This project generates an ElasticSearch (or file) index from Wikipedia (xml dumps). The process will analyze, extract and store Wikipedia article text and several distinct Wikipedia attributes and relations (detailed below).<br/>
 * Support several Wikipedia languages *{English, French, Spanish, German, Chinese}*
 * Support other Wikimedia resources: *{Wikipedia, Wikinews, Wikidata}*
+* Support storing the generated resources to either an Elastic index or json files
 * Integrated with Intel <a href="https://github.com/NervanaSystems/nlp-architect">NLP Architect</a>
 * Used in research publication: <a href="https://www.aclweb.org/anthology/2021.naacl-main.198/">WEC: Wikipedia Event Coreference</a>
 
@@ -57,39 +58,50 @@ Click relation for further details:
 
 ## Prerequisites
 * Java 11
-* ElasticSearch 7.17.4 
+* Wikipedia xml.bz2 dump file in required language (For example <a href=https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles.xml.bz2>latest en XML dump</a>)
+* Optional: ElasticSearch 7.17.4 (needed when exporting to an elastic index)
     * Recommended: Set Elastic using docker (<a href=https://github.com/AlonEirew/wikipedia-to-elastic/blob/master/docker/README.md>docker/README.md</a>)
     * Alternative:
         * Install Elastic from the official <a href=https://www.elastic.co/downloads/past-releases/#elasticsearch>Elasticsearch site</a>
         * Install plugins: analysis-icu, analysis-smartcn (<a href=https://www.elastic.co/guide/en/elasticsearch/plugins/7.17/analysis-icu.html>guide</a>)
-* Wikipedia xml.bz2 dump file in required language (For example <a href=https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles.xml.bz2>latest en XML dump</a>)
 * Optional: Wikidata json.bz2 dump file (<a href=https://dumps.wikimedia.org/wikidatawiki/entities/latest-all.json.bz2>latest JSON dump</a>)
 
 ***
 
 ## Configuration
-* `conf.json` - Main project configuration
+### Main Configuration File (`conf.json`)
 
-```json
-    "indexName": "enwiki_v3" (Set your desired Elastic Search index name)  
-    "docType": "wikipage" (Set your desired Elastic Search documnent type)
-    "extractRelationFields": true (Weather to extract relations fields while processing the data, support only english wikipedia)
-    "insertBulkSize": 100 (Number of pages to bulk insert to elastic search every iteration (found this number to give best preformence))
-    "mapping": "mapping.json" (Elastic Mapping file, should point to src/main/resources/mapping.json)
-    "setting": "en_map_settings.json" (Elastic Setting file, current support {en, fr, es, de, zh})
-    "host": "localhost" (Elastic host, were Elastic instance is installed and running)
-    "port": 9200 (Elastic port, host port were Elastic is installed and running, elastic defualt is set to 9200)
-    "wikipediaDump": "dumps/enwiki-latest-pages-articles.xml.bz2" (Wikipedia .bz2 downloaded dump file location)
-    "scheme": "http" (Elastic host schema, should probebly stay unchanged)
-    "shards": 1 (Number of Elastic shards to use)
-    "replicas": 0 (Number of Elastic replicas to use)
-    "lang": "en" (current support {en, fr, es, de, zh})
-    "includeRawText": true (will include wikipedia page text, parsed and clean as possible)
-    "relationTypes": ["Category", "Infobox", "Parenthesis", "PartName"] (Which relations to extract, full list at /src/main/java/wiki/data/relations/RelationType.java)
-```
-* `src/main/resources/mapping.json` - Elastic wiki index mapping (Should probably stay unchanged)
+* `exportMethod` - Whether to export to Elastic Index (set to `elastic`) or json files (then set to `json_files`)
+* `extractRelationFields` - Weather to extract relations fields while processing the data, support only english wikipedia
+* `wikipediaDump` - Wikipedia .bz2 downloaded dump file location
+* `lang` - current support {`en` (English), `fr` (French), `es` (Spanish), `de` (German), `zh` (Chinese)}
+* `includeRawText` - will include wikipedia page text, parsed and clean as possible
+* `relationTypes` - ["Category", "Infobox", "Parenthesis", "PartName"] (relations to extract, full list at /src/main/java/wiki/data/relations/RelationType.java)
+
+### Json Export Configuration File (`config/json_file_conf.json`)
+This configuration is needed when the export method is `json_files`
+* `outIndexDirectory` - The folder location where to save the exported files
+* `pagesPerFile` - How many pages to save per file (100,000 pages ~ 1.5 GB)
+
+### Elastic Configuration File (`config/elastic_conf.json`)
+This configuration is needed when the export method is `elastic` 
+* `indexName` - Set your desired Elastic Search index name
+* `docType` - Set your desired Elastic Search documnent type
+* `insertBulkSize` - Number of pages to bulk insert to elastic search every iteration (found `1000` to give best preformence)
+* `mapping` - Elastic Mapping file, should point to src/main/resources/mapping.json
+* `setting` - Elastic Setting file, current support {en, fr, es, de, zh}
+* `host` - Elastic host
+* `port` - Elastic port
+* `scheme` - Elastic host schema (default: `http`)
+* `shards` - Number of Elastic shards
+* `replicas` - Number of Elastic replicas
+
+#### Elastic Mapping File
+`src/main/resources/mapping.json` - Elastic wiki index mapping (Should probably stay unchanged)
+
+#### Elastic Index Files
 * `src/main/resources/{en,es,fr,de,zh}_map_settings.json` - Elastic index settings (Should probably stay unchanged)
-* `src/main/resources/lang/{en,es,fr,de,zh}.json` - language specific configuration files
+* `src/main/resources/lang/{en,es,fr,de,zh}.json` - language specific configuration for relation key word translations
 * `src/main/resources/stop_words/{en,es,fr,de,zh}.txt` - language specific stop-words list
 
 ***
@@ -98,13 +110,14 @@ Click relation for further details:
 
 - Make sure Elastic process is running and active on your host (if running Elastic locally your IP is <a href="http://localhost:9200/">http://localhost:9200/</a>)
 - Checkout/Clone the repository
-- Put wiki xml.bz2 dump file (no need to extract the bz2 file!) in: `dumps` folder under root checkout repository.<br/> 
-<i><b>Recommendation:</b> Start with a small wiki dump, make sure you like what you get (or modify configurations to meet your needs) before moving to a full blown 15GB dump export..</i>
-- Make sure `conf.json` configuration for Elastic are set as expected (default localhost:9200)
 - From command line navigate to project root directory and run:<br/>
 `./gradlew clean build -x test` <br/>
 *Should get a message saying: `BUILD SUCCESSFUL in 7s`*
 - Extract the build zip file created at this location `build/distributions/WikipediaToElastic-1.0.zip`
+- Put wiki xml.bz2 dump file (no need to extract the bz2 file!) in: `dumps` folder<br/> 
+<i><b>Recommendation:</b> Start with a small wiki dump, make sure you like what you get (or modify configurations to meet your needs) before moving to a full blown 15GB dump export.</i>
+- Make sure `conf.json` configurations are set as expected
+- Make sure `config` folder configurations are set as expected
 - Run the process from command line:<br/>
 `java -Xmx6000m -DentityExpansionLimit=2147480000 -DtotalEntitySizeLimit=2147480000 -Djdk.xml.totalEntitySizeLimit=2147480000 -jar build/distributions/WikipediaToElastic-1.0/WikipediaToElastic-1.0.jar`
 
@@ -117,20 +130,19 @@ Click relation for further details:
 ## Integrating Wikidata Attributes
 Running this process require a Wikipedia index (generated by the above process) 
 
-### Wikidata Configuration Files
-* `wikidata_conf.json` - basic process configuration
-```json
-    "indexName" : "enwiki_v3" (Set your Elastic Search index to be modidied)  
-    "docType" : "wikipage" (Set your desired Elastic Search documnent type)
-    "insertBulkSize": 100 (Number of pages to bulk insert to elastic search every iteration (found this number to give best preformence))
-    "host" : "localhost" (Elastic host, were Elastic instance is installed and running)
-    "port" : 9200 (Elastic port, host port were Elastic is installed and running, elastic defualt is set to 9200)
-    "wikidataDump" : "dumps/enwiki-latest-pages-articles.xml.bz2" (Wikidata .bz2 downloaded dump file location)
-    "scheme" : "http" (Elastic host schema, should probebly stay unchanged)
-    "lang": "en" (should corrolate with the wikipedia index)
-```
+### Wikidata Main Configuration File (`config/wikidata_conf.json`)
+Main configuration file for Wikidata export process, currently only support if Wikipedia was export to an Elasticsearch index.
 
-### Wikidata Running and Testing
+* indexName - Elasticsearch index to enhance with wikidata attributes  
+* docType - Set your desired documnent type
+* insertBulkSize - Number of pages to bulk insert to elastic search every iteration
+* host - Elastic host
+* port - Elastic port
+* wikidataDump - Wikidata .bz2 downloaded dump file location
+* scheme - Elastic host schema
+* lang - should correlate with the wikipedia index language
+
+## Wikidata Running and Testing
 - Make sure Elastic process is running and active on your host (if running Elastic locally your IP is <a href="http://localhost:9200/">http://localhost:9200/</a>)
 - Make sure `wikidata_conf.json` configuration are set as expected
 - Run the process from command line:<br/>

@@ -37,7 +37,6 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import wiki.config.ElasticConfiguration;
 import wiki.data.WikiDataParsedPage;
 import wiki.data.WikipediaParsedPage;
-import wiki.config.MainConfiguration;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -49,7 +48,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
 
-public class ElasticAPI implements Closeable {
+public class ElasticAPI implements IAPI<AcknowledgedResponse> {
 
     private final static Logger LOGGER = LogManager.getLogger(ElasticAPI.class);
     private static final Gson GSON = new Gson();
@@ -57,6 +56,8 @@ public class ElasticAPI implements Closeable {
 
     private final AtomicInteger totalIdsProcessed = new AtomicInteger(0);
     private final AtomicInteger totalIdsSuccessfullyCommitted = new AtomicInteger(0);
+
+    private final ElasticConfiguration elasticConfiguration;
 
     // Limit the number of threads accessing elastic in parallel
     private final Semaphore available = new Semaphore(MAX_AVAILABLE, true);
@@ -67,6 +68,7 @@ public class ElasticAPI implements Closeable {
     private final String docType;
 
     public ElasticAPI(ElasticConfiguration configuration) throws IOException {
+        this.elasticConfiguration = configuration;
         if(configuration.getIndexName() != null && !configuration.getIndexName().isEmpty() &&
                 configuration.getDocType() != null && !configuration.getDocType().isEmpty()) {
             this.indexName = configuration.getIndexName();
@@ -83,6 +85,7 @@ public class ElasticAPI implements Closeable {
                                 configuration.getScheme())));
     }
 
+    @Override
     public AcknowledgedResponse deleteIndex() throws ConnectException {
         AcknowledgedResponse deleteIndexResponse = null;
         try {
@@ -107,26 +110,27 @@ public class ElasticAPI implements Closeable {
         return deleteIndexResponse;
     }
 
-    public AcknowledgedResponse createIndex(ElasticConfiguration configuration) throws IOException {
+    @Override
+    public AcknowledgedResponse createIndex() throws IOException {
         AcknowledgedResponse createIndexResponse = null;
         try {
             // Create the index
-            CreateIndexRequest crRequest = new CreateIndexRequest(configuration.getIndexName());
+            CreateIndexRequest crRequest = new CreateIndexRequest(this.elasticConfiguration.getIndexName());
 
             // Create shards & replicas
             Settings.Builder builder = Settings.builder();
             builder
-                    .put("index.number_of_shards", configuration.getShards())
-                    .put("index.number_of_replicas", configuration.getReplicas());
+                    .put("index.number_of_shards", this.elasticConfiguration.getShards())
+                    .put("index.number_of_replicas", this.elasticConfiguration.getReplicas());
 
-            String settingFileContent = configuration.getSettingFileContent();
+            String settingFileContent = this.elasticConfiguration.getSettingFileContent();
             if(settingFileContent != null && !settingFileContent.isEmpty()) {
                 builder.loadFromSource(settingFileContent, XContentType.JSON);
             }
             crRequest.settings(builder);
 
             // Create index mapping
-            String mappingFileContent = configuration.getMappingFileContent();
+            String mappingFileContent = this.elasticConfiguration.getMappingFileContent();
             if(mappingFileContent != null && !mappingFileContent.isEmpty()) {
                 System.out.println(mappingFileContent);
 //                crRequest.mapping("_doc", mappingFileContent, XContentType.JSON);
@@ -137,7 +141,7 @@ public class ElasticAPI implements Closeable {
             createIndexResponse = this.client.indices().create(crRequest, RequestOptions.DEFAULT);
             this.available.release();
 
-            LOGGER.info("Index " + configuration.getIndexName() + " created successfully: " + createIndexResponse.isAcknowledged());
+            LOGGER.info("Index " + this.elasticConfiguration.getIndexName() + " created successfully: " + createIndexResponse.isAcknowledged());
         } catch (InterruptedException e) {
             LOGGER.error("Could not creat elasticsearch index");
         }
@@ -195,7 +199,8 @@ public class ElasticAPI implements Closeable {
         }
     }
 
-    public IndexResponse addDoc(WikipediaParsedPage page) {
+    @Override
+    public void addDoc(WikipediaParsedPage page) {
         IndexResponse res = null;
 
         try {
@@ -210,10 +215,9 @@ public class ElasticAPI implements Closeable {
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
-
-        return res;
     }
 
+    @Override
     public void addBulkAsnc(List<WikipediaParsedPage> pages) {
         BulkRequest bulkRequest = new BulkRequest();
 
@@ -343,11 +347,11 @@ public class ElasticAPI implements Closeable {
         }
     }
 
+    @Override
     public boolean isDocExists(String docId) {
         GetRequest getRequest = new GetRequest(
                 this.indexName,
                 docId);
-
         try {
             this.available.acquire();
             GetResponse getResponse = this.client.get(getRequest, RequestOptions.DEFAULT);
@@ -362,6 +366,7 @@ public class ElasticAPI implements Closeable {
         return false;
     }
 
+    @Override
     public boolean isIndexExists() {
         boolean ret = false;
         try {
@@ -373,10 +378,12 @@ public class ElasticAPI implements Closeable {
         return ret;
     }
 
+    @Override
     public int getTotalIdsProcessed() {
         return totalIdsProcessed.get();
     }
 
+    @Override
     public int getTotalIdsSuccessfullyCommitted() {
         return totalIdsSuccessfullyCommitted.get();
     }
