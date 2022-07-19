@@ -1,4 +1,4 @@
-package wiki.elastic;
+package wiki.persistency;
 
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;

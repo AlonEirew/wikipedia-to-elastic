@@ -11,3 +11,4 @@ dumps/enwiki-20220601-pages-articles-multistream.xml.bz2
 /docker/elastic-dump.7z
 /elastic-dump/*
 /libs
+file_index

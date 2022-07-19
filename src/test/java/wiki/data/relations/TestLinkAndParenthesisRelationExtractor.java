@@ -3,7 +3,7 @@ package wiki.data.relations;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import wiki.TestUtils;
-import wiki.utils.LangConfiguration;
+import wiki.config.LangConfiguration;
 
 import java.io.FileNotFoundException;
 

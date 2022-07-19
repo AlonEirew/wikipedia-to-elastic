@@ -7,7 +7,7 @@ import com.google.gson.JsonObject;
 import org.apache.commons.io.FileUtils;
 import wiki.data.TestRelationsBuilderAndPageParser;
 import wiki.data.WikipediaParsedPageRelations;
-import wiki.utils.LangConfiguration;
+import wiki.config.LangConfiguration;
 
 import java.io.*;
 import java.util.ArrayList;

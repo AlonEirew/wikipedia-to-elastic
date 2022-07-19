@@ -1,0 +1,20 @@
+FROM ubuntu:latest
+RUN apt-get update && apt-get install -y \
+    wget \
+    gnupg \
+    curl \
+    p7zip-full \
+    default-jre
+
+RUN wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.17.4-linux-x86_64.tar.gz
+RUN tar -xzf elasticsearch-7.17.4-linux-x86_64.tar.gz
+
+RUN /elasticsearch-7.17.4/bin/elasticsearch-plugin install analysis-icu
+RUN /elasticsearch-7.17.4/bin/elasticsearch-plugin install analysis-smartcn
+
+COPY elasticsearch.yml /elasticsearch-7.17.4/config/
+RUN chmod +r /elasticsearch-7.17.4/config/elasticsearch.yml
+
+EXPOSE 9200 9300
+
+CMD service elasticsearch start && tail -f var/log/elasticsearch/docker-cluster.log

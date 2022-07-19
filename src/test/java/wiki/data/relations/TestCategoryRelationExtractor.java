@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import wiki.TestUtils;
-import wiki.utils.LangConfiguration;
+import wiki.config.LangConfiguration;
 
 import java.io.FileNotFoundException;
 import java.util.Set;

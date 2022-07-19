@@ -10,9 +10,9 @@ import wiki.data.WikipediaParsedPageBuilder;
 import wiki.data.WikipediaParsedPageRelations;
 import wiki.data.WikipediaParsedPageRelationsBuilder;
 import wiki.handlers.IPageHandler;
-import wiki.utils.LangConfiguration;
+import wiki.config.LangConfiguration;
 import wiki.utils.SimpleExecutorService;
-import wiki.utils.WikiToElasticConfiguration;
+import wiki.config.MainConfiguration;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
@@ -60,7 +60,7 @@ public class WikipediaSTAXParser implements Closeable {
         this.includeRawText = includeRawText;
     }
 
-    public WikipediaSTAXParser(IPageHandler handler, WikiToElasticConfiguration config, LangConfiguration langConfig, DeleteUpdateMode mode) {
+    public WikipediaSTAXParser(IPageHandler handler, MainConfiguration config, LangConfiguration langConfig, DeleteUpdateMode mode) {
         this(handler, langConfig, config.isIncludeRawText());
         this.deleteUpdateMode = mode;
         this.extractFields = config.isExtractRelationFields();

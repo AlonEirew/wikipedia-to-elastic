@@ -1,0 +1,4 @@
+{
+  "outIndexDirectory": "file_index",
+  "pagesPerFile": 100000
+}

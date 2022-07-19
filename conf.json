@@ -1,16 +1,7 @@
 {
-  "indexName": "test_en",
-  "docType": "wikipage",
+  "exportMethod": "elastic",
   "extractRelationFields": true,
-  "insertBulkSize": 100,
-  "mapping": "mapping.json",
-  "setting": "en_map_settings.json",
-  "host": "localhost",
-  "wikipediaDump": "dumps/enwiki-20220601-pages-articles-multistream.xml.bz2",
-  "port": 9200,
-  "scheme": "http",
-  "shards": 1,
-  "replicas": 0,
+  "wikipediaDump": "dumps/tinywiki-latest-pages-articles.xml.bz2",
   "lang": "en",
   "includeRawText" : true,
   "relationTypes": [

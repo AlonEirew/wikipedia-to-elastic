@@ -1,8 +1,8 @@
 package wiki.data.relations;
 
 import wiki.data.obj.BeCompRelationResult;
-import wiki.utils.LangConfiguration;
-import wiki.utils.WikiToElasticConfiguration;
+import wiki.config.LangConfiguration;
+import wiki.config.MainConfiguration;
 
 import java.util.List;
 
@@ -16,7 +16,7 @@ public class ExtractorsManager {
     private final IRelationsExtractor<BeCompRelationResult> beCompExtractor = new BeCompRelationExtractor();
     private final IRelationsExtractor<String> infoboxExtrator = new InfoboxRelationExtractor();
 
-    public static void initExtractors(WikiToElasticConfiguration config, LangConfiguration langConfiguration) {
+    public static void initExtractors(MainConfiguration config, LangConfiguration langConfiguration) {
         relationTypes = config.getRelationTypes();
         for(RelationType type : config.getRelationTypes()) {
             switch (type) {

@@ -9,7 +9,7 @@ import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import wiki.data.obj.BeCompRelationResult;
-import wiki.utils.LangConfiguration;
+import wiki.config.LangConfiguration;
 
 import java.util.LinkedList;
 import java.util.List;

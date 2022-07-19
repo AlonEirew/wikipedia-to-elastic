@@ -1,38 +1,23 @@
-/**
- * @author  Alon Eirew
- */
+package wiki.config;
 
-package wiki.utils;
-
-import com.google.gson.reflect.TypeToken;
 import org.apache.commons.io.IOUtils;
-import wiki.data.relations.RelationType;
+import wiki.utils.WikiToElasticUtils;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 import java.util.Objects;
 
-public class WikiToElasticConfiguration {
-
+public class ElasticConfiguration {
     private String indexName;
     private String docType;
     private String mapping;
     private String setting;
     private String host;
     private String scheme;
-    private String wikipediaDump;
-    private String wikidataDump;
-    private String wikidataJsonOutput;
     private int port;
     private int shards;
     private int replicas;
     private int insertBulkSize;
-    private boolean extractRelationFields;
-    private String lang;
-    private boolean includeRawText;
-    private List<RelationType> relationTypes;
 
     private transient String mappingFileContent = null;
     private transient String settingFileContent = null;
@@ -101,14 +86,6 @@ public class WikiToElasticConfiguration {
         this.replicas = replicas;
     }
 
-    public String getWikipediaDump() {
-        return wikipediaDump;
-    }
-
-    public void setWikipediaDump(String wikipediaDump) {
-        this.wikipediaDump = wikipediaDump;
-    }
-
     public String getSetting() {
         return setting;
     }
@@ -125,22 +102,6 @@ public class WikiToElasticConfiguration {
         this.insertBulkSize = insertBulkSize;
     }
 
-    public boolean isExtractRelationFields() {
-        return extractRelationFields;
-    }
-
-    public void setExtractRelationFields(boolean extractRelationFields) {
-        this.extractRelationFields = extractRelationFields;
-    }
-
-    public List<RelationType> getRelationTypes() {
-        return relationTypes;
-    }
-
-    public void setRelationTypes(List<RelationType> relationTypes) {
-        this.relationTypes = relationTypes;
-    }
-
     public String getMappingFileContent() throws IOException {
         if(this.mappingFileContent == null && this.mapping != null) {
             this.mappingFileContent = IOUtils.toString(Objects.requireNonNull(
@@ -152,40 +113,8 @@ public class WikiToElasticConfiguration {
     public String getSettingFileContent() throws IOException {
         if(this.settingFileContent == null && this.setting != null) {
             this.settingFileContent = IOUtils.toString(Objects.requireNonNull(
-                            WikiToElasticUtils.class.getClassLoader().getResourceAsStream(this.setting)), StandardCharsets.UTF_8);
+                    WikiToElasticUtils.class.getClassLoader().getResourceAsStream(this.setting)), StandardCharsets.UTF_8);
         }
         return this.settingFileContent;
-    }
-
-    public String getLang() {
-        return lang;
-    }
-
-    public void setLang(String lang) {
-        this.lang = lang;
-    }
-
-    public boolean isIncludeRawText() {
-        return includeRawText;
-    }
-
-    public void setIncludeRawText(boolean includeRawText) {
-        this.includeRawText = includeRawText;
-    }
-
-    public String getWikidataDump() {
-        return wikidataDump;
-    }
-
-    public void setWikidataDump(String wikidataDump) {
-        this.wikidataDump = wikidataDump;
-    }
-
-    public String getWikidataJsonOutput() {
-        return wikidataJsonOutput;
-    }
-
-    public void setWikidataJsonOutput(String wikidataJsonOutput) {
-        this.wikidataJsonOutput = wikidataJsonOutput;
     }
 }
