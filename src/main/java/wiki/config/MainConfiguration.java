@@ -17,6 +17,7 @@ public class MainConfiguration {
     private boolean extractRelationFields;
     private String lang;
     private boolean includeRawText;
+    private boolean includeParsedParagraphs;
     private List<RelationType> relationTypes;
 
     public String getExportMethod() {
@@ -65,6 +66,14 @@ public class MainConfiguration {
 
     public void setIncludeRawText(boolean includeRawText) {
         this.includeRawText = includeRawText;
+    }
+
+    public boolean isIncludeParsedParagraphs() {
+        return includeParsedParagraphs;
+    }
+
+    public void setIncludeParsedParagraphs(boolean includeParsedParagraphs) {
+        this.includeParsedParagraphs = includeParsedParagraphs;
     }
 
     public String getWikidataDump() {

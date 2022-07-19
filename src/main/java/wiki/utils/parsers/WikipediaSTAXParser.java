@@ -6,6 +6,7 @@ package wiki.utils.parsers;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import wiki.data.WikipediaParsedPage;
 import wiki.data.WikipediaParsedPageBuilder;
 import wiki.data.WikipediaParsedPageRelations;
 import wiki.data.WikipediaParsedPageRelationsBuilder;
@@ -25,11 +26,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.*;
 
 public class WikipediaSTAXParser implements Closeable {
     private final static Logger LOGGER = LogManager.getLogger(WikipediaSTAXParser.class);
+
+    private static final int MAX_WORD_COUNT = 20;
 
     public enum DeleteUpdateMode {DELETE, UPDATE, NA}
 
@@ -43,6 +47,7 @@ public class WikipediaSTAXParser implements Closeable {
     private final String[] filterTitles;
 
     private final boolean includeRawText;
+    private final boolean includeParsedParagraphs;
     private final IPageHandler handler;
     private final ExecutorService executorService;
     private final Set<Long> totalIds = new HashSet<>();
@@ -50,7 +55,7 @@ public class WikipediaSTAXParser implements Closeable {
     private DeleteUpdateMode deleteUpdateMode;
 
 
-    public WikipediaSTAXParser(IPageHandler handler, LangConfiguration langConfig, boolean includeRawText) {
+    public WikipediaSTAXParser(IPageHandler handler, LangConfiguration langConfig, boolean includeRawText, boolean includeParseParagraphs) {
         this.executorService = SimpleExecutorService.initExecutorService();
         this.handler = handler;
         this.extractFields = true;
@@ -58,10 +63,11 @@ public class WikipediaSTAXParser implements Closeable {
         this.filterTitles = langConfig.getTitlesPref().toArray(new String[0]);
         this.redirectTextPrefix = "#" + langConfig.getRedirect();
         this.includeRawText = includeRawText;
+        this.includeParsedParagraphs = includeParseParagraphs;
     }
 
     public WikipediaSTAXParser(IPageHandler handler, MainConfiguration config, LangConfiguration langConfig, DeleteUpdateMode mode) {
-        this(handler, langConfig, config.isIncludeRawText());
+        this(handler, langConfig, config.isIncludeRawText(), config.isIncludeParsedParagraphs());
         this.deleteUpdateMode = mode;
         this.extractFields = config.isExtractRelationFields();
     }
@@ -161,7 +167,8 @@ public class WikipediaSTAXParser implements Closeable {
                         relations = new WikipediaParsedPageRelationsBuilder().buildFromText(text);
                     } else {
                         // Empty relations for redirect pages (Relations can be found in the underline redirected page)
-                        relations = new WikipediaParsedPageRelationsBuilder().build();
+//                        relations = new WikipediaParsedPageRelationsBuilder().build();
+                        relations = null;
                     }
 
                     final WikipediaParsedPageBuilder pageBuilder = new WikipediaParsedPageBuilder()
@@ -170,12 +177,24 @@ public class WikipediaSTAXParser implements Closeable {
                             .setRedirectTitle(redirect)
                             .setRelations(relations);
 
-                    if(includeRawText) {
+                    if(includeRawText && !text.isEmpty()) {
                         pageBuilder.setText(text);
+                    } else {
+                        pageBuilder.setText(null);
+                    }
+
+                    if(includeParsedParagraphs) {
+                        List<String> allPageParagraphs = WikiPageParser.extractAllPageParagraphs(text, MAX_WORD_COUNT);
+                        pageBuilder.setParsedParagraphs(allPageParagraphs);
+                    } else {
+                        pageBuilder.setParsedParagraphs(null);
                     }
 
                     // Adding the page to the elastic search queue handler
-                    handler.addPage(pageBuilder.build());
+                    WikipediaParsedPage wikiParsedPage = pageBuilder.build();
+                    if (wikiParsedPage.isValid()) {
+                        handler.addPage(wikiParsedPage);
+                    }
                 } catch (Exception ex) {
                     LOGGER.error("Got Exception in thread", ex);
                 }

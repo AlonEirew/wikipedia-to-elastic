@@ -4,19 +4,22 @@
 
 package wiki.data;
 
+import java.util.List;
 import java.util.Objects;
 
 public class WikipediaParsedPage {
     private final String title;
     private final transient long id;
     private final String text;
+    private final List<String> parsedParagraphs;
     private final String redirectTitle;
     private final WikipediaParsedPageRelations relations;
 
-    public WikipediaParsedPage(String title, long id, String text, String redirectTitle, WikipediaParsedPageRelations relations) {
+    public WikipediaParsedPage(String title, long id, String text, List<String> parsedParagraphs, String redirectTitle, WikipediaParsedPageRelations relations) {
         this.title = title;
         this.id = id;
         this.text = text;
+        this.parsedParagraphs = parsedParagraphs;
         this.redirectTitle = redirectTitle;
         this.relations = relations;
     }
@@ -25,6 +28,7 @@ public class WikipediaParsedPage {
         this.title = page.title;
         this.id = page.id;
         this.text = page.text;
+        this.parsedParagraphs = page.parsedParagraphs;
         this.redirectTitle = page.redirectTitle;
         this.relations = page.relations;
     }
@@ -45,8 +49,16 @@ public class WikipediaParsedPage {
         return redirectTitle;
     }
 
+    public List<String> getParsedParagraphs() {
+        return parsedParagraphs;
+    }
+
     public WikipediaParsedPageRelations getRelations() {
         return relations;
+    }
+
+    public boolean isValid() {
+        return this.text != null || this.parsedParagraphs != null || this.relations != null;
     }
 
     @Override
@@ -54,17 +66,12 @@ public class WikipediaParsedPage {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         WikipediaParsedPage that = (WikipediaParsedPage) o;
-        return id == that.id &&
-                Objects.equals(title, that.title) &&
-                Objects.equals(text, that.text) &&
-                Objects.equals(redirectTitle, that.redirectTitle) &&
-                Objects.equals(relations, that.relations);
+        return id == that.id && Objects.equals(title, that.title) && Objects.equals(text, that.text) && Objects.equals(parsedParagraphs, that.parsedParagraphs) && Objects.equals(redirectTitle, that.redirectTitle) && Objects.equals(relations, that.relations);
     }
 
     @Override
     public int hashCode() {
-
-        return Objects.hash(title, id, text, redirectTitle, relations);
+        return Objects.hash(title, id, text, parsedParagraphs, redirectTitle, relations);
     }
 
     @Override

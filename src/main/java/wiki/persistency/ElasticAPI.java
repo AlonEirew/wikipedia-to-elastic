@@ -303,9 +303,9 @@ public class ElasticAPI implements IAPI<AcknowledgedResponse> {
             final String title = (String) map.get("title");
             String redirect = (String) map.get("redirectTitle");
             if (redirect != null && !redirect.isEmpty()) {
-                wikiPairs.put(title, new WikipediaParsedPage(title, id, null, redirect, null));
+                wikiPairs.put(title, new WikipediaParsedPage(title, id, null, null, redirect, null));
             } else {
-                wikiPairs.put(title, new WikipediaParsedPage(title, id, null, null, null));
+                wikiPairs.put(title, new WikipediaParsedPage(title, id, null, null, null, null));
             }
 
         }

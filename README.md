@@ -6,10 +6,13 @@
 
 # Wikipedia to ElasticSearch
 
-This project generates an ElasticSearch (or file) index from Wikipedia (xml dumps). The process will analyze, extract and store Wikipedia article text and several distinct Wikipedia attributes and relations (detailed below).<br/>
-* Support several Wikipedia languages *{English, French, Spanish, German, Chinese}*
-* Support other Wikimedia resources: *{Wikipedia, Wikinews, Wikidata}*
-* Support storing the generated resources to either an Elastic index or json files
+This project generates an ElasticSearch, or file index from Wikipedia (xml dumps). The process will analyze, extract and store Wikipedia article text and several distinct Wikipedia attributes and relations (detailed below).<br/>
+
+## Project Features:
+* Export Wikipedia in different languages *{English, French, Spanish, German, Chinese}*
+* Export other Wikimedia resources: *{Wikipedia, Wikinews, Wikidata}*
+* Support storing to either an Elastic index or file system (json files)
+* Support the extraction of Wikipedia article text clean of markdown and html tags
 * Integrated with Intel <a href="https://github.com/NervanaSystems/nlp-architect">NLP Architect</a>
 * Used in research publication: <a href="https://www.aclweb.org/anthology/2021.naacl-main.198/">WEC: Wikipedia Event Coreference</a>
 
@@ -22,6 +25,9 @@ This project generates an ElasticSearch (or file) index from Wikipedia (xml dump
     - [Supported Relations Types](https://github.com/AlonEirew/wikipedia-to-elastic#Extracted-Relations-Types)
 - [Prerequisites](https://github.com/AlonEirew/wikipedia-to-elastic#Prerequisites)
 - [Configuration](https://github.com/AlonEirew/wikipedia-to-elastic#Configuration)
+  - [Main Configuration File](https://github.com/AlonEirew/wikipedia-to-elastic#Main-Configuration-File)
+  - [Json Export Configuration File](https://github.com/AlonEirew/wikipedia-to-elastic#Json-Export-Configuration-File)
+  - [Elastic Configuration Files](https://github.com/AlonEirew/wikipedia-to-elastic#Json-Export-Configuration-File)
 - [Build Run and Test](https://github.com/AlonEirew/wikipedia-to-elastic#Build-Run-and-Test)
 - [Integrating Wikidata Attributes](https://github.com/AlonEirew/wikipedia-to-elastic#Integrating-Wikidata-Attributes)
 - [Usage](https://github.com/AlonEirew/wikipedia-to-elastic#Usage)
@@ -69,22 +75,24 @@ Click relation for further details:
 ***
 
 ## Configuration
-### Main Configuration File (`conf.json`)
-
+### Main Configuration File 
+`conf.json` is the main process configuration file: 
 * `exportMethod` - Whether to export to Elastic Index (set to `elastic`) or json files (then set to `json_files`)
-* `extractRelationFields` - Weather to extract relations fields while processing the data, support only english wikipedia
+* `extractRelationFields` - When set to `true` will extract the relations fields (listed in `relationTypes`) while processing the data (support only with english Wikipedia)
 * `wikipediaDump` - Wikipedia .bz2 downloaded dump file location
-* `lang` - current support {`en` (English), `fr` (French), `es` (Spanish), `de` (German), `zh` (Chinese)}
-* `includeRawText` - will include wikipedia page text, parsed and clean as possible
-* `relationTypes` - ["Category", "Infobox", "Parenthesis", "PartName"] (relations to extract, full list at /src/main/java/wiki/data/relations/RelationType.java)
+* `lang` - Support {`en` (English), `fr` (French), `es` (Spanish), `de` (German), `zh` (Chinese)}
+* `includeRawText` - When set to `true`, will include original wikipedia page text (including html and markdown), parsed and clean as possible
+* `includeParsedParagraphs` - When set to `true`, will include a list of parsed wikipedia article paragraphs, clean of any markdown or html tags
+* `relationTypes` - ["Category", "Infobox", "Parenthesis", "PartName"]. To export those relations, the `extractRelationFields` configuration need to be set to `true` (the full list of available relations is in `/src/main/java/wiki/data/relations/RelationType.java`)
 
-### Json Export Configuration File (`config/json_file_conf.json`)
-This configuration is needed when the export method is `json_files`
+### Json Export Configuration File
+`config/json_file_conf.json` is the configuration needed only when the `exportMethod` is set to `json_files`
 * `outIndexDirectory` - The folder location where to save the exported files
-* `pagesPerFile` - How many pages to save per file (100,000 pages ~ 1.5 GB)
+* `pagesPerFile` - How many pages to save per file (100,000 pages ~ 0.5 GB)
 
-### Elastic Configuration File (`config/elastic_conf.json`)
-This configuration is needed when the export method is `elastic` 
+### Elastic Configuration Files
+#### Main Elastic Configuration File
+`config/elastic_conf.json` - Those configurations are needed only when the `exportMethod` is set to `elastic` 
 * `indexName` - Set your desired Elastic Search index name
 * `docType` - Set your desired Elastic Search documnent type
 * `insertBulkSize` - Number of pages to bulk insert to elastic search every iteration (found `1000` to give best preformence)
@@ -238,6 +246,7 @@ Pages that have been created with the following structures (also see "Created Fi
 | _id | Text | Wikipedia page id |
 | _source.title | Text | Wikipedia page title |
 | _source.text | Text | Wikipedia page text |
+| _source.parsedParagraphs | Text | Clean of html/markdown Wikipedia article text split to passages |
 | _source.redirectTitle | Text (optional) | Wikipedia page redirect title |
 | _source.relations.infobox | Text (optional) | The article infobox element |
 | _source.relations.categories | List (optional) | Categories relation list |

@@ -4,10 +4,13 @@
 
 package wiki.data;
 
+import java.util.List;
+
 public class WikipediaParsedPageBuilder {
     private String title;
     private long id;
     private String text = "";
+    private List<String> parsedParagraphs;
     private String redirectTitle;
     private WikipediaParsedPageRelations relations;
 
@@ -36,7 +39,12 @@ public class WikipediaParsedPageBuilder {
         return this;
     }
 
+    public WikipediaParsedPageBuilder setParsedParagraphs(List<String> parsedParagraphs) {
+        this.parsedParagraphs = parsedParagraphs;
+        return this;
+    }
+
     public WikipediaParsedPage build() {
-        return new WikipediaParsedPage(this.title, this.id, this.text, this.redirectTitle, this.relations);
+        return new WikipediaParsedPage(this.title, this.id, this.text, this.parsedParagraphs, this.redirectTitle, this.relations);
     }
 }
