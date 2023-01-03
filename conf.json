@@ -1,9 +1,10 @@
 {
   "exportMethod": "elastic",
-  "extractRelationFields": true,
+  "extractRelationFields": false,
   "wikipediaDump": "dumps/tinywiki-latest-pages-articles.xml.bz2",
   "lang": "en",
-  "includeRawText" : true,
+  "includeRawText" : false,
+  "includeParsedParagraphs": true,
   "relationTypes": [
     "Category",
     "Infobox",

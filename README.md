@@ -27,7 +27,7 @@ This project generates an ElasticSearch, or file index from Wikipedia (xml dumps
 - [Configuration](https://github.com/AlonEirew/wikipedia-to-elastic#Configuration)
   - [Main Configuration File](https://github.com/AlonEirew/wikipedia-to-elastic#Main-Configuration-File)
   - [Json Export Configuration File](https://github.com/AlonEirew/wikipedia-to-elastic#Json-Export-Configuration-File)
-  - [Elastic Configuration Files](https://github.com/AlonEirew/wikipedia-to-elastic#Json-Export-Configuration-File)
+  - [Elastic Configuration Files](https://github.com/AlonEirew/wikipedia-to-elastic#Elastic-Configuration-Files)
 - [Build Run and Test](https://github.com/AlonEirew/wikipedia-to-elastic#Build-Run-and-Test)
 - [Integrating Wikidata Attributes](https://github.com/AlonEirew/wikipedia-to-elastic#Integrating-Wikidata-Attributes)
 - [Usage](https://github.com/AlonEirew/wikipedia-to-elastic#Usage)
@@ -245,8 +245,8 @@ Pages that have been created with the following structures (also see "Created Fi
 | ------------- | ------------- | ------------- |
 | _id | Text | Wikipedia page id |
 | _source.title | Text | Wikipedia page title |
-| _source.text | Text | Wikipedia page text |
-| _source.parsedParagraphs | Text | Clean of html/markdown Wikipedia article text split to passages |
+| _source.text | Text (optional) | Wikipedia page text |
+| _source.parsedParagraphs | List (optional) | Clean of html/markdown Wikipedia article text split to passages |
 | _source.redirectTitle | Text (optional) | Wikipedia page redirect title |
 | _source.relations.infobox | Text (optional) | The article infobox element |
 | _source.relations.categories | List (optional) | Categories relation list |
