@@ -14,7 +14,9 @@ This project generates an ElasticSearch, or file index from Wikipedia (xml dumps
 * Support storing to either an Elastic index or file system (json files)
 * Support the extraction of Wikipedia article text clean of markdown and html tags
 * Integrated with Intel <a href="https://github.com/NervanaSystems/nlp-architect">NLP Architect</a>
-* Used in research publication: <a href="https://www.aclweb.org/anthology/2021.naacl-main.198/">WEC: Wikipedia Event Coreference</a>
+* Used in scientific research: 
+    * <a href="https://www.aclweb.org/anthology/2021.naacl-main.198/">WEC: Wikipedia Event Coreference</a>
+    * <a href="https://arxiv.org/abs/2210.12654">Cross-document Event Coreference Search: Task, Dataset and Modeling</a>
 
 *Relations integrity tested only for English. Other languages might require some adjustments. <br/>
 
