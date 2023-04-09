@@ -29,8 +29,8 @@ public class WikiDataFeatToFile {
 
     public static void main(String[] args) throws Exception {
         long startTime = System.currentTimeMillis();
-        MainConfiguration mainConfiguration = GSON.fromJson(new FileReader("conf.json"), MainConfiguration.class);
-        ElasticConfiguration elasticConfiguration = GSON.fromJson(new FileReader("config/wikidata_conf.json"), ElasticConfiguration.class);
+        MainConfiguration mainConfiguration = GSON.fromJson(new FileReader("config/wikidata_conf.json"), MainConfiguration.class);
+        ElasticConfiguration elasticConfiguration = GSON.fromJson(new FileReader("config/elastic_conf.json"), ElasticConfiguration.class);
 
         if(mainConfiguration.getWikidataDump() != null && !mainConfiguration.getWikidataDump().isEmpty()) {
             File inputDump = new File(mainConfiguration.getWikidataDump());
