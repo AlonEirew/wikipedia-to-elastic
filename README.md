@@ -38,6 +38,8 @@ This project generates an ElasticSearch, or file index from Wikipedia (xml dumps
 
 ## Introduction
 
+In addition to exporting the clean article text from Wikipedia to Elastic or Json files, this project offers the ability to extract several distinct Wikipedia attributes and relations (listed below).
+
 ### Special Wikipedia Resources and Attributes
 3 different types of Wikipedia pages are used: {Redirect/Disambiguation/Title} in order to extract 6 different 
 semantic features for tasks such as Identifying Semantic Relations, Entity Linking, Cross Document Co-Reference, Knowledge Graphs, Summarization and other.
@@ -83,7 +85,7 @@ Click relation for further details:
 * `extractRelationFields` - When set to `true` will extract the relations fields (listed in `relationTypes`) while processing the data (support only with english Wikipedia)
 * `wikipediaDump` - Wikipedia .bz2 downloaded dump file location
 * `lang` - Support {`en` (English), `fr` (French), `es` (Spanish), `de` (German), `zh` (Chinese)}
-* `includeRawText` - When set to `true`, will include original wikipedia page text (including html and markdown), parsed and clean as possible
+* `includeRawText` - When set to `true`, will include the original wikipedia article text (in Markdown)
 * `includeParsedParagraphs` - When set to `true`, will include a list of parsed wikipedia article paragraphs, clean of any markdown or html tags
 * `relationTypes` - ["Category", "Infobox", "Parenthesis", "PartName"]. To export those relations, the `extractRelationFields` configuration need to be set to `true` (the full list of available relations is in `/src/main/java/wiki/data/relations/RelationType.java`)
 
